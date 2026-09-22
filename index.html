@@ -1,81 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flurries 26 — Winter Event</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flurries '26 - Winter Event</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Snowfall Container -->
+    <div id="snowflakes"></div>
 
-  <!-- Snowfall -->
-  <div class="snowflakes" aria-hidden="true">
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
-    <div class="snowflake">❄</div>
-  </div>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="index.html" class="logo">
+                <i class="fas fa-snowflake"></i>
+                FLURRIES '26
+            </a>
+            <ul class="nav-links" id="navLinks">
+                <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="buypass.html"><i class="fas fa-ticket-alt"></i> Buy Pass</a></li>
+                <li><a href="getpass.html"><i class="fas fa-download"></i> Get Pass</a></li>
+                <li><a href="admin.html"><i class="fas fa-lock"></i> Admin</a></li>
+            </ul>
+            <div class="hamburger" id="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
 
-  <!-- Navbar -->
-  <nav>
-    <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries 26</div>
-    <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('active')">
-      <i class="fa-solid fa-bars"></i>
-    </button>
-    <ul class="nav-links">
-      <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
-      <li><a href="buypass.html"><i class="fa-solid fa-ticket"></i> Buy Pass</a></li>
-      <li><a href="getpass.html"><i class="fa-solid fa-download"></i> Get Pass</a></li>
-      <li><a href="admin.html"><i class="fa-solid fa-user-shield"></i> Admin</a></li>
-    </ul>
-  </nav>
+    <!-- Hero Section -->
+    <div class="container">
+        <div class="hero">
+            <h1><i class="fas fa-snowflake"></i> FLURRIES '26</h1>
+            <p>Experience the Ultimate Winter Event</p>
+            <p style="font-size: 1.2rem; color: #1976d2;">
+                <i class="fas fa-calendar"></i> September 22, 2026 | 
+                <i class="fas fa-users"></i> 100 Exclusive Passes
+            </p>
+            <div style="margin-top: 2rem;">
+                <a href="buypass.html" class="btn">
+                    <i class="fas fa-ticket-alt"></i> Buy Your Pass Now
+                </a>
+                <a href="getpass.html" class="btn" style="background: linear-gradient(135deg, #42a5f5, #64b5f6);">
+                    <i class="fas fa-download"></i> Download Pass
+                </a>
+            </div>
+        </div>
 
-  <!-- Hero -->
-  <section class="hero">
-    <h1><i class="fa-solid fa-snowflake"></i> Flurries 26</h1>
-    <p>Join us for the most magical winter event of the year! An unforgettable experience with 100 exclusive seats. Secure your pass now.</p>
-    <a href="buypass.html" class="btn"><i class="fa-solid fa-ticket"></i> Buy Your Pass</a>
-  </section>
+        <!-- Event Details -->
+        <div class="card">
+            <h2><i class="fas fa-info-circle"></i> Event Details</h2>
+            <div class="event-grid">
+                <div class="event-card">
+                    <i class="fas fa-calendar-alt"></i>
+                    <h3>Date</h3>
+                    <p>September 22, 2026</p>
+                    <p>10:00 AM - 10:00 PM</p>
+                </div>
+                <div class="event-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <h3>Venue</h3>
+                    <p>Winter Wonderland Arena</p>
+                    <p>Colombo, Sri Lanka</p>
+                </div>
+                <div class="event-card">
+                    <i class="fas fa-music"></i>
+                    <h3>Entertainment</h3>
+                    <p>Live DJ</p>
+                    <p>Ice Sculptures</p>
+                </div>
+                <div class="event-card">
+                    <i class="fas fa-utensils"></i>
+                    <h3>Food & Drinks</h3>
+                    <p>Gourmet Dining</p>
+                    <p>Hot Beverages</p>
+                </div>
+            </div>
+        </div>
 
-  <!-- Features -->
-  <section>
-    <h2 class="section-title"><i class="fa-solid fa-star"></i> Why Attend?</h2>
-    <div class="cards">
-      <div class="card">
-        <i class="fa-solid fa-users"></i>
-        <h3>Exclusive Gathering</h3>
-        <p>Limited to 100 guests for an intimate, premium experience.</p>
-      </div>
-      <div class="card">
-        <i class="fa-solid fa-qrcode"></i>
-        <h3>Smart Digital Pass</h3>
-        <p>Unique QR-coded pass — easy download, instant verification.</p>
-      </div>
-      <div class="card">
-        <i class="fa-solid fa-music"></i>
-        <h3>Unforgettable Moments</h3>
-        <p>Music, networking, and memories that last a lifetime.</p>
-      </div>
+        <!-- Features -->
+        <div class="card">
+            <h2><i class="fas fa-star"></i> What's Included</h2>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Full Day Access</p>
+                </div>
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Welcome Drink</p>
+                </div>
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Winter Themed Activities</p>
+                </div>
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Professional Photography</p>
+                </div>
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Live Entertainment</p>
+                </div>
+                <div style="padding: 1rem;">
+                    <i class="fas fa-check-circle" style="color: #4caf50; font-size: 1.5rem;"></i>
+                    <p>Exclusive Merchandise</p>
+                </div>
+            </div>
+        </div>
     </div>
-  </section>
 
-  <!-- CTA -->
-  <section style="text-align:center;">
-    <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> Ready to Join?</h2>
-    <p style="max-width:600px; margin:0 auto 2rem;">Pass price: <strong style="color:var(--primary-dark); font-size:1.5rem;">Rs. 5,000</strong></p>
-    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
-      <a href="buypass.html" class="btn"><i class="fa-solid fa-cart-shopping"></i> Buy Now</a>
-      <a href="getpass.html" class="btn btn-outline"><i class="fa-solid fa-key"></i> Already Bought?</a>
-    </div>
-  </section>
+    <!-- Footer -->
+    <footer>
+        <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.9rem;">
+            <i class="fas fa-snowflake"></i> Flurries '26 - All Rights Reserved
+        </p>
+    </footer>
 
-  <!-- Footer -->
-  <footer>
-    <p>© 2026 Flurries 26. All rights reserved.</p>
-    <p>Designed by <a href="https://hexasolutions.online" target="_blank"><i class="fa-solid fa-code"></i> Hexa Solutions</a></p>
-  </footer>
-
+    <script src="script.js"></script>
+    <script>
+        // Initialize Firebase (Replace with your config)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+    </script>
 </body>
 </html>
