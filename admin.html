@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flurries '26 - Admin Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries '26 Admin</div>
+        <ul>
+            <li><a href="index.html"><i class="fa-solid fa-home"></i> Home</a></li>
+            <li><a href="admin.html" class="active"><i class="fa-solid fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <!-- Login Section -->
+        <div id="login-section">
+            <h2><i class="fa-solid fa-user-shield"></i> Admin Login</h2>
+            <input type="email" id="admin-email" placeholder="Admin Email">
+            <input type="password" id="admin-password" placeholder="Password">
+            <button id="login-btn"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
+        </div>
+
+        <!-- Dashboard Section (Hidden initially) -->
+        <div id="dashboard-section" style="display: none;">
+            <h2><i class="fa-solid fa-users-gear"></i> Issue User Pass</h2>
+            <form id="pass-form">
+                <label>Full Name:</label>
+                <input type="text" id="user-name" required placeholder="Enter attendee name">
+                
+                <label>Phone Number:</label>
+                <input type="text" id="user-phone" required placeholder="Enter phone number">
+                
+                <label>Batch / Details:</label>
+                <input type="text" id="user-batch" required placeholder="e.g. Batch 2026 / CS">
+                
+                <button type="submit"><i class="fa-solid fa-circle-plus"></i> Generate 8-Char Pass ID</button>
+            </form>
+            <div id="success-msg" style="margin-top: 20px; color: #00b4d8; font-weight: bold;"></div>
+            
+            <hr style="margin: 30px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.2);">
+            
+            <h2><i class="fa-solid fa-qrcode"></i> Check-in Scanner / Lookup</h2>
+            <input type="text" id="search-pass-id" placeholder="Enter or Scan 8-Char Pass ID">
+            <button id="verify-btn"><i class="fa-solid fa-magnifying-glass"></i> Verify Pass</button>
+            <div id="verify-result" style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; display: none;"></div>
+            
+            <div style="margin-top: 30px;">
+                <button id="logout-btn" style="background: #e63946;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Designed by Hexa Solutions (<a href="https://hexasolutions.online" target="_blank">hexasolutions.online</a>)
+    </footer>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="admin.js"></script>
+    <script src="snow.js"></script>
+</body>
+</html>
