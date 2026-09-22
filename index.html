@@ -1,93 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flurries '26 - Winter Event</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flurries 26 — Winter Event</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Snow Container -->
-    <div class="snow-container"></div>
 
-    <!-- Navigation -->
-    <nav class="navbar">
-        <div class="logo">
-            <i class="fas fa-snowflake"></i>
-            <span>FLURRIES '26</span>
-        </div>
-        <ul class="nav-links">
-            <li><a href="index.html" class="active"><i class="fas fa-home"></i> Home</a></li>
-            <li><a href="buypass.html"><i class="fas fa-ticket-alt"></i> Buy Pass</a></li>
-            <li><a href="getpass.html"><i class="fas fa-download"></i> Get Pass</a></li>
-            <li><a href="admin.html"><i class="fas fa-user-shield"></i> Admin</a></li>
-        </ul>
-    </nav>
+  <!-- Snowfall -->
+  <div class="snowflakes" aria-hidden="true">
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div><div class="snowflake">❆</div>
+    <div class="snowflake">❄</div>
+  </div>
 
-    <!-- Hero Section -->
-    <section class="hero">
-        <div class="hero-content">
-            <h1 class="event-title">
-                <i class="fas fa-snowflake"></i>
-                FLURRIES '26
-                <i class="fas fa-snowflake"></i>
-            </h1>
-            <p class="tagline">Experience the Ultimate Winter Celebration</p>
-            <div class="event-details">
-                <div class="detail-card">
-                    <i class="fas fa-calendar-alt"></i>
-                    <span>December 2026</span>
-                </div>
-                <div class="detail-card">
-                    <i class="fas fa-users"></i>
-                    <span>100 Exclusive Seats</span>
-                </div>
-                <div class="detail-card">
-                    <i class="fas fa-music"></i>
-                    <span>Live Entertainment</span>
-                </div>
-            </div>
-            <a href="buypass.html" class="cta-button">
-                <i class="fas fa-ticket-alt"></i>
-                Book Your Pass Now
-            </a>
-        </div>
-    </section>
+  <!-- Navbar -->
+  <nav>
+    <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries 26</div>
+    <button class="hamburger" onclick="document.querySelector('.nav-links').classList.toggle('active')">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <ul class="nav-links">
+      <li><a href="index.html"><i class="fa-solid fa-house"></i> Home</a></li>
+      <li><a href="buypass.html"><i class="fa-solid fa-ticket"></i> Buy Pass</a></li>
+      <li><a href="getpass.html"><i class="fa-solid fa-download"></i> Get Pass</a></li>
+      <li><a href="admin.html"><i class="fa-solid fa-user-shield"></i> Admin</a></li>
+    </ul>
+  </nav>
 
-    <!-- Features Section -->
-    <section class="features">
-        <h2><i class="fas fa-star"></i> Event Highlights</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <i class="fas fa-utensils"></i>
-                <h3>Gourmet Dining</h3>
-                <p>Premium food and beverages</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-music"></i>
-                <h3>Live DJ</h3>
-                <p>Top entertainment acts</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-gift"></i>
-                <h3>Giveaways</h3>
-                <p>Exciting prizes & surprises</p>
-            </div>
-            <div class="feature-card">
-                <i class="fas fa-camera"></i>
-                <h3>Photo Booth</h3>
-                <p>Capture memorable moments</p>
-            </div>
-        </div>
-    </section>
+  <!-- Hero -->
+  <section class="hero">
+    <h1><i class="fa-solid fa-snowflake"></i> Flurries 26</h1>
+    <p>Join us for the most magical winter event of the year! An unforgettable experience with 100 exclusive seats. Secure your pass now.</p>
+    <a href="buypass.html" class="btn"><i class="fa-solid fa-ticket"></i> Buy Your Pass</a>
+  </section>
 
-    <!-- Footer -->
-    <footer>
-        <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
-        <p>&copy; 2026 Flurries Event. All rights reserved.</p>
-    </footer>
+  <!-- Features -->
+  <section>
+    <h2 class="section-title"><i class="fa-solid fa-star"></i> Why Attend?</h2>
+    <div class="cards">
+      <div class="card">
+        <i class="fa-solid fa-users"></i>
+        <h3>Exclusive Gathering</h3>
+        <p>Limited to 100 guests for an intimate, premium experience.</p>
+      </div>
+      <div class="card">
+        <i class="fa-solid fa-qrcode"></i>
+        <h3>Smart Digital Pass</h3>
+        <p>Unique QR-coded pass — easy download, instant verification.</p>
+      </div>
+      <div class="card">
+        <i class="fa-solid fa-music"></i>
+        <h3>Unforgettable Moments</h3>
+        <p>Music, networking, and memories that last a lifetime.</p>
+      </div>
+    </div>
+  </section>
 
-    <script src="js/snow.js"></script>
+  <!-- CTA -->
+  <section style="text-align:center;">
+    <h2 class="section-title"><i class="fa-solid fa-calendar-check"></i> Ready to Join?</h2>
+    <p style="max-width:600px; margin:0 auto 2rem;">Pass price: <strong style="color:var(--primary-dark); font-size:1.5rem;">Rs. 5,000</strong></p>
+    <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+      <a href="buypass.html" class="btn"><i class="fa-solid fa-cart-shopping"></i> Buy Now</a>
+      <a href="getpass.html" class="btn btn-outline"><i class="fa-solid fa-key"></i> Already Bought?</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2026 Flurries 26. All rights reserved.</p>
+    <p>Designed by <a href="https://hexasolutions.online" target="_blank"><i class="fa-solid fa-code"></i> Hexa Solutions</a></p>
+  </footer>
+
 </body>
 </html>
