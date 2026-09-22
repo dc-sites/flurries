@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flurries '26 - Download Pass</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <nav>
+        <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries '26</div>
+        <ul>
+            <li><a href="index.html"><i class="fa-solid fa-home"></i> Home</a></li>
+            <li><a href="buypass.html"><i class="fa-solid fa-ticket"></i> Buy Pass</a></li>
+            <li><a href="getpass.html" class="active"><i class="fa-solid fa-download"></i> Get Pass</a></li>
+            <li><a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a></li>
+        </ul>
+    </nav>
+
+    <div class="container" style="text-align: center;">
+        <h2><i class="fa-solid fa-ticket"></i> Download Your Ticket Pass</h2>
+        <p>Enter your assigned 8-character Pass ID to generate and download your custom pass card.</p>
+        
+        <input type="text" id="pass-id-input" placeholder="Enter 8-Character Pass ID (e.g. A9B2C3D4)" style="text-transform: uppercase; text-align: center; font-size: 20px; letter-spacing: 2px;" maxlength="8">
+        <button id="fetch-pass-btn"><i class="fa-solid fa-wand-magic-sparkles"></i> Generate Pass</button>
+
+        <!-- Hidden canvas container used to compose the image pass -->
+        <div id="ticket-preview-container" style="margin-top: 30px; display: flex; justify-content: center;">
+            <div id="ticket-card" style="position: relative; width: 700px; height: 350px; background-image: url('ticket-template.jpg'); background-size: cover; background-position: center; border-radius: 12px; overflow: hidden; display: none; text-align: left; color: #102a43;">
+                
+                <!-- Left Square: User Details -->
+                <div style="position: absolute; top: 110px; left: 45px; width: 310px; height: 200px; display: flex; flex-direction: column; justify-content: center; padding: 15px;">
+                    <p style="margin: 4px 0; font-size: 15px; font-weight: bold;">Name: <span id="t-name" style="font-weight: normal;"></span></p>
+                    <p style="margin: 4px 0; font-size: 15px; font-weight: bold;">Phone: <span id="t-phone" style="font-weight: normal;"></span></p>
+                    <p style="margin: 4px 0; font-size: 15px; font-weight: bold;">Batch: <span id="t-batch" style="font-weight: normal;"></span></p>
+                    <p style="margin: 4px 0; font-size: 13px; font-weight: bold; color: #555;">ID: <span id="t-id" style="font-weight: normal;"></span></p>
+                </div>
+
+                <!-- Right Square: QR Code Container -->
+                <div id="qrcode" style="position: absolute; top: 125px; left: 455px; width: 140px; height: 140px; background: white; padding: 5px; border-radius: 8px; display: flex; align-items: center; justify-content: center;"></div>
+            </div>
+        </div>
+
+        <button id="download-pass-btn" style="display: none; margin-top: 20px; background: #2a9d8f;"><i class="fa-solid fa-download"></i> Download Pass Image</button>
+    </div>
+
+    <footer>
+        Designed by Hexa Solutions (<a href="https://hexasolutions.online" target="_blank">hexasolutions.online</a>)
+    </footer>
+
+    <!-- Firebase SDKs & Canvas Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="getpass.js"></script>
+    <script src="snow.js"></script>
+</body>
+</html>
