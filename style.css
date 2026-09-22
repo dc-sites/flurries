@@ -1,218 +1,668 @@
-let html5QrCode = null;
-
-// Check auth state
-auth.onAuthStateChanged(user => {
-    if (user) {
-        document.getElementById('loginSection').style.display = 'none';
-        document.getElementById('adminDashboard').style.display = 'block';
-        loadAllPasses();
-    } else {
-        document.getElementById('loginSection').style.display = 'block';
-        document.getElementById('adminDashboard').style.display = 'none';
-    }
-});
-
-// Login
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const email = document.getElementById('adminEmail').value;
-    const password = document.getElementById('adminPassword').value;
-    
-    try {
-        await auth.signInWithEmailAndPassword(email, password);
-    } catch (error) {
-        document.getElementById('loginError').textContent = 'Invalid credentials!';
-        document.getElementById('loginError').style.display = 'block';
-    }
-});
-
-// Logout
-function logout() {
-    auth.signOut();
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-// Generate 8-character Pass ID
-function generatePassId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let passId = '';
-    for (let i = 0; i < 8; i++) {
-        passId += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return passId;
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 50%, #e3f2fd 100%);
+    min-height: 100vh;
+    color: #1565c0;
+    overflow-x: hidden;
 }
 
-// Auto-generate Pass ID on form load
-document.getElementById('createPassForm').addEventListener('focus', () => {
-    if (!document.getElementById('generatedPassId').value) {
-        document.getElementById('generatedPassId').value = generatePassId();
-    }
-});
+/* Snow Animation */
+.snow-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1000;
+}
 
-// Create Pass
-document.getElementById('createPassForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const passId = document.getElementById('generatedPassId').value.toUpperCase();
-    const name = document.getElementById('userName').value;
-    const phone = document.getElementById('userPhone').value;
-    const batch = document.getElementById('userBatch').value;
-    
-    try {
-        // Check if pass ID already exists
-        const doc = await db.collection('passes').doc(passId).get();
-        if (doc.exists) {
-            alert('Pass ID already exists! Generating new one...');
-            document.getElementById('generatedPassId').value = generatePassId();
-            return;
-        }
-        
-        // Create pass
-        await db.collection('passes').doc(passId).set({
-            name: name,
-            phone: phone,
-            batch: batch,
-            passId: passId,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            status: 'active'
-        });
-        
-        // Show success message
-        const successMsg = document.getElementById('passCreated');
-        successMsg.innerHTML = `
-            <strong>Pass Created Successfully!</strong><br>
-            Pass ID: <strong>${passId}</strong><br>
-            Share this ID with the user to download their pass.
-        `;
-        successMsg.style.display = 'block';
-        
-        // Reset form
-        document.getElementById('createPassForm').reset();
-        document.getElementById('generatedPassId').value = generatePassId();
-        
-        // Reload passes list
-        loadAllPasses();
-        
-    } catch (error) {
-        console.error('Error creating pass:', error);
-        alert('Error creating pass. Please try again.');
-    }
-});
+.snowflake {
+    position: absolute;
+    top: -10px;
+    color: white;
+    font-size: 1em;
+    animation: fall linear infinite;
+    opacity: 0.8;
+}
 
-// Load all passes
-async function loadAllPasses() {
-    const tbody = document.getElementById('passesTableBody');
-    tbody.innerHTML = '';
-    
-    try {
-        const snapshot = await db.collection('passes').orderBy('createdAt', 'desc').get();
-        
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            const row = `
-                <tr>
-                    <td><strong>${data.passId}</strong></td>
-                    <td>${data.name}</td>
-                    <td>${data.phone}</td>
-                    <td>${data.batch}</td>
-                    <td><span class="status-badge">${data.status || 'active'}</span></td>
-                </tr>
-            `;
-            tbody.innerHTML += row;
-        });
-    } catch (error) {
-        console.error('Error loading passes:', error);
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
     }
 }
 
-// QR Scanner
-async function startScanner() {
-    if (html5QrCode) {
-        html5QrCode.stop();
-    }
-    
-    html5QrCode = new Html5Qrcode("scannerContainer");
-    
-    try {
-        await html5QrCode.start(
-            { facingMode: "environment" },
-            {
-                fps: 10,
-                qrbox: { width: 250, height: 250 }
-            },
-            onScanSuccess,
-            onScanFailure
-        );
-    } catch (error) {
-        console.error('Error starting scanner:', error);
-        alert('Unable to access camera. Please ensure camera permissions are granted.');
-    }
+/* Navigation */
+.navbar {
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
 }
 
-async function onScanSuccess(decodedText, decodedResult) {
-    // Stop scanning
-    html5QrCode.stop();
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+}
+
+.logo i {
+    animation: rotate 10s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.nav-links {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    transition: all 0.3s;
+}
+
+.nav-links a:hover,
+.nav-links a.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hero Section */
+.hero {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(227,242,253,0.4) 100%);
+}
+
+.hero-content {
+    text-align: center;
+    max-width: 800px;
+}
+
+.event-title {
+    font-size: 4rem;
+    color: #0d47a1;
+    margin-bottom: 1rem;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.event-title i {
+    margin: 0 20px;
+    color: #42a5f5;
+}
+
+.tagline {
+    font-size: 1.5rem;
+    color: #42a5f5;
+    margin-bottom: 2rem;
+}
+
+.event-details {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 3rem;
+    flex-wrap: wrap;
+}
+
+.detail-card {
+    background: white;
+    padding: 1.5rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.detail-card i {
+    font-size: 2rem;
+    color: #1976d2;
+}
+
+.cta-button {
+    display: inline-block;
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    color: white;
+    padding: 1rem 3rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 1.2rem;
+    font-weight: bold;
+    transition: transform 0.3s, box-shadow 0.3s;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.cta-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+}
+
+/* Features Section */
+.features {
+    padding: 4rem 2rem;
+    background: white;
+}
+
+.features h2 {
+    text-align: center;
+    font-size: 2.5rem;
+    margin-bottom: 3rem;
+    color: #0d47a1;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.feature-card {
+    background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+    padding: 2rem;
+    border-radius: 15px;
+    text-align: center;
+    transition: transform 0.3s;
+}
+
+.feature-card:hover {
+    transform: translateY(-10px);
+}
+
+.feature-card i {
+    font-size: 3rem;
+    color: #1976d2;
+    margin-bottom: 1rem;
+}
+
+/* Buy Pass Section */
+.buy-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.buy-container {
+    max-width: 600px;
+    width: 100%;
+}
+
+.buy-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #0d47a1;
+}
+
+.pricing-card {
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.price-header {
+    margin-bottom: 2rem;
+}
+
+.price-header i {
+    font-size: 4rem;
+    color: #ffd700;
+}
+
+.price-amount {
+    margin: 2rem 0;
+}
+
+.currency {
+    font-size: 2rem;
+    color: #1976d2;
+}
+
+.amount {
+    font-size: 5rem;
+    font-weight: bold;
+    color: #0d47a1;
+}
+
+.features-list {
+    list-style: none;
+    margin: 2rem 0;
+    text-align: left;
+}
+
+.features-list li {
+    padding: 0.8rem;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+.features-list i {
+    color: #4caf50;
+    margin-right: 10px;
+}
+
+.whatsapp-btn {
+    display: inline-block;
+    background: #25d366;
+    color: white;
+    padding: 1.2rem 3rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-size: 1.3rem;
+    font-weight: bold;
+    margin: 2rem 0;
+    transition: transform 0.3s;
+}
+
+.whatsapp-btn:hover {
+    transform: scale(1.05);
+}
+
+.contact-info {
+    color: #666;
+    margin-top: 1rem;
+}
+
+.payment-info {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    margin-top: 2rem;
+}
+
+.payment-info ol {
+    margin-left: 2rem;
+    margin-top: 1rem;
+}
+
+.payment-info li {
+    margin: 0.5rem 0;
+}
+
+/* Get Pass Section */
+.getpass-section {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.getpass-container {
+    max-width: 800px;
+    width: 100%;
+}
+
+.getpass-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #0d47a1;
+}
+
+.search-box {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 1rem;
+    border: 2px solid #bbdefb;
+    border-radius: 10px;
+    font-size: 1.1rem;
+    text-align: center;
+    text-transform: uppercase;
+}
+
+.search-btn {
+    padding: 1rem 2rem;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 1.1rem;
+    transition: background 0.3s;
+}
+
+.search-btn:hover {
+    background: #0d47a1;
+}
+
+/* Ticket Pass Design */
+.pass-display {
+    margin-top: 2rem;
+}
+
+.ticket-pass {
+    background: linear-gradient(135deg, #1976d2, #42a5f5);
+    border-radius: 20px;
+    padding: 2rem;
+    display: flex;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    color: white;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+.pass-left {
+    flex: 2;
+    padding-right: 2rem;
+    border-right: 2px dashed rgba(255,255,255,0.3);
+}
+
+.pass-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.pass-header h2 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.pass-type {
+    background: rgba(255,255,255,0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
+}
+
+.pass-details {
+    margin-top: 2rem;
+}
+
+.detail-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin: 1rem 0;
+}
+
+.detail-row i {
+    font-size: 1.5rem;
+    width: 30px;
+}
+
+.detail-row label {
+    font-size: 0.8rem;
+    opacity: 0.8;
+    display: block;
+}
+
+.detail-row span {
+    font-size: 1.1rem;
+    font-weight: bold;
+}
+
+#qrcode {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+}
+
+.scan-text {
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.download-btn {
+    display: block;
+    width: 100%;
+    max-width: 700px;
+    margin: 2rem auto 0;
+    padding: 1.2rem;
+    background: #4caf50;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.download-btn:hover {
+    background: #388e3c;
+}
+
+/* Admin Styles */
+.admin-login {
+    min-height: 80vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.login-container {
+    background: white;
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+}
+
+.login-container h1 {
+    text-align: center;
+    margin-bottom: 2rem;
+    color: #0d47a1;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #1976d2;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.8rem;
+    border: 2px solid #bbdefb;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.login-btn,
+.create-btn,
+.scan-btn {
+    width: 100%;
+    padding: 1rem;
+    background: #1976d2;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.login-btn:hover,
+.create-btn:hover,
+.scan-btn:hover {
+    background: #0d47a1;
+}
+
+/* Dashboard */
+.admin-dashboard {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 10px;
+}
+
+.logout-btn {
+    padding: 0.8rem 1.5rem;
+    background: #f44336;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.dashboard-content {
+    display: grid;
+    gap: 2rem;
+}
+
+.admin-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.admin-card h2 {
+    margin-bottom: 1.5rem;
+    color: #0d47a1;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.success-message {
+    background: #c8e6c9;
+    color: #2e7d32;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+.error-message {
+    background: #ffcdd2;
+    color: #c62828;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1rem;
+}
+
+/* Table */
+.passes-table {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e3f2fd;
+}
+
+th {
+    background: #1976d2;
+    color: white;
+}
+
+tr:hover {
+    background: #f5f5f5;
+}
+
+/* Scan Result */
+.scan-result {
+    background: #c8e6c9;
+    padding: 2rem;
+    border-radius: 10px;
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.scan-result h3 {
+    color: #2e7d32;
+    margin-bottom: 1rem;
+}
+
+/* Footer */
+footer {
+    background: #0d47a1;
+    color: white;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 4rem;
+}
+
+footer a {
+    color: #42a5f5;
+    text-decoration: none;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .nav-links {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
     
-    try {
-        // Parse QR data
-        const qrData = JSON.parse(decodedText);
-        const passId = qrData.passId;
-        
-        // Verify pass in database
-        const doc = await db.collection('passes').doc(passId).get();
-        
-        if (doc.exists) {
-            const data = doc.data();
-            
-            // Show verified details
-            document.getElementById('verifiedDetails').innerHTML = `
-                <div style="text-align: left; max-width: 400px; margin: 0 auto;">
-                    <p><strong>Pass ID:</strong> ${data.passId}</p>
-                    <p><strong>Name:</strong> ${data.name}</p>
-                    <p><strong>Phone:</strong> ${data.phone}</p>
-                    <p><strong>Batch:</strong> ${data.batch}</p>
-                    <p><strong>Status:</strong> ✅ Verified</p>
-                </div>
-            `;
-            document.getElementById('scanResult').style.display = 'block';
-            
-            // Mark as scanned
-            await db.collection('passes').doc(passId).update({
-                scannedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                status: 'scanned'
-            });
-            
-        } else {
-            alert('Invalid pass! Pass not found in database.');
-        }
-        
-    } catch (error) {
-        console.error('Error verifying pass:', error);
-        alert('Error verifying pass. Please try again.');
+    .event-title {
+        font-size: 2.5rem;
+    }
+    
+    .ticket-pass {
+        flex-direction: column;
+    }
+    
+    .pass-left {
+        border-right: none;
+        border-bottom: 2px dashed rgba(255,255,255,0.3);
+        padding-right: 0;
+        padding-bottom: 2rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
     }
 }
-
-function onScanFailure(error) {
-    // Handle scan failure silently
-    console.warn(`Code scan error = ${error}`);
-}
-
-// Add status badge styles
-const style = document.createElement('style');
-style.textContent = `
-    .status-badge {
-        padding: 0.3rem 0.8rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: bold;
-    }
-    .status-badge.active {
-        background: #c8e6c9;
-        color: #2e7d32;
-    }
-    .status-badge.scanned {
-        background: #fff3cd;
-        color: #856404;
-    }
-`;
-document.head.appendChild(style);
