@@ -1,37 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flurries '26 - Buy Pass</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Buy Pass - Flurries 26</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <nav>
-        <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries '26</div>
-        <ul>
-            <li><a href="index.html"><i class="fa-solid fa-home"></i> Home</a></li>
-            <li><a href="buypass.html" class="active"><i class="fa-solid fa-ticket"></i> Buy Pass</a></li>
-            <li><a href="getpass.html"><i class="fa-solid fa-download"></i> Get Pass</a></li>
-            <li><a href="admin.html"><i class="fa-solid fa-lock"></i> Admin</a></li>
-        </ul>
-    </nav>
+  <div class="snowflakes" aria-hidden="true">
+    <div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div class="snowflake">❆</div><div class="snowflake">❄</div>
+    <div class="snowflake">❅</div><div class="snowflake">❆</div>
+    <div class="snowflake">❄</div><div class="snowflake">❅</div>
+    <div class="snowflake">❆</div><div class="snowflake">❄</div>
+    <div class="snowflake">❅</div><div class="snowflake">❆</div>
+  </div>
 
-    <div class="container" style="text-align: center;">
-        <h1><i class="fa-solid fa-ticket"></i> Event Pass Purchase</h1>
-        <p>Event: <strong>Flurries '26 Official Entry Pass</strong></p>
-        <p>Price: <span style="font-size: 24px; color: #00b4d8; font-weight: bold;">Rs. 5,000</span></p>
-        <p>To purchase your ticket, click the button below to message our official payment confirmation desk on WhatsApp. Once payment is verified, your unique Pass ID will be issued!</p>
-        
-        <a href="https://wa.me/94774075773?text=Hi,%20I%20want%20to%20buy%20a%20pass%20for%20Flurries%20'26.%20Please%20guide%20me%20through%20the%20payment%20process." class="whatsapp-btn" target="_blank">
-            <i class="fa-brands fa-whatsapp"></i> Buy via WhatsApp (+94 77 407 5773)[cite: 1]
-        </a>
+  <nav class="navbar">
+    <div class="logo">
+      <i class="fas fa-snowflake"></i>
+      <span>Flurries 26</span>
     </div>
+    <button class="hamburger" id="hamburger">
+      <span></span><span></span><span></span>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
+      <li><a href="buypass.html"><i class="fas fa-ticket-alt"></i> Buy Pass</a></li>
+      <li><a href="getpass.html"><i class="fas fa-download"></i> Get Pass</a></li>
+      <li><a href="admin.html"><i class="fas fa-user-shield"></i> Admin</a></li>
+    </ul>
+  </nav>
 
-    <footer>
-        Designed by Hexa Solutions (<a href="https://hexasolutions.online" target="_blank">hexasolutions.online</a>)
-    </footer>
-    <script src="snow.js"></script>
+  <div class="container">
+    <section class="card text-center">
+      <h1 style="color:var(--primary-dark); margin-bottom:1rem;">
+        <i class="fas fa-ticket-alt"></i> Get Your Flurries 26 Pass
+      </h1>
+      <p style="color:var(--text-light); font-size:1.1rem; margin-bottom:2rem;">
+        Secure your spot at the most exclusive winter event of the year
+      </p>
+
+      <div class="price-tag">
+        Rs. 5,000 <small>/ per person</small>
+      </div>
+
+      <div class="event-grid">
+        <div class="event-item">
+          <i class="fas fa-check-circle"></i>
+          <h3>Entry Pass</h3>
+          <p>Full event access</p>
+        </div>
+        <div class="event-item">
+          <i class="fas fa-gift"></i>
+          <h3>Welcome Kit</h3>
+          <p>Exclusive merchandise</p>
+        </div>
+        <div class="event-item">
+          <i class="fas fa-utensils"></i>
+          <h3>Refreshments</h3>
+          <p>Food & drinks included</p>
+        </div>
+        <div class="event-item">
+          <i class="fas fa-camera"></i>
+          <h3>Memories</h3>
+          <p>Professional photos</p>
+        </div>
+      </div>
+
+      <div class="alert alert-info mt-2">
+        <i class="fas fa-info-circle"></i>
+        <div>
+          <strong>Payment Process:</strong> Click "Buy Now" to chat with us on WhatsApp. 
+          After payment confirmation, you'll receive your unique 8-character Pass ID via WhatsApp.
+        </div>
+      </div>
+
+      <a href="https://wa.me/94774075773?text=Hi%2C%20I%20want%20to%20buy%20a%20pass%20for%20Flurries%2026%20(Rs.5000)" 
+         target="_blank" 
+         class="btn btn-whatsapp mt-2"
+         style="font-size:1.2rem; padding:1.2rem 2.5rem;">
+        <i class="fab fa-whatsapp"></i> Buy Now - Rs. 5000
+      </a>
+
+      <p class="mt-2" style="color:var(--text-light); font-size:0.9rem;">
+        <i class="fas fa-phone"></i> Contact: 077 407 5773
+      </p>
+    </section>
+
+    <section class="card">
+      <h2 style="color:var(--primary-dark); text-align:center; margin-bottom:1.5rem;">
+        <i class="fas fa-question-circle"></i> After Payment
+      </h2>
+      <div class="event-grid">
+        <div class="event-item">
+          <i class="fas fa-key"></i>
+          <h3>Get Pass ID</h3>
+          <p>Receive 8-char ID via WhatsApp</p>
+        </div>
+        <div class="event-item">
+          <i class="fas fa-globe"></i>
+          <h3>Visit Get Pass</h3>
+          <p>Go to "Get Pass" page</p>
+        </div>
+        <div class="event-item">
+          <i class="fas fa-download"></i>
+          <h3>Download Ticket</h3>
+          <p>Enter ID & download QR pass</p>
+        </div>
+      </div>
+      <div class="text-center mt-2">
+        <a href="getpass.html" class="btn btn-primary">
+          <i class="fas fa-arrow-right"></i> Go to Get Pass Page
+        </a>
+      </div>
+    </section>
+  </div>
+
+  <footer class="footer">
+    <p><i class="fas fa-snowflake"></i> Flurries 26 &copy; 2026</p>
+    <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
+  </footer>
+
+  <script>
+    const hamburger = document.getElementById('hamburger');
+    const navLinks = document.getElementById('navLinks');
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('active');
+      navLinks.classList.toggle('active');
+    });
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', () => {
+        hamburger.classList.remove('active');
+        navLinks.classList.remove('active');
+      });
+    });
+  </script>
 </body>
 </html>
