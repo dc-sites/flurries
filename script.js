@@ -1,8 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp, updateDoc } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
     apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
     authDomain: "flurries-32408.firebaseapp.com",
@@ -12,13 +11,12 @@ const firebaseConfig = {
     appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Navbar Scroll Effect
+    // Navbar Scroll Effect
     window.addEventListener('scroll', () => {
         const navbar = document.querySelector('.navbar');
         if (navbar) {
@@ -27,16 +25,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Mobile Menu
+    // Mobile Menu
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
-
     if (hamburger && navLinks) {
         hamburger.addEventListener('click', () => {
             hamburger.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
-
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
                 hamburger.classList.remove('active');
@@ -45,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 3. Snowflakes
+    // Snowflakes
     function createSnowflake() {
         const snowflake = document.createElement('div');
         snowflake.classList.add('snowflake');
@@ -59,19 +55,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     setInterval(createSnowflake, 150);
 
-    // 4. Scroll Reveal
+    // Scroll Reveal
     function revealOnScroll() {
-        const reveals = document.querySelectorAll('.reveal');
-        reveals.forEach(el => {
-            const windowHeight = window.innerHeight;
-            const elementTop = el.getBoundingClientRect().top;
-            if (elementTop < windowHeight - 150) el.classList.add('active');
+        document.querySelectorAll('.reveal').forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 150) {
+                el.classList.add('active');
+            }
         });
     }
     window.addEventListener('scroll', revealOnScroll);
-    revealOnScroll(); // Run on load
+    revealOnScroll();
 
-    // 5. Firebase Admin Logic
+    // --- ADMIN LOGIC ---
     const loginForm = document.getElementById('loginFormElement');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -86,12 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => {
-            signOut(auth);
-            window.location.href = 'index.html';
-        });
-    }
+    if (logoutBtn) logoutBtn.addEventListener('click', () => { signOut(auth); window.location.href = 'index.html'; });
 
     onAuthStateChanged(auth, (user) => {
         const adminContent = document.getElementById('adminContent');
@@ -112,16 +102,18 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const name = document.getElementById('userName').value;
             const phone = document.getElementById('userPhone').value;
+            const gender = document.getElementById('userGender').value;
             const batch = document.getElementById('userBatch').value;
             const passId = generatePassId();
             
             try {
                 await setDoc(doc(db, 'passes', passId), {
-                    name, phone, batch, passId, status: 'active',
+                    name, phone, gender, batch, passId, 
+                    status: 'pending', scannedAt: null,
                     createdAt: serverTimestamp()
                 });
                 showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
-                document.getElementById('addPassForm').reset();
+                addPassForm.reset();
                 loadAdminData();
             } catch (error) { 
                 showAlert('Error: ' + error.message, 'error'); 
@@ -129,6 +121,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // User Get Pass Logic
     const getPassForm = document.getElementById('getPassFormElement');
     if (getPassForm) {
         getPassForm.addEventListener('submit', async (e) => {
@@ -141,30 +134,21 @@ document.addEventListener('DOMContentLoaded', () => {
             
             try {
                 const docSnap = await getDoc(doc(db, 'passes', passId));
-                if (docSnap.exists()) {
-                    displayPass(docSnap.data());
-                } else {
-                    showAlert('Invalid Pass ID.', 'error');
-                }
+                if (docSnap.exists()) displayPass(docSnap.data());
+                else showAlert('Invalid Pass ID.', 'error');
             } catch (error) { 
                 showAlert('Connection error.', 'error'); 
             } finally { 
-                btn.innerHTML = originalHTML; 
-                btn.disabled = false; 
+                btn.innerHTML = originalHTML; btn.disabled = false; 
             }
         });
     }
 
     const downloadBtn = document.getElementById('downloadBtn');
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', downloadPass);
-    }
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 });
 
-// ==========================================
 // Helper Functions
-// ==========================================
-
 function generatePassId() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let result = 'FL26';
@@ -184,9 +168,7 @@ async function downloadPass() {
     const passElement = document.getElementById('passTemplate');
     const btn = document.getElementById('downloadBtn');
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; 
-    btn.disabled = true;
-    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; btn.disabled = true;
     try {
         const canvas = await html2canvas(passElement, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
         const link = document.createElement('a');
@@ -197,8 +179,7 @@ async function downloadPass() {
     } catch (error) { 
         showAlert('Error downloading pass.', 'error'); 
     } finally { 
-        btn.innerHTML = originalHTML; 
-        btn.disabled = false; 
+        btn.innerHTML = originalHTML; btn.disabled = false; 
     }
 }
 
@@ -208,10 +189,7 @@ function showAlert(message, type) {
     alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
-    setTimeout(() => { 
-        alertDiv.style.opacity = '0'; 
-        setTimeout(() => alertDiv.remove(), 300); 
-    }, 4000);
+    setTimeout(() => { alertDiv.style.opacity = '0'; setTimeout(() => alertDiv.remove(), 300); }, 4000);
 }
 
 async function loadAdminData() {
@@ -222,17 +200,22 @@ async function loadAdminData() {
     if (table) {
         table.innerHTML = '';
         if (snapshot.empty) { 
-            table.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
+            table.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
             return; 
         }
-        snapshot.forEach(doc => {
-            const d = doc.data();
+        snapshot.forEach(docSnap => {
+            const d = docSnap.data();
+            const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Not Scanned';
+            const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
+            
             table.innerHTML += `<tr>
                 <td><strong>${d.passId}</strong></td>
                 <td>${d.name}</td>
-                <td>${d.phone}</td>
+                <td>${d.gender || 'N/A'}</td>
                 <td>${d.batch}</td>
-                <td><span class="status-badge">Active</span></td>
+                <td>${d.phone}</td>
+                <td><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
+                <td>${scanTime}</td>
             </tr>`;
         });
     }
