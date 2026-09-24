@@ -158,7 +158,7 @@ body {
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 45vh; /* Takes up the bottom 45% of the screen */
+    height: 75vh; /* Takes up the bottom 45% of the screen */
     overflow: hidden;
     z-index: 5;
     pointer-events: none;
