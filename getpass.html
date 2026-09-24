@@ -1,273 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Get Your Pass - Flurries 26</title>
-  <link rel="stylesheet" href="style.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Get Your Pass | Flurries 26</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
-  <div class="snowflakes" aria-hidden="true">
-    <div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❆</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❆</div>
-    <div class="snowflake">❄</div><div class="snowflake">❅</div>
-    <div class="snowflake">❆</div><div class="snowflake">❄</div>
-    <div class="snowflake">❅</div><div class="snowflake">❆</div>
-  </div>
+    <nav class="navbar">
+        <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
+        <ul class="nav-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="buypass.html">Buy Tickets</a></li>
+            <li><a href="getpass.html">Get Pass</a></li>
+            <li><a href="trailer.html">Trailer</a></li>
+        </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+    </nav>
 
-  <nav class="navbar">
-    <div class="logo">
-      <i class="fas fa-snowflake"></i>
-      <span>Flurries 26</span>
-    </div>
-    <button class="hamburger" id="hamburger">
-      <span></span><span></span><span></span>
-    </button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="index.html"><i class="fas fa-home"></i> Home</a></li>
-      <li><a href="buypass.html"><i class="fas fa-ticket-alt"></i> Buy Pass</a></li>
-      <li><a href="getpass.html"><i class="fas fa-download"></i> Get Pass</a></li>
-      <li><a href="admin.html"><i class="fas fa-user-shield"></i> Admin</a></li>
-    </ul>
-  </nav>
-
-  <div class="container">
-    <section class="card">
-      <h1 style="color:var(--primary-dark); text-align:center; margin-bottom:1rem;">
-        <i class="fas fa-download"></i> Download Your Pass
-      </h1>
-      <p style="text-align:center; color:var(--text-light); margin-bottom:2rem;">
-        Enter your 8-character Pass ID to download your personalized QR ticket
-      </p>
-
-      <div id="alertBox"></div>
-
-      <div class="form-group">
-        <label><i class="fas fa-key"></i> Pass ID</label>
-        <input type="text" id="passIdInput" class="form-control" 
-               placeholder="e.g., A7K9M2X3" maxlength="8" 
-               style="text-transform:uppercase; letter-spacing:3px; font-size:1.3rem; text-align:center;">
-      </div>
-
-      <button id="fetchBtn" class="btn btn-primary" style="width:100%;">
-        <i class="fas fa-search"></i> Fetch My Pass
-      </button>
+    <section style="padding-top: 150px;">
+        <div class="container">
+            <div class="section-header reveal">
+                <div class="section-tag">Retrieve Your Pass</div>
+                <h2 class="section-title">Access Your Credential</h2>
+                <p class="section-subtitle">Enter your Pass ID to download your VIP pass</p>
+            </div>
+            
+            <div class="card reveal" id="getPassForm" style="max-width: 650px; margin: 0 auto; padding: 3.5rem;">
+                <form id="getPassFormElement">
+                    <div class="form-group">
+                        <label for="passIdInput">
+                            <i class="fas fa-key" style="margin-right: 0.5rem; color: var(--ocean);"></i>
+                            Pass Identification Code
+                        </label>
+                        <input 
+                            type="text" 
+                            id="passIdInput" 
+                            placeholder="e.g., FL26A1B2" 
+                            required 
+                            style="text-transform: uppercase; letter-spacing: 3px; font-weight: 700; font-size: 1.3rem; text-align: center;"
+                        >
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-search"></i> Retrieve My Pass
+                    </button>
+                </form>
+                
+                <p style="margin-top: 2.5rem; text-align: center; color: var(--navy-strong); font-size: 0.95rem;">
+                    <i class="fas fa-info-circle" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                    Your Pass ID was sent to you via WhatsApp after payment
+                </p>
+            </div>
+            
+            <div id="passDisplay" class="hidden">
+                <div class="pass-container reveal" id="passTemplate">
+                    <div class="pass-header">
+                        <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26">
+                        <h2>FLURRIES 26</h2>
+                        <p>Official VIP Access Credential</p>
+                    </div>
+                    <div class="pass-body">
+                        <div class="pass-details">
+                            <h3>Guest Information</h3>
+                            <p>
+                                <strong>Name:</strong>
+                                <span id="displayName" style="font-weight: 700; font-size: 1.15rem;">-</span>
+                            </p>
+                            <p>
+                                <strong>Phone:</strong>
+                                <span id="displayPhone">-</span>
+                            </p>
+                            <p>
+                                <strong>Batch:</strong>
+                                <span id="displayBatch">-</span>
+                            </p>
+                            <p>
+                                <strong>Pass ID:</strong>
+                                <span id="displayPassId" style="font-family: monospace; font-size: 1.15rem; letter-spacing: 2.5px; background: rgba(74, 138, 181, 0.15); padding: 0.4rem 0.8rem; border-radius: 8px; border: 2px solid var(--ice);">-</span>
+                            </p>
+                        </div>
+                        <div class="qr-section">
+                            <div class="qr-frame">
+                                <div id="qrcode"></div>
+                            </div>
+                            <p>Scan at Entry</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 3.5rem;">
+                    <button id="downloadBtn" class="btn btn-primary" style="margin-right: 1rem;">
+                        <i class="fas fa-download"></i> Download Pass
+                    </button>
+                    <button onclick="location.reload()" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Get Another Pass
+                    </button>
+                </div>
+            </div>
+        </div>
     </section>
 
-    <!-- Pass Preview (Hidden initially) -->
-    <section id="passSection" class="card hidden">
-      <h2 style="color:var(--primary-dark); text-align:center; margin-bottom:1rem;">
-        <i class="fas fa-id-card"></i> Your Flurries 26 Pass
-      </h2>
-      <div class="pass-preview">
-        <div class="pass-canvas-container">
-          <canvas id="passCanvas" width="800" height="500"></canvas>
-        </div>
-      </div>
-      <div class="text-center mt-2">
-        <button id="downloadBtn" class="btn btn-success" style="font-size:1.1rem; padding:1rem 2rem;">
-          <i class="fas fa-download"></i> Download Pass Image
-        </button>
-      </div>
-    </section>
-  </div>
+    <footer>
+        <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
+    </footer>
 
-  <footer class="footer">
-    <p><i class="fas fa-snowflake"></i> Flurries 26 &copy; 2026</p>
-    <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
-  </footer>
-
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
-    // 🔥 REPLACE WITH YOUR FIREBASE CONFIG
-    const firebaseConfig = {
-      apiKey: "YOUR_API_KEY_HERE",
-      authDomain: "flurries-26.firebaseapp.com",
-      projectId: "flurries-26",
-      storageBucket: "flurries-26.appspot.com",
-      messagingSenderId: "YOUR_SENDER_ID",
-      appId: "YOUR_APP_ID"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    const alertBox = document.getElementById('alertBox');
-    const passSection = document.getElementById('passSection');
-    const passIdInput = document.getElementById('passIdInput');
-    const fetchBtn = document.getElementById('fetchBtn');
-    const downloadBtn = document.getElementById('downloadBtn');
-    const canvas = document.getElementById('passCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let currentUserData = null;
-
-    function showAlert(message, type = 'info') {
-      alertBox.innerHTML = `
-        <div class="alert alert-${type}">
-          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'times-circle' : 'info-circle'}"></i>
-          <span>${message}</span>
-        </div>
-      `;
-    }
-
-    // Fetch user data
-    fetchBtn.addEventListener('click', async () => {
-      const passId = passIdInput.value.trim().toUpperCase();
-      if (passId.length !== 8) {
-        showAlert('Please enter a valid 8-character Pass ID', 'error');
-        return;
-      }
-
-      fetchBtn.disabled = true;
-      fetchBtn.innerHTML = '<span class="loader"></span> Fetching...';
-
-      try {
-        const userDoc = await getDoc(doc(db, 'passes', passId));
-        if (!userDoc.exists()) {
-          showAlert('Invalid Pass ID. Please check and try again.', 'error');
-          passSection.classList.add('hidden');
-        } else {
-          currentUserData = { id: passId, ...userDoc.data() };
-          showAlert('Pass found! Generating your ticket...', 'success');
-          await generatePass(currentUserData);
-          passSection.classList.remove('hidden');
-        }
-      } catch (error) {
-        console.error(error);
-        showAlert('Error fetching pass. Please try again.', 'error');
-      } finally {
-        fetchBtn.disabled = false;
-        fetchBtn.innerHTML = '<i class="fas fa-search"></i> Fetch My Pass';
-      }
-    });
-
-    // Generate pass on canvas
-    async function generatePass(data) {
-      // Load template
-      const templateImg = new Image();
-      templateImg.crossOrigin = 'anonymous';
-      
-      await new Promise((resolve, reject) => {
-        templateImg.onload = resolve;
-        templateImg.onerror = () => {
-          // Fallback: draw gradient background if template not found
-          const gradient = ctx.createLinearGradient(0, 0, 800, 500);
-          gradient.addColorStop(0, '#E8F4FD');
-          gradient.addColorStop(1, '#A8D5F2');
-          ctx.fillStyle = gradient;
-          ctx.fillRect(0, 0, 800, 500);
-          resolve();
-        };
-        templateImg.src = 'template.png';
-      });
-
-      // Draw template (or fallback background)
-      if (templateImg.complete && templateImg.naturalWidth > 0) {
-        ctx.drawImage(templateImg, 0, 0, 800, 500);
-      }
-
-      // Draw semi-transparent overlay for text readability
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.75)';
-      ctx.fillRect(30, 30, 470, 440);
-
-      // Draw QR code on right side
-      try {
-        const qrDataURL = await QRCode.toDataURL(`FLURRIES26-${data.id}`, {
-          width: 280,
-          margin: 1,
-          color: { dark: '#1E3A5F', light: '#FFFFFF' }
-        });
-        const qrImg = new Image();
-        await new Promise((resolve) => {
-          qrImg.onload = resolve;
-          qrImg.src = qrDataURL;
-        });
-        // White background for QR
-        ctx.fillStyle = '#FFFFFF';
-        ctx.fillRect(530, 110, 240, 240);
-        ctx.drawImage(qrImg, 540, 120, 220, 220);
-      } catch (err) {
-        console.error('QR Error:', err);
-      }
-
-      // Draw text on left side
-      ctx.fillStyle = '#1E3A5F';
-      ctx.font = 'bold 32px Poppins, sans-serif';
-      ctx.fillText('FLURRIES 26', 50, 80);
-
-      ctx.font = '600 22px Poppins, sans-serif';
-      ctx.fillStyle = '#4A90E2';
-      ctx.fillText('Event Pass', 50, 115);
-
-      // Divider
-      ctx.strokeStyle = '#4A90E2';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.moveTo(50, 140);
-      ctx.lineTo(470, 140);
-      ctx.stroke();
-
-      // User details
-      ctx.fillStyle = '#5A7A9A';
-      ctx.font = '500 16px Poppins, sans-serif';
-      ctx.fillText('NAME', 50, 185);
-      ctx.fillStyle = '#1E3A5F';
-      ctx.font = 'bold 26px Poppins, sans-serif';
-      ctx.fillText(data.name || 'N/A', 50, 215);
-
-      ctx.fillStyle = '#5A7A9A';
-      ctx.font = '500 16px Poppins, sans-serif';
-      ctx.fillText('PHONE', 50, 270);
-      ctx.fillStyle = '#1E3A5F';
-      ctx.font = 'bold 24px Poppins, sans-serif';
-      ctx.fillText(data.phone || 'N/A', 50, 300);
-
-      ctx.fillStyle = '#5A7A9A';
-      ctx.font = '500 16px Poppins, sans-serif';
-      ctx.fillText('BATCH', 50, 355);
-      ctx.fillStyle = '#1E3A5F';
-      ctx.font = 'bold 24px Poppins, sans-serif';
-      ctx.fillText(data.batch || 'N/A', 50, 385);
-
-      // Pass ID at bottom
-      ctx.fillStyle = '#4A90E2';
-      ctx.font = 'bold 20px Courier New, monospace';
-      ctx.fillText(`ID: ${data.id}`, 50, 450);
-
-      // Footer
-      ctx.fillStyle = '#5A7A9A';
-      ctx.font = '14px Poppins, sans-serif';
-      ctx.fillText('Scan QR at entry • Designed by Hexa Solutions', 530, 450);
-    }
-
-    // Download pass
-    downloadBtn.addEventListener('click', () => {
-      const link = document.createElement('a');
-      link.download = `Flurries26-Pass-${currentUserData.id}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-    });
-
-    // Hamburger
-    const hamburger = document.getElementById('hamburger');
-    const navLinks = document.getElementById('navLinks');
-    hamburger.addEventListener('click', () => {
-      hamburger.classList.toggle('active');
-      navLinks.classList.toggle('active');
-    });
-    document.querySelectorAll('.nav-links a').forEach(link => {
-      link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-      });
-    });
-  </script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
