@@ -1,313 +1,250 @@
-// Firebase Config - REPLACE WITH YOURS
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
+// Your web app's Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
+    authDomain: "flurries-32408.firebaseapp.com",
+    projectId: "flurries-32408",
+    storageBucket: "flurries-32408.firebasestorage.app",
+    messagingSenderId: "459835238527",
+    appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
 
-// Navbar Scroll Effect
-window.addEventListener('scroll', () => {
-    const navbar = document.querySelector('.navbar');
-    if (window.scrollY > 50) {
-        navbar.classList.add('scrolled');
-    } else {
-        navbar.classList.remove('scrolled');
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
+        }
+    });
+
+    // 2. Mobile Menu
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+
+    // 3. Snowflakes
+    function createSnowflake() {
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snowflake');
+        snowflake.innerHTML = '❄';
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = Math.random() * 5 + 5 + 's';
+        snowflake.style.fontSize = Math.random() * 15 + 10 + 'px';
+        snowflake.style.opacity = Math.random() * 0.6 + 0.2;
+        document.body.appendChild(snowflake);
+        setTimeout(() => snowflake.remove(), 10000);
+    }
+    setInterval(createSnowflake, 150);
+
+    // 4. Scroll Reveal
+    function revealOnScroll() {
+        const reveals = document.querySelectorAll('.reveal');
+        reveals.forEach(el => {
+            const windowHeight = window.innerHeight;
+            const elementTop = el.getBoundingClientRect().top;
+            if (elementTop < windowHeight - 150) el.classList.add('active');
+        });
+    }
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll(); // Run on load
+
+    // 5. Firebase Admin Logic
+    const loginForm = document.getElementById('loginFormElement');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPassword').value);
+                showAlert('Access granted. Welcome aboard!', 'success');
+            } catch (error) {
+                showAlert('Invalid credentials.', 'error');
+            }
+        });
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => {
+            signOut(auth);
+            window.location.href = 'index.html';
+        });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+        const adminContent = document.getElementById('adminContent');
+        const loginFormEl = document.getElementById('loginForm');
+        if (user && adminContent && loginFormEl) {
+            loginFormEl.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+            loadAdminData();
+        } else if (!user && loginFormEl) {
+            loginFormEl.classList.remove('hidden');
+            adminContent.classList.add('hidden');
+        }
+    });
+
+    const addPassForm = document.getElementById('addPassForm');
+    if (addPassForm) {
+        addPassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            const batch = document.getElementById('userBatch').value;
+            const passId = generatePassId();
+            
+            try {
+                await setDoc(doc(db, 'passes', passId), {
+                    name, phone, batch, passId, status: 'active',
+                    createdAt: serverTimestamp()
+                });
+                showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
+                document.getElementById('addPassForm').reset();
+                loadAdminData();
+            } catch (error) { 
+                showAlert('Error: ' + error.message, 'error'); 
+            }
+        });
+    }
+
+    const getPassForm = document.getElementById('getPassFormElement');
+    if (getPassForm) {
+        getPassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const passId = document.getElementById('passIdInput').value.toUpperCase().trim();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...'; 
+            btn.disabled = true;
+            
+            try {
+                const docSnap = await getDoc(doc(db, 'passes', passId));
+                if (docSnap.exists()) {
+                    displayPass(docSnap.data());
+                } else {
+                    showAlert('Invalid Pass ID.', 'error');
+                }
+            } catch (error) { 
+                showAlert('Connection error.', 'error'); 
+            } finally { 
+                btn.innerHTML = originalHTML; 
+                btn.disabled = false; 
+            }
+        });
+    }
+
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', downloadPass);
     }
 });
 
-// Mobile Menu
-const hamburger = document.querySelector('.hamburger');
-const navLinks = document.querySelector('.nav-links');
+// ==========================================
+// Helper Functions
+// ==========================================
 
-hamburger?.addEventListener('click', () => {
-    hamburger.classList.toggle('active');
-    navLinks.classList.toggle('active');
-});
-
-document.querySelectorAll('.nav-links a').forEach(link => {
-    link.addEventListener('click', () => {
-        hamburger.classList.remove('active');
-        navLinks.classList.remove('active');
-    });
-});
-
-// Enhanced Snowflake Generation
-function createSnowflake() {
-    const snowflake = document.createElement('div');
-    snowflake.classList.add('snowflake');
-    snowflake.innerHTML = '❄';
-    snowflake.style.left = Math.random() * 100 + 'vw';
-    snowflake.style.animationDuration = Math.random() * 5 + 5 + 's';
-    snowflake.style.fontSize = Math.random() * 15 + 10 + 'px';
-    snowflake.style.opacity = Math.random() * 0.6 + 0.2;
-    
-    document.body.appendChild(snowflake);
-    setTimeout(() => snowflake.remove(), 10000);
-}
-
-setInterval(createSnowflake, 150);
-
-// Scroll Reveal Animation
-function revealOnScroll() {
-    const reveals = document.querySelectorAll('.reveal');
-    reveals.forEach(el => {
-        const windowHeight = window.innerHeight;
-        const elementTop = el.getBoundingClientRect().top;
-        const elementVisible = 150;
-        
-        if (elementTop < windowHeight - elementVisible) {
-            el.classList.add('active');
-        }
-    });
-}
-
-window.addEventListener('scroll', revealOnScroll);
-window.addEventListener('load', revealOnScroll);
-
-// Generate 8-char Pass ID
 function generatePassId() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let result = 'FL26';
-    for (let i = 0; i < 4; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
     return result;
 }
 
-// Generate QR Code
 function generateQRCode(data, elementId) {
-    document.getElementById(elementId).innerHTML = '';
-    new QRCode(document.getElementById(elementId), {
-        text: data,
-        width: 150,
-        height: 150,
-        colorDark: "#1B3A5C",
-        colorLight: "#ffffff",
-        correctLevel: QRCode.CorrectLevel.H
-    });
+    const el = document.getElementById(elementId);
+    if(el) {
+        el.innerHTML = '';
+        new QRCode(el, { text: data, width: 150, height: 150, colorDark: "#1B3A5C", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
+    }
 }
 
-// Download Pass
 async function downloadPass() {
     const passElement = document.getElementById('passTemplate');
     const btn = document.getElementById('downloadBtn');
     const originalHTML = btn.innerHTML;
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; 
     btn.disabled = true;
     
     try {
-        const canvas = await html2canvas(passElement, {
-            scale: 2,
-            backgroundColor: '#ffffff',
-            useCORS: true
-        });
-        
+        const canvas = await html2canvas(passElement, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
         const link = document.createElement('a');
         link.download = `Flurries26_VIP_Pass.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
-        
         showAlert('Pass downloaded successfully!', 'success');
-    } catch (error) {
-        showAlert('Error downloading pass.', 'error');
-    } finally {
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
+    } catch (error) { 
+        showAlert('Error downloading pass.', 'error'); 
+    } finally { 
+        btn.innerHTML = originalHTML; 
+        btn.disabled = false; 
     }
 }
 
-// Show Alert
 function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
-    alertDiv.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i>
-        <span>${message}</span>
-    `;
-    
+    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
-    
-    setTimeout(() => {
-        alertDiv.style.opacity = '0';
-        alertDiv.style.transform = 'translateY(-20px)';
-        setTimeout(() => alertDiv.remove(), 300);
+    setTimeout(() => { 
+        alertDiv.style.opacity = '0'; 
+        setTimeout(() => alertDiv.remove(), 300); 
     }, 4000);
 }
 
-// Admin Authentication
-function setupAdminAuth() {
-    const loginForm = document.getElementById('loginFormElement');
-    
-    loginForm?.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const email = document.getElementById('adminEmail').value;
-        const password = document.getElementById('adminPassword').value;
-        
-        try {
-            await auth.signInWithEmailAndPassword(email, password);
-            showAlert('Access granted. Welcome aboard!', 'success');
-        } catch (error) {
-            showAlert('Invalid credentials.', 'error');
-        }
-    });
-    
-    const logoutBtn = document.getElementById('logoutBtn');
-    logoutBtn?.addEventListener('click', () => {
-        auth.signOut();
-        window.location.href = 'index.html';
-    });
-}
-
-// Auth State Observer
-auth.onAuthStateChanged((user) => {
-    const adminContent = document.getElementById('adminContent');
-    const loginForm = document.getElementById('loginForm');
-    
-    if (user && adminContent && loginForm) {
-        loginForm.classList.add('hidden');
-        adminContent.classList.remove('hidden');
-        loadAdminData();
-    } else if (!user && loginForm) {
-        loginForm.classList.remove('hidden');
-        adminContent.classList.add('hidden');
-    }
-});
-
-// Load Admin Data
 async function loadAdminData() {
-    const snapshot = await db.collection('passes').orderBy('createdAt', 'desc').get();
+    const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
     const table = document.getElementById('passesTable');
     
     if (table) {
         table.innerHTML = '';
-        
-        if (snapshot.empty) {
-            table.innerHTML = `
-                <tr>
-                    <td colspan="5" style="text-align: center; padding: 3rem; color: var(--navy-strong);">
-                        No passes issued yet
-                    </td>
-                </tr>
-            `;
-            return;
+        if (snapshot.empty) { 
+            table.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
+            return; 
         }
-        
         snapshot.forEach(doc => {
-            const data = doc.data();
-            const row = `
-                <tr>
-                    <td><strong>${data.passId}</strong></td>
-                    <td>${data.name}</td>
-                    <td>${data.phone}</td>
-                    <td>${data.batch}</td>
-                    <td><span class="status-badge">Active</span></td>
-                </tr>
-            `;
-            table.innerHTML += row;
+            const d = doc.data();
+            table.innerHTML += `<tr>
+                <td><strong>${d.passId}</strong></td>
+                <td>${d.name}</td>
+                <td>${d.phone}</td>
+                <td>${d.batch}</td>
+                <td><span class="status-badge">Active</span></td>
+            </tr>`;
         });
     }
 }
 
-// Add New Pass
-async function addNewPass(e) {
-    e.preventDefault();
-    
-    const name = document.getElementById('userName').value;
-    const phone = document.getElementById('userPhone').value;
-    const batch = document.getElementById('userBatch').value;
-    const passId = generatePassId();
-    
-    try {
-        await db.collection('passes').doc(passId).set({
-            name,
-            phone,
-            batch,
-            passId,
-            status: 'active',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
-        document.getElementById('addPassForm').reset();
-        loadAdminData();
-    } catch (error) {
-        showAlert('Error: ' + error.message, 'error');
-    }
-}
-
-// Get Pass by ID
-async function getPassById(e) {
-    e.preventDefault();
-    
-    const passId = document.getElementById('passIdInput').value.toUpperCase().trim();
-    const btn = e.target.querySelector('button[type="submit"]');
-    const originalHTML = btn.innerHTML;
-    
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
-    btn.disabled = true;
-    
-    try {
-        const doc = await db.collection('passes').doc(passId).get();
-        
-        if (doc.exists) {
-            const data = doc.data();
-            displayPass(data);
-        } else {
-            showAlert('Invalid Pass ID.', 'error');
-        }
-    } catch (error) {
-        showAlert('Connection error.', 'error');
-    } finally {
-        btn.innerHTML = originalHTML;
-        btn.disabled = false;
-    }
-}
-
-// Display Pass
 function displayPass(data) {
     document.getElementById('displayName').textContent = data.name;
     document.getElementById('displayPhone').textContent = data.phone;
     document.getElementById('displayBatch').textContent = data.batch;
     document.getElementById('displayPassId').textContent = data.passId;
-    
-    const qrData = `FLURRIES26|${data.passId}|${data.name}|${data.phone}`;
-    generateQRCode(qrData, 'qrcode');
-    
+    generateQRCode(`FLURRIES26|${data.passId}|${data.name}|${data.phone}`, 'qrcode');
     document.getElementById('passDisplay').classList.remove('hidden');
     document.getElementById('getPassForm').classList.add('hidden');
-    
-    setTimeout(() => {
-        document.getElementById('passDisplay').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
-        });
-    }, 100);
+    setTimeout(() => document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 }
-
-// Initialize
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.getElementById('loginFormElement')) setupAdminAuth();
-    
-    if (document.getElementById('addPassForm')) {
-        document.getElementById('addPassForm').addEventListener('submit', addNewPass);
-        setupAdminAuth();
-    }
-    
-    if (document.getElementById('getPassFormElement')) {
-        document.getElementById('getPassFormElement').addEventListener('submit', getPassById);
-    }
-    
-    const downloadBtn = document.getElementById('downloadBtn');
-    downloadBtn?.addEventListener('click', downloadPass);
-    
-    revealOnScroll();
-});
