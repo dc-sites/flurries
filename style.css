@@ -69,26 +69,28 @@ body {
 .hamburger.active span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-/* Hero Section - Restructured for Top/Bottom layout */
+/* =========================================
+   FIXED HERO LAYOUT (Flexbox - No Overlap)
+   ========================================= */
 .hero {
     min-height: 100vh;
     display: flex;
-    flex-direction: column;
-    justify-content: flex-start; /* Pushes content to the top */
-    align-items: center;
-    text-align: center;
-    position: relative;
-    overflow: hidden;
-    padding: 160px 5% 0;
+    flex-direction: column; /* Stacks content on top, sea on bottom */
+    padding-top: 120px;
     background: linear-gradient(180deg, var(--white) 0%, var(--frost) 40%, var(--ice) 100%);
+    overflow: hidden;
 }
 
+/* Top Half: Text and Buttons */
 .hero-content {
-    position: relative;
+    flex: 1; /* Takes up all available top space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     z-index: 10;
-    max-width: 1000px;
-    margin-top: 2vh; /* Sits in the top half */
-    margin-bottom: 5vh; /* Space between buttons and the sea */
+    padding: 2rem 5% 4rem;
 }
 
 .hero-badge {
@@ -152,16 +154,13 @@ body {
     box-shadow: 0 15px 40px rgba(27, 58, 92, 0.3);
 }
 
-/* Edge-to-Edge Sea & Ship - Positioned in bottom half */
+/* Bottom Half: Sea & Ship (Relative positioning prevents overlap) */
 .sea-container {
-    position: absolute;
-    bottom: 0;
-    left: 0;
     width: 100%;
-    height: 75vh; /* Takes up the bottom 45% of the screen */
+    height: 45vh; /* Fixed height for the bottom section */
+    position: relative; /* Changed from absolute to relative */
     overflow: hidden;
-    z-index: 5;
-    pointer-events: none;
+    flex-shrink: 0; /* Prevents it from shrinking */
 }
 
 .ocean {
@@ -183,7 +182,7 @@ body {
 
 .viking-ship {
     position: absolute;
-    bottom: 8%; /* Lowered to sit nicely in the waves below the buttons */
+    bottom: 15%;
     left: 50%;
     transform: translateX(-50%);
     width: 380px;
@@ -359,11 +358,11 @@ footer a:hover { color: var(--white); text-shadow: 0 0 15px rgba(123, 184, 217, 
         padding-top: 100px; gap: 2rem;
     }
     .nav-links.active { left: 0; }
-    .hero { padding-top: 120px; }
+    .hero { padding-top: 100px; }
     .hero h1 { font-size: 4.5rem; } .hero h1 span { font-size: 3rem; }
     .hero-subtitle { font-size: 1.1rem; letter-spacing: 3px; }
     .sea-container { height: 35vh; }
-    .viking-ship { width: 280px; bottom: 5%; }
+    .viking-ship { width: 280px; bottom: 10%; }
     .pass-body { grid-template-columns: 1fr; gap: 2rem; }
     .section-title { font-size: 3rem; } .pricing-amount { font-size: 4rem; }
 }
