@@ -372,3 +372,121 @@ footer a:hover { color: var(--white); text-shadow: 0 0 15px rgba(123, 184, 217, 
 .alert { padding: 1.3rem 2rem; border-radius: 12px; margin-bottom: 2rem; font-weight: 600; animation: fadeInUp 0.4s ease; display: flex; align-items: center; gap: 1rem; border: 2px solid; }
 .alert-success { background: rgba(74, 138, 181, 0.15); color: var(--ocean); border-color: var(--ice); }
 .alert-error { background: rgba(220, 38, 38, 0.15); color: #dc2626; border-color: #fecaca; }
+
+/* =========================================
+   MOBILE VIP PASS - COMPACT & ELEGANT
+   ========================================= */
+@media (max-width: 768px) {
+    .pass-container {
+        max-width: 100%;
+        margin: 1.5rem auto;
+        border-radius: 16px;
+    }
+    
+    .pass-header {
+        padding: 1.8rem 1.2rem;
+    }
+    
+    .pass-header img {
+        height: 45px;
+        margin-bottom: 0.8rem;
+    }
+    
+    .pass-header h2 {
+        font-size: 1.8rem;
+        letter-spacing: 3px;
+        margin-bottom: 0.3rem;
+    }
+    
+    .pass-header p {
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+    
+    .pass-body {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    
+    .pass-body::before {
+        display: none;
+    }
+    
+    .pass-details h3 {
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+    }
+    
+    .pass-details p {
+        margin: 0.9rem 0;
+        font-size: 0.95rem;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+    }
+    
+    .pass-details p strong {
+        min-width: 80px;
+        font-size: 0.75rem;
+        letter-spacing: 1px;
+    }
+    
+    .pass-details p span {
+        font-size: 0.95rem !important;
+    }
+    
+    #displayPassId {
+        font-size: 0.95rem !important;
+        letter-spacing: 1.5px !important;
+        padding: 0.3rem 0.6rem !important;
+        word-break: break-all;
+    }
+    
+    .qr-section {
+        padding: 1.5rem;
+        border-radius: 12px;
+        order: -1; /* QR on top for mobile */
+    }
+    
+    .qr-frame {
+        width: 130px;
+        height: 130px;
+        padding: 0.6rem;
+        margin-bottom: 0.8rem;
+    }
+    
+    .qr-section p {
+        font-size: 0.7rem;
+        letter-spacing: 2px;
+    }
+    
+    /* Mobile buttons stack nicely */
+    #passDisplay > div:last-child {
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    #passDisplay > div:last-child .btn {
+        width: 100%;
+        justify-content: center;
+        padding: 1rem 2rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Extra small phones (iPhone SE, etc.) */
+@media (max-width: 400px) {
+    .pass-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .pass-body {
+        padding: 1rem;
+    }
+    
+    .qr-frame {
+        width: 110px;
+        height: 110px;
+    }
+}
+
