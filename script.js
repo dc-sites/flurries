@@ -31,7 +31,6 @@ hamburger?.addEventListener('click', () => {
     navLinks.classList.toggle('active');
 });
 
-// Close mobile menu on link click
 document.querySelectorAll('.nav-links a').forEach(link => {
     link.addEventListener('click', () => {
         hamburger.classList.remove('active');
@@ -39,7 +38,7 @@ document.querySelectorAll('.nav-links a').forEach(link => {
     });
 });
 
-// Snowflake Generation
+// Enhanced Snowflake Generation
 function createSnowflake() {
     const snowflake = document.createElement('div');
     snowflake.classList.add('snowflake');
@@ -50,11 +49,10 @@ function createSnowflake() {
     snowflake.style.opacity = Math.random() * 0.6 + 0.2;
     
     document.body.appendChild(snowflake);
-    
     setTimeout(() => snowflake.remove(), 10000);
 }
 
-setInterval(createSnowflake, 200);
+setInterval(createSnowflake, 150);
 
 // Scroll Reveal Animation
 function revealOnScroll() {
@@ -88,8 +86,8 @@ function generateQRCode(data, elementId) {
     document.getElementById(elementId).innerHTML = '';
     new QRCode(document.getElementById(elementId), {
         text: data,
-        width: 140,
-        height: 140,
+        width: 150,
+        height: 150,
         colorDark: "#1B3A5C",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.H
@@ -119,7 +117,7 @@ async function downloadPass() {
         
         showAlert('Pass downloaded successfully!', 'success');
     } catch (error) {
-        showAlert('Error downloading pass. Please try again.', 'error');
+        showAlert('Error downloading pass.', 'error');
     } finally {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
@@ -156,9 +154,9 @@ function setupAdminAuth() {
         
         try {
             await auth.signInWithEmailAndPassword(email, password);
-            showAlert('Access granted. Welcome back.', 'success');
+            showAlert('Access granted. Welcome aboard!', 'success');
         } catch (error) {
-            showAlert('Invalid credentials. Please try again.', 'error');
+            showAlert('Invalid credentials.', 'error');
         }
     });
     
@@ -238,11 +236,11 @@ async function addNewPass(e) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        showAlert(`Pass created successfully! ID: <strong>${passId}</strong>`, 'success');
+        showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
         document.getElementById('addPassForm').reset();
         loadAdminData();
     } catch (error) {
-        showAlert('Error creating pass: ' + error.message, 'error');
+        showAlert('Error: ' + error.message, 'error');
     }
 }
 
@@ -264,10 +262,10 @@ async function getPassById(e) {
             const data = doc.data();
             displayPass(data);
         } else {
-            showAlert('Invalid Pass ID. Please check and try again.', 'error');
+            showAlert('Invalid Pass ID.', 'error');
         }
     } catch (error) {
-        showAlert('Connection error. Please try again.', 'error');
+        showAlert('Connection error.', 'error');
     } finally {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
@@ -297,26 +295,19 @@ function displayPass(data) {
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
-    // Admin Login
-    if (document.getElementById('loginFormElement')) {
-        setupAdminAuth();
-    }
+    if (document.getElementById('loginFormElement')) setupAdminAuth();
     
-    // Admin Dashboard
     if (document.getElementById('addPassForm')) {
         document.getElementById('addPassForm').addEventListener('submit', addNewPass);
         setupAdminAuth();
     }
     
-    // Get Pass Form
     if (document.getElementById('getPassFormElement')) {
         document.getElementById('getPassFormElement').addEventListener('submit', getPassById);
     }
     
-    // Download Button
     const downloadBtn = document.getElementById('downloadBtn');
     downloadBtn?.addEventListener('click', downloadPass);
     
-    // Initial reveal check
     revealOnScroll();
 });
