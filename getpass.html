@@ -6,6 +6,7 @@
     <title>Get Your Pass | Flurries 26</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Required Libraries for QR and Image Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
@@ -18,14 +19,10 @@
             <li><a href="getpass.html">Get Pass</a></li>
             <li><a href="trailer.html">Trailer</a></li>
         </ul>
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+        <div class="hamburger"><span></span><span></span><span></span></div>
     </nav>
 
-    <section style="padding-top: 150px;">
+    <section style="padding-top: 150px; padding-bottom: 80px;">
         <div class="container">
             <div class="section-header reveal">
                 <div class="section-tag">Retrieve Your Pass</div>
@@ -33,11 +30,12 @@
                 <p class="section-subtitle">Enter your Pass ID to download your VIP pass</p>
             </div>
             
-            <div class="card reveal" id="getPassForm" style="max-width: 650px; margin: 0 auto; padding: 3.5rem;">
+            <!-- Get Pass Form -->
+            <div class="card reveal" id="getPassForm" style="max-width: 600px; margin: 0 auto; padding: 3rem 2rem;">
                 <form id="getPassFormElement">
                     <div class="form-group">
                         <label for="passIdInput">
-                            <i class="fas fa-key" style="margin-right: 0.5rem; color: var(--ocean);"></i>
+                            <i class="fas fa-key" style="margin-right: 0.5rem; color: var(--ocean);"></i> 
                             Pass Identification Code
                         </label>
                         <input 
@@ -45,20 +43,20 @@
                             id="passIdInput" 
                             placeholder="e.g., FL26A1B2" 
                             required 
-                            style="text-transform: uppercase; letter-spacing: 3px; font-weight: 700; font-size: 1.3rem; text-align: center;"
+                            style="text-transform: uppercase; letter-spacing: 3px; font-weight: 700; font-size: 1.2rem; text-align: center;"
                         >
                     </div>
                     <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
                         <i class="fas fa-search"></i> Retrieve My Pass
                     </button>
                 </form>
-                
-                <p style="margin-top: 2.5rem; text-align: center; color: var(--navy-strong); font-size: 0.95rem;">
-                    <i class="fas fa-info-circle" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                <p style="margin-top: 2rem; text-align: center; color: var(--navy-strong); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle" style="color: var(--ocean); margin-right: 0.5rem;"></i> 
                     Your Pass ID was sent to you via WhatsApp after payment
                 </p>
             </div>
             
+            <!-- Pass Display (Hidden by default) -->
             <div id="passDisplay" class="hidden">
                 <div class="pass-container reveal" id="passTemplate">
                     <div class="pass-header">
@@ -69,22 +67,11 @@
                     <div class="pass-body">
                         <div class="pass-details">
                             <h3>Guest Information</h3>
-                            <p>
-                                <strong>Name:</strong>
-                                <span id="displayName" style="font-weight: 700; font-size: 1.15rem;">-</span>
-                            </p>
-                            <p>
-                                <strong>Phone:</strong>
-                                <span id="displayPhone">-</span>
-                            </p>
-                            <p>
-                                <strong>Batch:</strong>
-                                <span id="displayBatch">-</span>
-                            </p>
-                            <p>
-                                <strong>Pass ID:</strong>
-                                <span id="displayPassId" style="font-family: monospace; font-size: 1.15rem; letter-spacing: 2.5px; background: rgba(74, 138, 181, 0.15); padding: 0.4rem 0.8rem; border-radius: 8px; border: 2px solid var(--ice);">-</span>
-                            </p>
+                            <p><strong>Name:</strong> <span id="displayName" style="font-weight: 700; font-size: 1.1rem;">-</span></p>
+                            <p><strong>Phone:</strong> <span id="displayPhone">-</span></p>
+                            <p><strong>Gender:</strong> <span id="displayGender">-</span></p>
+                            <p><strong>Batch:</strong> <span id="displayBatch">-</span></p>
+                            <p><strong>Pass ID:</strong> <span id="displayPassId" style="font-family: monospace; font-weight: bold; background: rgba(74, 138, 181, 0.15); padding: 0.3rem 0.6rem; border-radius: 6px; border: 1px solid var(--ice);">-</span></p>
                         </div>
                         <div class="qr-section">
                             <div class="qr-frame">
@@ -95,8 +82,9 @@
                     </div>
                 </div>
                 
-                <div style="text-align: center; margin-top: 3.5rem;">
-                    <button id="downloadBtn" class="btn btn-primary" style="margin-right: 1rem;">
+                <!-- Action Buttons -->
+                <div style="text-align: center; margin-top: 2.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+                    <button id="downloadBtn" class="btn btn-primary">
                         <i class="fas fa-download"></i> Download Pass
                     </button>
                     <button onclick="location.reload()" class="btn btn-secondary">
@@ -112,8 +100,7 @@
         <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <!-- Main Logic Script (Modular) -->
     <script type="module" src="script.js"></script>
 </body>
 </html>
