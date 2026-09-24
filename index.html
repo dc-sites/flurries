@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flurries 26 | The Winter Voyage</title>
+    <title>Flurries 26 | The Winter Saga</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -12,82 +12,67 @@
         <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
-            <li><a href="buypass.html">Acquire Pass</a></li>
+            <li><a href="buypass.html">Claim Seat</a></li>
             <li><a href="getpass.html">Retrieve Pass</a></li>
         </ul>
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+        <div class="hamburger"><span></span><span></span><span></span></div>
     </nav>
 
     <section class="hero">
         <div class="hero-content">
-            <h1>FLURRIES 26 <span>The Winter Voyage</span></h1>
-            <p>An exclusive gathering of 100. Brave the cold. Claim your seat at the feast.</p>
-            <a href="buypass.html" class="btn">
-                <i class="fas fa-shield-alt"></i> Secure Your Passage
-            </a>
+            <h1>FLURRIES 26</h1>
+            <p>Brave the Storm. Claim Your Legacy.</p>
+            <a href="buypass.html" class="btn"><i class="fas fa-compass"></i> Begin the Voyage</a>
         </div>
-
-        <!-- Viking Ship & Ocean Animation -->
-        <div class="ocean-scene">
+        
+        <!-- Animated Viking Ship -->
+        <div class="viking-ship-container">
             <svg class="viking-ship" viewBox="0 0 200 150" xmlns="http://www.w3.org/2000/svg">
                 <!-- Hull -->
-                <path d="M20,100 Q100,130 180,100 L160,110 Q100,120 40,110 Z" fill="#1B3A5C" stroke="#4A8AB5" stroke-width="2"/>
+                <path d="M20,100 Q100,140 180,100 L170,110 Q100,150 30,110 Z" fill="#2E5F8A" stroke="#7BB8D9" stroke-width="2"/>
+                <path d="M30,110 Q100,150 170,110 L160,120 Q100,160 40,120 Z" fill="#1B3A5C"/>
                 <!-- Dragon Head Prow -->
-                <path d="M20,100 Q10,80 25,70 Q30,85 35,95" fill="#2E5F8A" stroke="#4A8AB5" stroke-width="2"/>
-                <circle cx="22" cy="75" r="2" fill="#D6EEF8"/>
+                <path d="M20,100 Q10,80 15,60 Q20,70 30,90 Z" fill="#4A8AB5" stroke="#A8D4EC" stroke-width="1"/>
                 <!-- Mast -->
-                <line x1="100" y1="105" x2="100" y2="30" stroke="#4A8AB5" stroke-width="3"/>
+                <line x1="100" y1="110" x2="100" y2="30" stroke="#7BB8D9" stroke-width="3"/>
                 <!-- Sail -->
-                <path d="M100,35 L160,45 L150,95 L100,90 Z" fill="#2E5F8A" opacity="0.8" stroke="#7BB8D9" stroke-width="1"/>
-                <!-- Sail Details (Stripes) -->
-                <line x1="110" y1="40" x2="105" y2="92" stroke="#1B3A5C" stroke-width="2" opacity="0.5"/>
-                <line x1="130" y1="43" x2="125" y2="94" stroke="#1B3A5C" stroke-width="2" opacity="0.5"/>
-                <!-- Shield Rack -->
-                <circle cx="50" cy="102" r="6" fill="#4A8AB5" stroke="#1B3A5C" stroke-width="1"/>
-                <circle cx="70" cy="106" r="6" fill="#7BB8D9" stroke="#1B3A5C" stroke-width="1"/>
-                <circle cx="90" cy="108" r="6" fill="#4A8AB5" stroke="#1B3A5C" stroke-width="1"/>
+                <path d="M70,40 L130,40 L120,100 L80,100 Z" fill="#A8D4EC" opacity="0.8" stroke="#D6EEF8" stroke-width="1"/>
+                <path d="M70,40 L130,40 L120,100 L80,100 Z" fill="none" stroke="#7BB8D9" stroke-width="1" stroke-dasharray="4,4"/>
+                <!-- Shield Row -->
+                <circle cx="50" cy="105" r="4" fill="#D6EEF8"/>
+                <circle cx="70" cy="112" r="4" fill="#D6EEF8"/>
+                <circle cx="90" cy="116" r="4" fill="#D6EEF8"/>
+                <circle cx="110" cy="116" r="4" fill="#D6EEF8"/>
+                <circle cx="130" cy="112" r="4" fill="#D6EEF8"/>
+                <circle cx="150" cy="105" r="4" fill="#D6EEF8"/>
             </svg>
-            
-            <div class="waves">
-                <div class="wave wave-1"></div>
-                <div class="wave wave-2"></div>
-                <div class="wave wave-3"></div>
-            </div>
         </div>
     </section>
 
-    <div class="container">
-        <div class="card reveal">
-            <h2>The Gathering</h2>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 3rem; margin-top: 2rem;">
-                <div style="text-align: center; padding: 1rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(74, 138, 181, 0.1); border: 1px solid rgba(123, 184, 217, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; color: var(--light-blue);">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 0.5rem; color: var(--ice-white);">The Date</h3>
-                    <p style="color: var(--pale-blue); line-height: 1.6;">December 2026<br>When the frost bites hardest.</p>
+    <section>
+        <div class="container">
+            <h2 class="section-title reveal">The Saga</h2>
+            <p class="section-subtitle reveal">An exclusive gathering of 100 warriors</p>
+            
+            <div class="grid-3">
+                <div class="card reveal">
+                    <div class="feature-icon"><i class="fas fa-calendar-day"></i></div>
+                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 1rem; color: var(--pale-frost);">The Date</h3>
+                    <p style="color: var(--light-ice);">December 2026. When the winter solstice approaches, the gates shall open for one night only.</p>
                 </div>
-                <div style="text-align: center; padding: 1rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(74, 138, 181, 0.1); border: 1px solid rgba(123, 184, 217, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; color: var(--light-blue);">
-                        <i class="fas fa-map-marked-alt"></i>
-                    </div>
-                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 0.5rem; color: var(--ice-white);">The Grounds</h3>
-                    <p style="color: var(--pale-blue); line-height: 1.6;">Winter Garden Arena<br>A fortress of warmth.</p>
+                <div class="card reveal">
+                    <div class="feature-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 1rem; color: var(--pale-frost);">The Realm</h3>
+                    <p style="color: var(--light-ice);">Winter Garden Arena. A fortified estate prepared for the ultimate winter gala experience.</p>
                 </div>
-                <div style="text-align: center; padding: 1rem;">
-                    <div style="width: 80px; height: 80px; background: rgba(74, 138, 181, 0.1); border: 1px solid rgba(123, 184, 217, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem; color: var(--light-blue);">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 0.5rem; color: var(--ice-white);">The Crew</h3>
-                    <p style="color: var(--pale-blue); line-height: 1.6;">100 Warriors Only<br>No outsiders permitted.</p>
+                <div class="card reveal">
+                    <div class="feature-icon"><i class="fas fa-crown"></i></div>
+                    <h3 style="font-family: 'Cinzel', serif; margin-bottom: 1rem; color: var(--pale-frost);">The Elite</h3>
+                    <p style="color: var(--light-ice);">Strictly limited to 100 souls. Premium hospitality, curated experiences, and legendary nights.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <footer>
         <p>Forged by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
