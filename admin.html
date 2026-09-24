@@ -6,117 +6,177 @@
     <title>Admin | Flurries 26</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- QR Code Scanner Library -->
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <meta name="robots" content="noindex, nofollow">
+    
+    <style>
+        /* Admin Specific Styles */
+        .scanner-section {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem;
+            background: var(--cream);
+            border-radius: 16px;
+            border: 2px dashed var(--ice);
+        }
+        #reader {
+            width: 100%;
+            max-width: 500px;
+            margin: 1.5rem auto;
+            border-radius: 12px;
+            overflow: hidden;
+            border: 3px solid var(--navy-deep);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(27, 58, 92, 0.85); backdrop-filter: blur(5px);
+            z-index: 2000; display: flex; justify-content: center; align-items: center;
+        }
+        .modal.hidden { display: none; }
+        .modal-content {
+            background: white; padding: 2.5rem; border-radius: 20px;
+            width: 90%; max-width: 450px; text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: fadeInUp 0.3s ease;
+        }
+        .modal-content h3 {
+            font-family: 'Playfair Display', serif; font-size: 1.8rem;
+            color: var(--navy-deep); margin-bottom: 1.5rem;
+        }
+        .modal-details p {
+            margin: 0.8rem 0; color: var(--navy-strong); font-size: 1.05rem;
+            display: flex; justify-content: space-between; border-bottom: 1px solid var(--frost);
+            padding-bottom: 0.5rem;
+        }
+        .modal-details p strong { color: var(--navy-deep); }
+        .modal-actions { margin-top: 2rem; display: flex; flex-direction: column; gap: 1rem; }
+        
+        .status-badge.attended {
+            background: rgba(34, 197, 94, 0.15); color: #166534; border-color: #22c55e;
+        }
+        .status-badge.pending {
+            background: rgba(234, 179, 8, 0.15); color: #854d0e; border-color: #eab308;
+        }
+        
+        .export-btn {
+            background: var(--ocean); color: white; border: none; padding: 0.8rem 1.5rem;
+            border-radius: 8px; cursor: pointer; font-weight: 600; margin-bottom: 1rem;
+            display: inline-flex; align-items: center; gap: 0.5rem; transition: 0.3s;
+        }
+        .export-btn:hover { background: var(--navy-strong); transform: translateY(-2px); }
+    </style>
 </head>
 <body>
     <nav class="navbar">
         <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
         <ul class="nav-links">
             <li><a href="index.html">Public Site</a></li>
-            <li id="logoutBtn" style="cursor: pointer; color: #dc2626;">
-                <i class="fas fa-sign-out-alt"></i> Logout
-            </li>
+            <li id="logoutBtn" style="cursor: pointer; color: #fca5a5;"><i class="fas fa-sign-out-alt"></i> Logout</li>
         </ul>
-        <div class="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
+        <div class="hamburger"><span></span><span></span><span></span></div>
     </nav>
 
     <section style="padding-top: 150px;">
         <div class="container">
             <!-- Login Form -->
-            <div id="loginForm" class="card reveal" style="max-width: 500px; margin: 0 auto; padding: 3rem;">
-                <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 2rem; color: var(--navy-deep);">
-                    <i class="fas fa-lock" style="color: var(--ocean); margin-right: 0.5rem;"></i>
-                    Admin Access
+            <div id="loginForm" class="card reveal" style="max-width: 550px; margin: 0 auto; padding: 3.5rem;">
+                <h2 style="font-family: 'Playfair Display', serif; font-size: 2.8rem; text-align: center; margin-bottom: 2.5rem; color: var(--navy-deep);">
+                    <i class="fas fa-lock" style="color: var(--ocean); margin-right: 0.5rem;"></i> Admin Access
                 </h2>
                 <form id="loginFormElement">
                     <div class="form-group">
-                        <label for="adminEmail">
-                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
-                            Email Address
-                        </label>
+                        <label for="adminEmail"><i class="fas fa-envelope" style="margin-right: 0.5rem;"></i> Email Address</label>
                         <input type="email" id="adminEmail" required placeholder="admin@flurries26.com">
                     </div>
                     <div class="form-group">
-                        <label for="adminPassword">
-                            <i class="fas fa-lock" style="margin-right: 0.5rem;"></i>
-                            Password
-                        </label>
+                        <label for="adminPassword"><i class="fas fa-lock" style="margin-right: 0.5rem;"></i> Password</label>
                         <input type="password" id="adminPassword" required placeholder="••••••••">
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
-                        <i class="fas fa-sign-in-alt"></i> Sign In
-                    </button>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fas fa-sign-in-alt"></i> Sign In</button>
                 </form>
             </div>
             
             <!-- Admin Dashboard -->
             <div id="adminContent" class="hidden">
-                <div class="card reveal" style="padding: 3rem;">
-                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 2rem; color: var(--navy-deep);">
-                        <i class="fas fa-user-plus" style="color: var(--ocean); margin-right: 0.5rem;"></i>
-                        Issue New Pass
+                
+                <!-- QR Scanner Section -->
+                <div class="card reveal scanner-section">
+                    <h2 style="font-family: 'Playfair Display', serif; color: var(--navy-deep); margin-bottom: 1rem;">
+                        <i class="fas fa-qrcode" style="color: var(--ocean);"></i> Entry Scanner
+                    </h2>
+                    <p style="color: var(--navy-strong); margin-bottom: 1rem;">Point the camera at the attendee's QR Pass</p>
+                    <button id="startScannerBtn" class="btn btn-primary"><i class="fas fa-camera"></i> Start Scanner</button>
+                    <button id="stopScannerBtn" class="btn btn-secondary hidden" style="margin-left: 1rem;"><i class="fas fa-stop"></i> Stop</button>
+                    <div id="reader" class="hidden"></div>
+                </div>
+
+                <!-- Add New Pass Form -->
+                <div class="card reveal" style="padding: 3.5rem;">
+                    <h2 style="font-family: 'Playfair Display', serif; font-size: 2.3rem; margin-bottom: 2.5rem; color: var(--navy-deep);">
+                        <i class="fas fa-user-plus" style="color: var(--ocean); margin-right: 0.5rem;"></i> Issue New Pass
                     </h2>
                     <form id="addPassForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
                             <div class="form-group">
-                                <label for="userName">
-                                    <i class="fas fa-user" style="margin-right: 0.5rem;"></i>
-                                    Full Name
-                                </label>
+                                <label for="userName"><i class="fas fa-user" style="margin-right: 0.5rem;"></i> Full Name</label>
                                 <input type="text" id="userName" required placeholder="Enter guest name">
                             </div>
                             <div class="form-group">
-                                <label for="userPhone">
-                                    <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
-                                    Phone Number
-                                </label>
+                                <label for="userPhone"><i class="fas fa-phone" style="margin-right: 0.5rem;"></i> Phone Number</label>
                                 <input type="tel" id="userPhone" required placeholder="07X XXX XXXX">
                             </div>
                             <div class="form-group">
-                                <label for="userBatch">
-                                    <i class="fas fa-users" style="margin-right: 0.5rem;"></i>
-                                    Batch Allocation
-                                </label>
+                                <label for="userGender"><i class="fas fa-venus-mars" style="margin-right: 0.5rem;"></i> Gender</label>
+                                <select id="userGender" required>
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="userBatch"><i class="fas fa-users" style="margin-right: 0.5rem;"></i> Batch</label>
                                 <select id="userBatch" required>
-                                    <option value="">Select Batch</option>
-                                    <option value="Batch A">Batch A</option>
-                                    <option value="Batch B">Batch B</option>
-                                    <option value="Batch C">Batch C</option>
-                                    <option value="VIP">VIP</option>
+                                    <option value="2026 AL Batch">2026 AL Batch</option>
+                                    <option value="2023 OL Batch">2023 OL Batch</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1.5rem;">
                             <i class="fas fa-magic"></i> Generate Pass ID
                         </button>
                     </form>
                 </div>
                 
-                <div class="card reveal" style="margin-top: 3rem; padding: 3rem;">
-                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 2rem; color: var(--navy-deep);">
-                        <i class="fas fa-list" style="color: var(--ocean); margin-right: 0.5rem;"></i>
-                        Issued Passes Registry
-                    </h2>
+                <!-- Attendees Registry -->
+                <div class="card reveal" style="margin-top: 3rem; padding: 3.5rem;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 2rem;">
+                        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.3rem; color: var(--navy-deep); margin: 0;">
+                            <i class="fas fa-list" style="color: var(--ocean); margin-right: 0.5rem;"></i> Attendees Registry
+                        </h2>
+                        <button onclick="exportToCSV()" class="export-btn">
+                            <i class="fas fa-file-csv"></i> Export Data
+                        </button>
+                    </div>
+                    
                     <div style="overflow-x: auto;">
                         <table class="admin-table">
                             <thead>
                                 <tr>
                                     <th>Pass ID</th>
-                                    <th>Guest Name</th>
-                                    <th>Phone</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
                                     <th>Batch</th>
+                                    <th>Phone</th>
                                     <th>Status</th>
+                                    <th>Scanned Time</th>
                                 </tr>
                             </thead>
                             <tbody id="passesTable">
                                 <tr>
-                                    <td colspan="5" style="text-align: center; padding: 3rem;">
-                                        <i class="fas fa-spinner fa-spin" style="color: var(--ocean); margin-right: 0.5rem;"></i>
-                                        Loading data...
+                                    <td colspan="7" style="text-align: center; padding: 3rem;">
+                                        <i class="fas fa-spinner fa-spin" style="color: var(--ocean); margin-right: 0.5rem;"></i> Loading data...
                                     </td>
                                 </tr>
                             </tbody>
@@ -127,15 +187,207 @@
         </div>
     </section>
 
+    <!-- Scan Result Modal -->
+    <div id="scanModal" class="modal hidden">
+        <div class="modal-content">
+            <h3><i class="fas fa-id-card" style="color: var(--ocean);"></i> Pass Details</h3>
+            <div class="modal-details">
+                <p><strong>Name:</strong> <span id="modalName">-</span></p>
+                <p><strong>Gender:</strong> <span id="modalGender">-</span></p>
+                <p><strong>Batch:</strong> <span id="modalBatch">-</span></p>
+                <p><strong>Pass ID:</strong> <span id="modalPassId" style="font-family: monospace; font-weight: bold;">-</span></p>
+                <p><strong>Status:</strong> <span id="modalStatus">-</span></p>
+            </div>
+            <div id="modalActions" class="modal-actions"></div>
+            <button onclick="closeScanModal()" class="btn btn-secondary" style="margin-top: 1.5rem; width: 100%; justify-content: center;">
+                Close & Resume Scanning
+            </button>
+        </div>
+    </div>
+
     <footer>
         <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
         <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-   
-   <script type="module" src="script.js"></script>
+    <!-- Firebase & App Scripts -->
+    <script type="module" src="script.js"></script>
+    
+    <!-- Admin Specific Scanner & Export Logic -->
+    <script type="module">
+        import { getFirestore, doc, getDoc, updateDoc, serverTimestamp, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+        import { getAuth } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
+            authDomain: "flurries-32408.firebaseapp.com",
+            projectId: "flurries-32408",
+            storageBucket: "flurries-32408.firebasestorage.app",
+            messagingSenderId: "459835238527",
+            appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        let html5QrcodeScanner = null;
+
+        document.getElementById('startScannerBtn').addEventListener('click', () => {
+            document.getElementById('reader').classList.remove('hidden');
+            document.getElementById('startScannerBtn').classList.add('hidden');
+            document.getElementById('stopScannerBtn').classList.remove('hidden');
+
+            html5QrcodeScanner = new Html5Qrcode("reader");
+            const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+            
+            html5QrcodeScanner.start(
+                { facingMode: "environment" }, 
+                config, 
+                onScanSuccess, 
+                onScanFailure
+            ).catch(err => {
+                console.error("Failed to start scanner", err);
+                alert("Camera access denied or not available. Please allow camera permissions.");
+                document.getElementById('reader').classList.add('hidden');
+                document.getElementById('startScannerBtn').classList.remove('hidden');
+                document.getElementById('stopScannerBtn').classList.add('hidden');
+            });
+        });
+
+        document.getElementById('stopScannerBtn').addEventListener('click', () => {
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.stop().then(() => {
+                    document.getElementById('reader').classList.add('hidden');
+                    document.getElementById('startScannerBtn').classList.remove('hidden');
+                    document.getElementById('stopScannerBtn').classList.add('hidden');
+                });
+            }
+        });
+
+        function onScanSuccess(decodedText, decodedResult) {
+            // Pause scanner to prevent multiple rapid scans of the same code
+            html5QrcodeScanner.pause();
+            
+            // Expected format: FLURRIES26|PASS_ID|NAME|PHONE
+            const parts = decodedText.split('|');
+            if (parts.length >= 2) {
+                const passId = parts[1];
+                checkPassStatus(passId);
+            } else {
+                alert("Invalid QR Code Format");
+                html5QrcodeScanner.resume();
+            }
+        }
+
+        function onScanFailure(error) {
+            // Ignore continuous scan failures
+        }
+
+        async function checkPassStatus(passId) {
+            try {
+                const docRef = doc(db, 'passes', passId);
+                const docSnap = await getDoc(docRef);
+                
+                if (docSnap.exists()) {
+                    showScanModal(docSnap.data());
+                } else {
+                    alert("Pass ID not found in database.");
+                    html5QrcodeScanner.resume();
+                }
+            } catch (error) {
+                alert("Error fetching pass details: " + error.message);
+                html5QrcodeScanner.resume();
+            }
+        }
+
+        function showScanModal(data) {
+            document.getElementById('modalName').textContent = data.name;
+            document.getElementById('modalGender').textContent = data.gender || 'N/A';
+            document.getElementById('modalBatch').textContent = data.batch;
+            document.getElementById('modalPassId').textContent = data.passId;
+            
+            const actionsDiv = document.getElementById('modalActions');
+            const statusSpan = document.getElementById('modalStatus');
+            
+            if (data.status === 'attended' && data.scannedAt) {
+                const scanTime = data.scannedAt.toDate().toLocaleString();
+                statusSpan.textContent = `Already Scanned at: ${scanTime}`;
+                statusSpan.style.color = '#dc2626';
+                statusSpan.style.fontWeight = 'bold';
+                actionsDiv.innerHTML = '<p style="color: #dc2626; font-weight: bold; font-size: 1.1rem;"><i class="fas fa-ban"></i> Cannot scan again.</p>';
+            } else {
+                statusSpan.textContent = 'Not Scanned Yet';
+                statusSpan.style.color = '#166534';
+                statusSpan.style.fontWeight = 'bold';
+                actionsDiv.innerHTML = `<button id="markAttendedBtn" class="btn btn-primary" style="width: 100%; justify-content: center;"><i class="fas fa-check"></i> Mark Attended</button>`;
+                
+                document.getElementById('markAttendedBtn').addEventListener('click', () => markAttended(data.passId));
+            }
+            
+            document.getElementById('scanModal').classList.remove('hidden');
+        }
+
+        async function markAttended(passId) {
+            try {
+                await updateDoc(doc(db, 'passes', passId), {
+                    status: 'attended',
+                    scannedAt: serverTimestamp()
+                });
+                
+                // Show success in modal
+                document.getElementById('modalStatus').textContent = 'Marked as Attended!';
+                document.getElementById('modalStatus').style.color = '#166534';
+                document.getElementById('modalActions').innerHTML = '<p style="color: #166534; font-weight: bold;"><i class="fas fa-check-circle"></i> Success!</p>';
+                
+                // Refresh the main table in the background
+                if (typeof loadAdminData === 'function') {
+                    loadAdminData();
+                }
+                
+                // Auto-close modal and resume scanner after 1.5 seconds
+                setTimeout(() => {
+                    closeScanModal();
+                }, 1500);
+                
+            } catch (error) {
+                alert("Error updating status: " + error.message);
+            }
+        }
+
+        function closeScanModal() {
+            document.getElementById('scanModal').classList.add('hidden');
+            if (html5QrcodeScanner) {
+                html5QrcodeScanner.resume();
+            }
+        }
+
+        // Export to CSV Function
+        window.exportToCSV = async function() {
+            try {
+                const snapshot = await getDocs(collection(db, 'passes'));
+                let csvContent = "data:text/csv;charset=utf-8,";
+                csvContent += "Pass ID,Name,Gender,Batch,Phone,Status,Scanned Time\n";
+                
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString().replace(/,/g, '') : 'Not Scanned';
+                    // Escape commas in names/batches to prevent CSV breaking
+                    const row = `"${d.passId}","${d.name}","${d.gender || 'N/A'}","${d.batch}","${d.phone}","${d.status}","${scanTime}"`;
+                    csvContent += row + "\n";
+                });
+                
+                const encodedUri = encodeURI(csvContent);
+                const link = document.createElement("a");
+                link.setAttribute("href", encodedUri);
+                link.setAttribute("download", `Flurries26_Attendees_${new Date().toISOString().slice(0,10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch (error) {
+                alert("Error exporting data: " + error.message);
+            }
+        };
+    </script>
 </body>
 </html>
