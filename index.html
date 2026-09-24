@@ -3,12 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flurries 26 | An Epic Winter Saga</title>
+    <title>Flurries 26 | Ready to Make Some Waves?</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
         <ul class="nav-links">
@@ -24,12 +23,13 @@
         </div>
     </nav>
 
-    <!-- Hero Section -->
     <section class="hero">
         <div class="hero-content">
             <div class="hero-badge">Limited to 100 Guests</div>
             <h1>Flurries <span>26</span></h1>
-            <p class="hero-subtitle">Where Winter Meets Wonder</p>
+            <p class="hero-subtitle">Ready to Make Some Waves?</p>
+            <p class="hero-tagline">An Epic Winter Voyage Awaits</p>
+            
             <div class="hero-buttons">
                 <a href="buypass.html" class="btn btn-primary">
                     <i class="fas fa-ticket-alt"></i> Buy Tickets
@@ -40,89 +40,99 @@
             </div>
         </div>
         
-        <!-- Animated Sea & Ship -->
-        <div class="sea-container">
+        <!-- Ship & Sea Container -->
+        <div class="ship-sea-container">
+            <div class="splash"></div>
             <div class="ocean">
                 <div class="wave"></div>
                 <div class="wave"></div>
+                <div class="wave"></div>
             </div>
+            
+            <!-- Detailed Viking Ship SVG -->
+            <svg class="viking-ship" viewBox="0 0 350 250" xmlns="http://www.w3.org/2000/svg">
+                <!-- Hull -->
+                <path d="M30,180 Q175,230 320,180 L310,195 Q175,245 40,195 Z" fill="#2E5F8A" stroke="#1B3A5C" stroke-width="3"/>
+                <path d="M40,195 Q175,245 310,195 L300,205 Q175,255 50,205 Z" fill="#1B3A5C"/>
+                
+                <!-- Dragon Head Prow -->
+                <path d="M30,180 Q15,155 20,130 Q25,145 40,170 Z" fill="#4A8AB5" stroke="#7BB8D9" stroke-width="2"/>
+                <circle cx="25" cy="145" r="3" fill="#1B3A5C"/>
+                <path d="M15,135 Q10,125 18,120" stroke="#1B3A5C" stroke-width="2" fill="none"/>
+                
+                <!-- Stern -->
+                <path d="M320,180 Q335,160 330,140" stroke="#2E5F8A" stroke-width="8" fill="none"/>
+                <circle cx="330" cy="140" r="5" fill="#1B3A5C"/>
+                
+                <!-- Mast -->
+                <line x1="175" y1="190" x2="175" y2="50" stroke="#7BB8D9" stroke-width="5"/>
+                <line x1="165" y1="70" x2="185" y2="70" stroke="#1B3A5C" stroke-width="3"/>
+                
+                <!-- Sail with Details -->
+                <path d="M110,60 L240,60 L230,180 L120,180 Z" fill="#A8D4EC" opacity="0.95" stroke="#D6EEF8" stroke-width="2"/>
+                <line x1="110" y1="60" x2="240" y2="60" stroke="#2E5F8A" stroke-width="2"/>
+                <line x1="120" y1="80" x2="230" y2="80" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
+                <line x1="125" y1="105" x2="225" y2="105" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
+                <line x1="130" y1="130" x2="220" y2="130" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
+                <line x1="135" y1="155" x2="215" y2="155" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
+                
+                <!-- Shield Row -->
+                <circle cx="60" cy="185" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="90" cy="193" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="120" cy="198" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="150" cy="201" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="180" cy="201" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="210" cy="198" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="240" cy="193" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                <circle cx="270" cy="185" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
+                
+                <!-- Oars -->
+                <line x1="70" y1="195" x2="45" y2="220" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/>
+                <line x1="280" y1="195" x2="305" y2="220" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/>
+                
+                <!-- Flag -->
+                <line x1="175" y1="50" x2="175" y2="30" stroke="#1B3A5C" stroke-width="2"/>
+                <path d="M175,30 L195,40 L175,50 Z" fill="#4A8AB5"/>
+            </svg>
         </div>
-        
-        <!-- Viking Ship SVG -->
-        <svg class="viking-ship" viewBox="0 0 280 200" xmlns="http://www.w3.org/2000/svg">
-            <!-- Hull -->
-            <path d="M20,140 Q140,180 260,140 L250,150 Q140,190 30,150 Z" fill="#2E5F8A" stroke="#1B3A5C" stroke-width="2"/>
-            <path d="M30,150 Q140,190 250,150 L240,160 Q140,200 40,160 Z" fill="#1B3A5C"/>
-            
-            <!-- Dragon Head -->
-            <path d="M20,140 Q10,120 15,100 Q20,110 30,130 Z" fill="#4A8AB5" stroke="#7BB8D9" stroke-width="1.5"/>
-            <circle cx="18" cy="115" r="2" fill="#1B3A5C"/>
-            
-            <!-- Mast -->
-            <line x1="140" y1="150" x2="140" y2="40" stroke="#7BB8D9" stroke-width="4"/>
-            
-            <!-- Sail with Details -->
-            <path d="M90,50 L190,50 L180,140 L100,140 Z" fill="#A8D4EC" opacity="0.9" stroke="#D6EEF8" stroke-width="2"/>
-            <line x1="90" y1="50" x2="190" y2="50" stroke="#2E5F8A" stroke-width="2"/>
-            <line x1="100" y1="65" x2="180" y2="65" stroke="#2E5F8A" stroke-width="1" opacity="0.5"/>
-            <line x1="105" y1="85" x2="175" y2="85" stroke="#2E5F8A" stroke-width="1" opacity="0.5"/>
-            <line x1="110" y1="105" x2="170" y2="105" stroke="#2E5F8A" stroke-width="1" opacity="0.5"/>
-            <line x1="115" y1="125" x2="165" y2="125" stroke="#2E5F8A" stroke-width="1" opacity="0.5"/>
-            
-            <!-- Shield Row -->
-            <circle cx="50" cy="145" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="75" cy="152" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="100" cy="156" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="125" cy="158" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="150" cy="158" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="175" cy="156" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="200" cy="152" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            <circle cx="225" cy="145" r="5" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="1"/>
-            
-            <!-- Oars -->
-            <line x1="60" y1="155" x2="40" y2="175" stroke="#1B3A5C" stroke-width="2"/>
-            <line x1="220" y1="155" x2="240" y2="175" stroke="#1B3A5C" stroke-width="2"/>
-        </svg>
     </section>
 
-    <!-- Features Section -->
     <section>
         <div class="container">
             <div class="section-header reveal">
                 <div class="section-tag">The Experience</div>
-                <h2 class="section-title">An Unforgettable Journey</h2>
-                <p class="section-subtitle">Embark on a winter adventure like no other</p>
+                <h2 class="section-title">Set Sail With Us</h2>
+                <p class="section-subtitle">Embark on an unforgettable winter journey</p>
             </div>
             
             <div class="features-grid">
-                <div class="feature-card reveal">
+                <div class="feature-card reveal floating">
                     <div class="feature-icon">
                         <i class="fas fa-calendar-alt"></i>
                     </div>
                     <h3>The Date</h3>
-                    <p>December 2026. When the winter winds blow and the snow falls, we gather for one magical night.</p>
+                    <p>December 2026. When winter's embrace is strongest, we gather for one legendary night.</p>
                 </div>
                 
-                <div class="feature-card reveal">
+                <div class="feature-card reveal floating" style="animation-delay: 0.2s;">
                     <div class="feature-icon">
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <h3>The Venue</h3>
-                    <p>Winter Garden Arena. A carefully selected location that embodies the spirit of winter elegance.</p>
+                    <p>Winter Garden Arena. A magnificent location chosen for its elegance and grandeur.</p>
                 </div>
                 
-                <div class="feature-card reveal">
+                <div class="feature-card reveal floating" style="animation-delay: 0.4s;">
                     <div class="feature-icon">
                         <i class="fas fa-crown"></i>
                     </div>
                     <h3>Exclusivity</h3>
-                    <p>Limited to 100 distinguished guests. Premium hospitality, curated experiences, and legendary memories.</p>
+                    <p>Limited to 100 distinguished guests. Premium hospitality and legendary memories await.</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Footer -->
     <footer>
         <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
         <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
