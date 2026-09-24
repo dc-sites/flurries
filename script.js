@@ -13,24 +13,24 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 const auth = firebase.auth();
 
-// Snowfall Animation
+// Elegant Snowfall Animation
 function createSnowflake() {
     const snowflake = document.createElement('div');
     snowflake.classList.add('snowflake');
-    snowflake.innerHTML = '❄';
+    snowflake.innerHTML = '';
     snowflake.style.left = Math.random() * 100 + 'vw';
-    snowflake.style.animationDuration = Math.random() * 3 + 2 + 's';
-    snowflake.style.opacity = Math.random();
-    snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+    snowflake.style.animationDuration = Math.random() * 6 + 6 + 's';
+    snowflake.style.opacity = Math.random() * 0.5 + 0.1;
+    snowflake.style.fontSize = Math.random() * 10 + 8 + 'px';
     
     document.body.appendChild(snowflake);
     
     setTimeout(() => {
         snowflake.remove();
-    }, 5000);
+    }, 12000);
 }
 
-setInterval(createSnowflake, 100);
+setInterval(createSnowflake, 400);
 
 // Mobile Menu Toggle
 const hamburger = document.querySelector('.hamburger');
@@ -39,12 +39,34 @@ const navLinks = document.querySelector('.nav-links');
 if (hamburger) {
     hamburger.addEventListener('click', () => {
         navLinks.classList.toggle('active');
+        const spans = hamburger.querySelectorAll('span');
+        if (navLinks.classList.contains('active')) {
+            spans[0].style.transform = 'rotate(45deg) translate(5px, 6px)';
+            spans[1].style.opacity = '0';
+            spans[2].style.transform = 'rotate(-45deg) translate(5px, -6px)';
+        } else {
+            spans[0].style.transform = 'none';
+            spans[1].style.opacity = '1';
+            spans[2].style.transform = 'none';
+        }
     });
 }
 
-// Generate 8-character ID
+// Scroll Reveal Animation (Alokawarsha style)
+const revealElements = document.querySelectorAll('.reveal');
+const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+        }
+    });
+}, { threshold: 0.15 });
+
+revealElements.forEach(el => revealObserver.observe(el));
+
+// Generate 8-character Premium ID
 function generatePassId() {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let result = 'FL26';
     for (let i = 0; i < 4; i++) {
         result += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -54,44 +76,60 @@ function generatePassId() {
 
 // Generate QR Code
 function generateQRCode(data, elementId) {
-    const qr = new QRCode(document.getElementById(elementId), {
+    document.getElementById(elementId).innerHTML = '';
+    new QRCode(document.getElementById(elementId), {
         text: data,
-        width: 150,
-        height: 150,
-        colorDark: "#1565C0",
-        colorLight: "#ffffff",
+        width: 140,
+        height: 140,
+        colorDark: "#1B3A5C",
+        colorLight: "#D6EEF8",
         correctLevel: QRCode.CorrectLevel.H
     });
 }
 
-// Download Pass as Image
+// Download Pass as High-Quality Image
 async function downloadPass() {
     const passElement = document.getElementById('passTemplate');
-    const canvas = await html2canvas(passElement);
-    const link = document.createElement('a');
-    link.download = `Flurries26_Pass.png`;
-    link.href = canvas.toDataURL();
-    link.click();
+    const btn = document.getElementById('downloadBtn');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Forging...';
+    
+    try {
+        const canvas = await html2canvas(passElement, {
+            scale: 2,
+            backgroundColor: '#1B3A5C',
+            useCORS: true
+        });
+        const link = document.createElement('a');
+        link.download = `Flurries26_VIP_Credential.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        showAlert('Credential forged successfully!', 'success');
+    } catch (error) {
+        showAlert('Error forging credential. Please try again.', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+    }
 }
 
 // Show Alert
 function showAlert(message, type) {
     const alertDiv = document.createElement('div');
     alertDiv.className = `alert alert-${type}`;
-    alertDiv.textContent = message;
-    alertDiv.style.display = 'block';
+    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'shield-alt' : 'exclamation-triangle'}"></i> ${message}`;
     
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
     
     setTimeout(() => {
-        alertDiv.remove();
-    }, 3000);
+        alertDiv.style.opacity = '0';
+        setTimeout(() => alertDiv.remove(), 300);
+    }, 4000);
 }
 
 // Admin Authentication
 function setupAdminAuth() {
-    const loginForm = document.getElementById('loginForm');
+    const loginForm = document.getElementById('loginFormElement');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -100,9 +138,9 @@ function setupAdminAuth() {
             
             try {
                 await auth.signInWithEmailAndPassword(email, password);
-                window.location.href = 'admin.html';
+                showAlert('Access granted.', 'success');
             } catch (error) {
-                showAlert('Login failed: ' + error.message, 'error');
+                showAlert('Invalid credentials. Access denied.', 'error');
             }
         });
     }
@@ -125,6 +163,9 @@ auth.onAuthStateChanged((user) => {
         loginForm.classList.add('hidden');
         adminContent.classList.remove('hidden');
         loadAdminData();
+    } else if (!user && loginForm) {
+        loginForm.classList.remove('hidden');
+        adminContent.classList.add('hidden');
     }
 });
 
@@ -135,15 +176,20 @@ async function loadAdminData() {
     
     if (table) {
         table.innerHTML = '';
+        if (snapshot.empty) {
+            table.innerHTML = '<tr><td colspan="5" style="text-align: center; padding: 3rem; color: var(--pale-blue);">No credentials issued yet.</td></tr>';
+            return;
+        }
+        
         snapshot.forEach(doc => {
             const data = doc.data();
             const row = `
                 <tr>
-                    <td>${data.passId}</td>
+                    <td><strong style="color: var(--ice-white); letter-spacing: 1px;">${data.passId}</strong></td>
                     <td>${data.name}</td>
                     <td>${data.phone}</td>
                     <td>${data.batch}</td>
-                    <td>${data.status}</td>
+                    <td><span class="status-badge">Active</span></td>
                 </tr>
             `;
             table.innerHTML += row;
@@ -170,11 +216,11 @@ async function addNewPass(e) {
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         });
         
-        showAlert(`Pass created successfully! ID: ${passId}`, 'success');
+        showAlert(`Credential forged! ID: <strong>${passId}</strong>`, 'success');
         document.getElementById('addPassForm').reset();
         loadAdminData();
     } catch (error) {
-        showAlert('Error creating pass: ' + error.message, 'error');
+        showAlert('Error forging credential: ' + error.message, 'error');
     }
 }
 
@@ -182,7 +228,11 @@ async function addNewPass(e) {
 async function getPassById(e) {
     e.preventDefault();
     
-    const passId = document.getElementById('passIdInput').value.toUpperCase();
+    const passId = document.getElementById('passIdInput').value.toUpperCase().trim();
+    const btn = e.target.querySelector('button[type="submit"]');
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
+    btn.disabled = true;
     
     try {
         const doc = await db.collection('passes').doc(passId).get();
@@ -191,10 +241,13 @@ async function getPassById(e) {
             const data = doc.data();
             displayPass(data);
         } else {
-            showAlert('Invalid Pass ID. Please check and try again.', 'error');
+            showAlert('Invalid Credential ID. Check your transmission.', 'error');
         }
     } catch (error) {
-        showAlert('Error fetching pass: ' + error.message, 'error');
+        showAlert('Connection error. Check your link.', 'error');
+    } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     }
 }
 
@@ -205,39 +258,28 @@ function displayPass(data) {
     document.getElementById('displayBatch').textContent = data.batch;
     document.getElementById('displayPassId').textContent = data.passId;
     
-    const qrData = JSON.stringify({
-        name: data.name,
-        phone: data.phone,
-        batch: data.batch,
-        passId: data.passId,
-        event: 'Flurries 26'
-    });
-    
+    const qrData = `FLURRIES26|${data.passId}|${data.name}|${data.phone}`;
     generateQRCode(qrData, 'qrcode');
     
     document.getElementById('passDisplay').classList.remove('hidden');
     document.getElementById('getPassForm').classList.add('hidden');
+    
+    document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
 // Initialize Pages
 document.addEventListener('DOMContentLoaded', () => {
-    // Admin Login Page
-    if (document.getElementById('loginForm')) {
-        setupAdminAuth();
-    }
+    if (document.getElementById('loginFormElement')) setupAdminAuth();
     
-    // Admin Dashboard
     if (document.getElementById('addPassForm')) {
         document.getElementById('addPassForm').addEventListener('submit', addNewPass);
         setupAdminAuth();
     }
     
-    // Get Pass Page
-    if (document.getElementById('getPassForm')) {
-        document.getElementById('getPassForm').addEventListener('submit', getPassById);
+    if (document.getElementById('getPassFormElement')) {
+        document.getElementById('getPassFormElement').addEventListener('submit', getPassById);
     }
     
-    // Download Button
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) {
         downloadBtn.addEventListener('click', downloadPass);
