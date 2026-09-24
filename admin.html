@@ -3,68 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flurries '26 - Admin Dashboard</title>
+    <title>Admin | Flurries 26</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="robots" content="noindex, nofollow">
 </head>
 <body>
-    <nav>
-        <div class="logo"><i class="fa-solid fa-snowflake"></i> Flurries '26 Admin</div>
-        <ul>
-            <li><a href="index.html"><i class="fa-solid fa-home"></i> Home</a></li>
-            <li><a href="admin.html" class="active"><i class="fa-solid fa-lock"></i> Admin</a></li>
+    <nav class="navbar">
+        <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
+        <ul class="nav-links">
+            <li><a href="index.html">Public Site</a></li>
+            <li id="logoutBtn" style="cursor: pointer; color: #dc2626;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </li>
         </ul>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </nav>
 
-    <div class="container">
-        <!-- Login Section -->
-        <div id="login-section">
-            <h2><i class="fa-solid fa-user-shield"></i> Admin Login</h2>
-            <input type="email" id="admin-email" placeholder="Admin Email">
-            <input type="password" id="admin-password" placeholder="Password">
-            <button id="login-btn"><i class="fa-solid fa-right-to-bracket"></i> Login</button>
-        </div>
-
-        <!-- Dashboard Section (Hidden initially) -->
-        <div id="dashboard-section" style="display: none;">
-            <h2><i class="fa-solid fa-users-gear"></i> Issue User Pass</h2>
-            <form id="pass-form">
-                <label>Full Name:</label>
-                <input type="text" id="user-name" required placeholder="Enter attendee name">
-                
-                <label>Phone Number:</label>
-                <input type="text" id="user-phone" required placeholder="Enter phone number">
-                
-                <label>Batch / Details:</label>
-                <input type="text" id="user-batch" required placeholder="e.g. Batch 2026 / CS">
-                
-                <button type="submit"><i class="fa-solid fa-circle-plus"></i> Generate 8-Char Pass ID</button>
-            </form>
-            <div id="success-msg" style="margin-top: 20px; color: #00b4d8; font-weight: bold;"></div>
+    <section style="padding-top: 150px;">
+        <div class="container">
+            <!-- Login Form -->
+            <div id="loginForm" class="card reveal" style="max-width: 500px; margin: 0 auto; padding: 3rem;">
+                <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2.5rem; text-align: center; margin-bottom: 2rem; color: var(--navy-deep);">
+                    <i class="fas fa-lock" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                    Admin Access
+                </h2>
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label for="adminEmail">
+                            <i class="fas fa-envelope" style="margin-right: 0.5rem;"></i>
+                            Email Address
+                        </label>
+                        <input type="email" id="adminEmail" required placeholder="admin@flurries26.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminPassword">
+                            <i class="fas fa-lock" style="margin-right: 0.5rem;"></i>
+                            Password
+                        </label>
+                        <input type="password" id="adminPassword" required placeholder="••••••••">
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+            </div>
             
-            <hr style="margin: 30px 0; border: 0; border-top: 1px solid rgba(255,255,255,0.2);">
-            
-            <h2><i class="fa-solid fa-qrcode"></i> Check-in Scanner / Lookup</h2>
-            <input type="text" id="search-pass-id" placeholder="Enter or Scan 8-Char Pass ID">
-            <button id="verify-btn"><i class="fa-solid fa-magnifying-glass"></i> Verify Pass</button>
-            <div id="verify-result" style="margin-top: 20px; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 8px; display: none;"></div>
-            
-            <div style="margin-top: 30px;">
-                <button id="logout-btn" style="background: #e63946;"><i class="fa-solid fa-right-from-bracket"></i> Logout</button>
+            <!-- Admin Dashboard -->
+            <div id="adminContent" class="hidden">
+                <div class="card reveal" style="padding: 3rem;">
+                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 2rem; color: var(--navy-deep);">
+                        <i class="fas fa-user-plus" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                        Issue New Pass
+                    </h2>
+                    <form id="addPassForm">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem;">
+                            <div class="form-group">
+                                <label for="userName">
+                                    <i class="fas fa-user" style="margin-right: 0.5rem;"></i>
+                                    Full Name
+                                </label>
+                                <input type="text" id="userName" required placeholder="Enter guest name">
+                            </div>
+                            <div class="form-group">
+                                <label for="userPhone">
+                                    <i class="fas fa-phone" style="margin-right: 0.5rem;"></i>
+                                    Phone Number
+                                </label>
+                                <input type="tel" id="userPhone" required placeholder="07X XXX XXXX">
+                            </div>
+                            <div class="form-group">
+                                <label for="userBatch">
+                                    <i class="fas fa-users" style="margin-right: 0.5rem;"></i>
+                                    Batch Allocation
+                                </label>
+                                <select id="userBatch" required>
+                                    <option value="">Select Batch</option>
+                                    <option value="Batch A">Batch A</option>
+                                    <option value="Batch B">Batch B</option>
+                                    <option value="Batch C">Batch C</option>
+                                    <option value="VIP">VIP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-magic"></i> Generate Pass ID
+                        </button>
+                    </form>
+                </div>
+                
+                <div class="card reveal" style="margin-top: 3rem; padding: 3rem;">
+                    <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 2rem; margin-bottom: 2rem; color: var(--navy-deep);">
+                        <i class="fas fa-list" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                        Issued Passes Registry
+                    </h2>
+                    <div style="overflow-x: auto;">
+                        <table class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Pass ID</th>
+                                    <th>Guest Name</th>
+                                    <th>Phone</th>
+                                    <th>Batch</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="passesTable">
+                                <tr>
+                                    <td colspan="5" style="text-align: center; padding: 3rem;">
+                                        <i class="fas fa-spinner fa-spin" style="color: var(--ocean); margin-right: 0.5rem;"></i>
+                                        Loading data...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
+    </section>
 
     <footer>
-        Designed by Hexa Solutions (<a href="https://hexasolutions.online" target="_blank">hexasolutions.online</a>)
+        <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
     </footer>
 
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
-    <script src="firebase-config.js"></script>
-    <script src="admin.js"></script>
-    <script src="snow.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
