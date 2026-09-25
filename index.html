@@ -8,93 +8,99 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
+    <!-- Navigation -->
     <nav class="navbar">
-        <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26" class="logo">
+        <a href="index.html">
+            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="logo">
+        </a>
         <ul class="nav-links">
             <li><a href="index.html">Home</a></li>
             <li><a href="buypass.html">Buy Tickets</a></li>
             <li><a href="getpass.html">Get Pass</a></li>
             <li><a href="trailer.html">Trailer</a></li>
         </ul>
-        <div class="hamburger"><span></span><span></span><span></span></div>
+        <div class="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
     </nav>
 
-    <section class="hero">
-        <!-- TOP: Text and Buttons -->
+    <!-- Hero Section with Edge-to-Edge Sea -->
+    <header class="hero">
         <div class="hero-content">
-            <div class="hero-badge">Limited to 100 Guests</div>
-            <h1>Flurries <span>26</span></h1>
-            <p class="hero-subtitle">Ready to Make Some Waves?</p>
-            <p class="hero-tagline">An Epic Winter Voyage Awaits</p>
+            <span class="hero-badge">Limited to 100 Guests</span>
+            <h1>Flurries 26<br><span>Ready to Make Some Waves?</span></h1>
+            <p class="hero-subtitle">An Epic Winter Voyage Awaits</p>
             <div class="hero-buttons">
                 <a href="buypass.html" class="btn btn-primary"><i class="fas fa-ticket-alt"></i> Buy Tickets</a>
                 <a href="trailer.html" class="btn btn-secondary"><i class="fas fa-play"></i> Watch Trailer</a>
             </div>
         </div>
         
-        <!-- BOTTOM: Sea and Ship (Physically below buttons now) -->
+        <!-- Edge-to-Edge Sea Container (Full Width, No Box) -->
         <div class="sea-container">
             <div class="ocean">
                 <div class="wave"></div>
                 <div class="wave"></div>
             </div>
-            <svg class="viking-ship" viewBox="0 0 350 250" xmlns="http://www.w3.org/2000/svg">
-                <path d="M30,180 Q175,230 320,180 L310,195 Q175,245 40,195 Z" fill="#2E5F8A" stroke="#1B3A5C" stroke-width="3"/>
-                <path d="M40,195 Q175,245 310,195 L300,205 Q175,255 50,205 Z" fill="#1B3A5C"/>
-                <path d="M30,180 Q15,155 20,130 Q25,145 40,170 Z" fill="#4A8AB5" stroke="#7BB8D9" stroke-width="2"/>
-                <circle cx="25" cy="145" r="3" fill="#1B3A5C"/>
-                <path d="M15,135 Q10,125 18,120" stroke="#1B3A5C" stroke-width="2" fill="none"/>
-                <path d="M320,180 Q335,160 330,140" stroke="#2E5F8A" stroke-width="8" fill="none"/>
-                <circle cx="330" cy="140" r="5" fill="#1B3A5C"/>
-                <line x1="175" y1="190" x2="175" y2="50" stroke="#7BB8D9" stroke-width="5"/>
-                <line x1="165" y1="70" x2="185" y2="70" stroke="#1B3A5C" stroke-width="3"/>
-                <path d="M110,60 L240,60 L230,180 L120,180 Z" fill="#A8D4EC" opacity="0.95" stroke="#D6EEF8" stroke-width="2"/>
-                <line x1="110" y1="60" x2="240" y2="60" stroke="#2E5F8A" stroke-width="2"/>
-                <line x1="120" y1="80" x2="230" y2="80" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
-                <line x1="125" y1="105" x2="225" y2="105" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
-                <line x1="130" y1="130" x2="220" y2="130" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
-                <line x1="135" y1="155" x2="215" y2="155" stroke="#2E5F8A" stroke-width="1.5" opacity="0.6"/>
-                <circle cx="60" cy="185" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="90" cy="193" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="120" cy="198" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="150" cy="201" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="180" cy="201" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="210" cy="198" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="240" cy="193" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <circle cx="270" cy="185" r="6" fill="#D6EEF8" stroke="#1B3A5C" stroke-width="2"/>
-                <line x1="70" y1="195" x2="45" y2="220" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/>
-                <line x1="280" y1="195" x2="305" y2="220" stroke="#1B3A5C" stroke-width="3" stroke-linecap="round"/>
-                <line x1="175" y1="50" x2="175" y2="30" stroke="#1B3A5C" stroke-width="2"/>
-                <path d="M175,30 L195,40 L175,50 Z" fill="#4A8AB5"/>
-            </svg>
         </div>
-    </section>
+    </header>
 
-    <section>
+    <!-- The Experience Section -->
+    <section class="experience reveal">
         <div class="container">
-            <div class="section-header reveal">
-                <div class="section-tag">The Experience</div>
+            <div class="section-header">
+                <span class="section-tag">The Experience</span>
                 <h2 class="section-title">Set Sail With Us</h2>
                 <p class="section-subtitle">Embark on an unforgettable winter journey</p>
             </div>
             <div class="features-grid">
-                <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-calendar-alt"></i></div><h3>The Date</h3><p>December 2026. When winter's embrace is strongest, we gather for one legendary night.</p></div>
-                <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div><h3>The Venue</h3><p>Winter Garden Arena. A magnificent location chosen for its elegance and grandeur.</p></div>
-                <div class="feature-card reveal"><div class="feature-icon"><i class="fas fa-crown"></i></div><h3>Exclusivity</h3><p>Limited to 100 distinguished guests. Premium hospitality and legendary memories await.</p></div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <h3>The Date</h3>
+                    <p>December 2026. When winter's embrace is strongest, we gather for one legendary night.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-map-marker-alt"></i></div>
+                    <h3>The Venue</h3>
+                    <p>Winter Garden Arena. A magnificent location chosen for its elegance and grandeur.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon"><i class="fas fa-crown"></i></div>
+                    <h3>Exclusivity</h3>
+                    <p>Limited to 100 distinguished guests. Premium hospitality and legendary memories await.</p>
+                </div>
             </div>
         </div>
     </section>
 
+    <!-- NEW: Official Partner Hotel Section -->
+    <section class="accommodation-section reveal">
+        <div class="container">
+            <div class="section-header">
+                <span class="section-tag">Stay With Us</span>
+                <h2 class="section-title">Official Partner Hotel</h2>
+                <p class="section-subtitle">Experience premium comfort and hospitality at our exclusive partner hotel.</p>
+            </div>
+            <div class="hotel-card">
+                <a href="https://www.hotelswissdale.lk" target="_blank" rel="noopener noreferrer" class="hotel-link">
+                    <img src="https://i.postimg.cc/vHVRVqwZ/img-09-r2wf9kq36f0q5zn4ixkmkuagbihqerjvo2g6tpei2o.jpg" alt="Hotel Swiss Dale" class="hotel-image">
+                    <div class="hotel-overlay">
+                        <h3>Hotel Swiss Dale</h3>
+                        <p>Visit Website <i class="fas fa-external-link-alt"></i></p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
     <footer>
         <p>Designed by <a href="https://hexasolutions.online" target="_blank">Hexa Solutions</a></p>
-        <p style="margin-top: 0.5rem; font-size: 0.85rem; opacity: 0.7;">&copy; 2026 Flurries. All rights reserved.</p>
+        <p>&copy; 2026 Flurries. All rights reserved.</p>
     </footer>
 
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script type="module" src="script.js"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>
