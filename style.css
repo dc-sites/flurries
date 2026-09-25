@@ -561,3 +561,98 @@ footer a:hover { color: var(--white); text-shadow: 0 0 15px rgba(123, 184, 217, 
         padding: 0.8rem;
     }
 }
+
+/* =========================================
+   ACCOMMODATION / HOTEL SECTION
+   ========================================= */
+.accommodation-section {
+    background: var(--cream);
+    padding: 100px 5%;
+}
+
+.hotel-card {
+    max-width: 900px;
+    margin: 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(27, 58, 92, 0.15);
+    border: 3px solid var(--frost);
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.hotel-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 30px 80px rgba(27, 58, 92, 0.25);
+    border-color: var(--sky);
+}
+
+.hotel-link {
+    display: block;
+    position: relative;
+    text-decoration: none;
+    color: inherit;
+}
+
+.hotel-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.6s ease;
+}
+
+.hotel-card:hover .hotel-image {
+    transform: scale(1.03);
+}
+
+.hotel-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(27, 58, 92, 0.95) 0%, rgba(27, 58, 92, 0.7) 60%, transparent 100%);
+    padding: 4rem 2rem 2.5rem;
+    color: var(--white);
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.4s ease;
+}
+
+.hotel-card:hover .hotel-overlay {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.hotel-overlay h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    color: var(--white);
+}
+
+.hotel-overlay p {
+    font-size: 1rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    color: var(--sky);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+/* Mobile adjustments for hotel section */
+@media (max-width: 768px) {
+    .hotel-overlay {
+        opacity: 1; /* Always visible on mobile for better UX */
+        transform: translateY(0);
+        padding: 2rem 1.5rem 1.5rem;
+    }
+    .hotel-overlay h3 {
+        font-size: 1.5rem;
+    }
+    .hotel-overlay p {
+        font-size: 0.85rem;
+    }
+}
