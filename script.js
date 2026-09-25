@@ -3,12 +3,12 @@ import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy,
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
-    authDomain: "flurries-32408.firebaseapp.com",
-    projectId: "flurries-32408",
-    storageBucket: "flurries-32408.firebasestorage.app",
-    messagingSenderId: "459835238527",
-    appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
+  apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
+  authDomain: "flurries2.firebaseapp.com",
+  projectId: "flurries2",
+  storageBucket: "flurries2.firebasestorage.app",
+  messagingSenderId: "267044553050",
+  appId: "1:267044553050:web:32937f10a904b931f2b363"
 };
 
 const app = initializeApp(firebaseConfig);
