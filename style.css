@@ -656,3 +656,12 @@ footer a:hover { color: var(--white); text-shadow: 0 0 15px rgba(123, 184, 217, 
         font-size: 0.85rem;
     }
 }
+/* =========================================
+   CTA SECTION (Below Sea)
+   ========================================= */
+.cta-section {
+    background: linear-gradient(180deg, var(--frost) 0%, var(--white) 100%);
+    padding-top: 80px;
+    padding-bottom: 80px;
+    text-align: center;
+}
