@@ -16,7 +16,23 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 1. Navbar Scroll Effect
+    // ==========================================
+    // 5-SECOND PRELOADER LOGIC
+    // ==========================================
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        setTimeout(() => {
+            preloader.classList.add('preloader-hidden');
+            document.body.classList.remove('loading');
+            
+            // Completely remove from DOM after fade-out for performance
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 800);
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
+    
     window.addEventListener('scroll', () => {
         const navbar = document.querySelector('.navbar');
         if (navbar) {
