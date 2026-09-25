@@ -16,22 +16,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ==========================================
-    // 5-SECOND VIKING PRELOADER LOGIC
-    // ==========================================
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        setTimeout(() => {
-            preloader.classList.add('preloader-hidden');
-            document.body.classList.remove('loading');
-            
-            // Completely remove from DOM after fade-out for performance
-            setTimeout(() => {
-                preloader.style.display = 'none';
-            }, 800);
-        }, 5000); // 5000 milliseconds = 5 seconds
-    }
-
     // 1. Navbar Scroll Effect
     window.addEventListener('scroll', () => {
         const navbar = document.querySelector('.navbar');
@@ -95,13 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    
+
     const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', () => { 
-        signOut(auth); 
-        window.location.href = 'index.html'; 
-    });
-    
+    if (logoutBtn) logoutBtn.addEventListener('click', () => { signOut(auth); window.location.href = 'index.html'; });
+
     onAuthStateChanged(auth, (user) => {
         const adminContent = document.getElementById('adminContent');
         const loginFormEl = document.getElementById('loginForm');
@@ -125,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const gender = document.getElementById('userGender').value;
             const batch = document.getElementById('userBatch').value;
             const passId = generatePassId();
+            
             try {
                 await setDoc(doc(db, 'passes', passId), {
                     name, phone, gender, batch, passId, 
@@ -150,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...'; 
             btn.disabled = true;
+            
             try {
                 const docSnap = await getDoc(doc(db, 'passes', passId));
                 if (docSnap.exists()) displayPass(docSnap.data());
@@ -157,8 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { 
                 showAlert('Connection error.', 'error'); 
             } finally { 
-                btn.innerHTML = originalHTML; 
-                btn.disabled = false; 
+                btn.innerHTML = originalHTML; btn.disabled = false; 
             }
         });
     }
@@ -171,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ==========================================
 // Helper Functions
 // ==========================================
+
 function generatePassId() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let result = 'FL26';
@@ -190,12 +173,13 @@ async function downloadPass() {
     const passElement = document.getElementById('passTemplate');
     const btn = document.getElementById('downloadBtn');
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; 
     btn.disabled = true;
+    
     try {
         const isMobile = window.innerWidth <= 768;
         let originalStyles = null;
-        
+
         // Mobile rendering trick: Temporarily expand to desktop size for crisp export
         if (isMobile) {
             originalStyles = {
@@ -207,6 +191,7 @@ async function downloadPass() {
                 zIndex: passElement.style.zIndex,
                 transform: passElement.style.transform
             };
+            
             passElement.style.width = '750px';
             passElement.style.maxWidth = '750px';
             passElement.style.position = 'absolute';
@@ -214,16 +199,17 @@ async function downloadPass() {
             passElement.style.top = '0';
             passElement.style.zIndex = '-1';
             passElement.style.transform = 'none';
+            
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-        
+
         const canvas = await html2canvas(passElement, { 
             scale: isMobile ? 3 : 2, 
             backgroundColor: '#ffffff', 
             useCORS: true,
             logging: false
         });
-        
+
         // Restore original styles
         if (isMobile && originalStyles) {
             passElement.style.width = originalStyles.width || '';
@@ -234,7 +220,7 @@ async function downloadPass() {
             passElement.style.zIndex = originalStyles.zIndex || '';
             passElement.style.transform = originalStyles.transform || '';
         }
-        
+
         const link = document.createElement('a');
         const passId = document.getElementById('displayPassId').textContent;
         link.download = `Flurries26_Pass_${passId}.png`;
@@ -256,9 +242,9 @@ function showAlert(message, type) {
     alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
-    setTimeout(() => {
-        alertDiv.style.opacity = '0';
-        setTimeout(() => alertDiv.remove(), 300);
+    setTimeout(() => { 
+        alertDiv.style.opacity = '0'; 
+        setTimeout(() => alertDiv.remove(), 300); 
     }, 4000);
 }
 
@@ -266,6 +252,7 @@ async function loadAdminData() {
     const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
     const table = document.getElementById('allPassesTable');
+    
     if (table) {
         table.innerHTML = '';
         if (snapshot.empty) { 
@@ -276,6 +263,7 @@ async function loadAdminData() {
             const d = docSnap.data();
             const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Not Scanned';
             const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
+            
             table.innerHTML += `<tr>
                 <td><strong>${d.passId}</strong></td>
                 <td>${d.name}</td>
@@ -295,10 +283,13 @@ function displayPass(data) {
     document.getElementById('displayGender').textContent = data.gender || 'N/A';
     document.getElementById('displayBatch').textContent = data.batch;
     document.getElementById('displayPassId').textContent = data.passId;
+    
     const qrData = `FLURRIES26|${data.passId}|${data.name}|${data.phone}`;
     generateQRCode(qrData, 'qrcode');
+    
     document.getElementById('passDisplay').classList.remove('hidden');
     document.getElementById('getPassForm').classList.add('hidden');
+    
     setTimeout(() => {
         document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 100);
