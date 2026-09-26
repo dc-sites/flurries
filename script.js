@@ -2,9 +2,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-// ==========================================
-// NEW FIREBASE CONFIGURATION (flurries2)
-// ==========================================
+
 const firebaseConfig = {
   apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
   authDomain: "flurries2.firebaseapp.com",
