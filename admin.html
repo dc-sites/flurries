@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Admin Dashboard | Flurries 26</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -10,7 +10,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <a href="index.html">
             <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="logo">
@@ -26,14 +25,14 @@
         </div>
     </nav>
 
-    <main class="container" style="padding-top: 120px; padding-bottom: 50px;">
+    <main class="container admin-main">
         <!-- Login Form -->
-        <div id="loginForm" class="pass-container" style="max-width: 500px; margin: 0 auto;">
-            <div class="pass-header">
+        <div id="loginForm" class="pass-container login-box">
+            <div class="pass-header compact">
                 <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Logo">
                 <h2>Admin Access</h2>
             </div>
-            <div class="pass-body" style="display: block; grid-template-columns: 1fr;">
+            <div class="pass-body compact-form">
                 <form id="loginFormElement">
                     <div class="form-group">
                         <label>Email</label>
@@ -43,126 +42,123 @@
                         <label>Password</label>
                         <input type="password" id="adminPassword" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" style="width: 100%;">Sign In</button>
+                    <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">Sign In</button>
                 </form>
             </div>
         </div>
 
-        <!-- Admin Content (Hidden by default) -->
+        <!-- Admin Content -->
         <div id="adminContent" class="hidden">
             
-            <!-- Mobile-Friendly Section Menu (Hamburger Style) -->
-            <div class="admin-section-menu">
-                <button class="section-menu-btn active" data-section="generate">
-                    <i class="fas fa-plus-circle"></i>
-                    <span>Generate Pass</span>
-                    <i class="fas fa-chevron-right arrow"></i>
-                </button>
-                <button class="section-menu-btn" data-section="scan">
+            <!-- Compact Section Menu -->
+            <div class="admin-section-menu compact">
+                <button class="section-menu-btn active" data-section="scan">
                     <i class="fas fa-qrcode"></i>
                     <span>Scan QR</span>
                     <i class="fas fa-chevron-right arrow"></i>
                 </button>
+                <button class="section-menu-btn" data-section="generate">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Generate</span>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </button>
                 <button class="section-menu-btn" data-section="registry">
                     <i class="fas fa-id-card"></i>
-                    <span>Generated Passes</span>
+                    <span>All Passes</span>
                     <i class="fas fa-chevron-right arrow"></i>
                 </button>
                 <button class="section-menu-btn" data-section="details">
                     <i class="fas fa-list-check"></i>
-                    <span>Scanned Details</span>
+                    <span>Scanned</span>
                     <i class="fas fa-chevron-right arrow"></i>
                 </button>
             </div>
 
-            <!-- SECTION 1: Generate Pass -->
-            <div id="section-generate" class="section-content active">
-                <div class="section-header">
-                    <span class="section-tag">Registry</span>
-                    <h2 class="section-title">Issue New Pass</h2>
-                    <p class="section-subtitle">Create a new VIP credential for an attendee</p>
+            <!-- SECTION 1: Scan QR (Default) -->
+            <div id="section-scan" class="section-content active">
+                <div class="section-header compact">
+                    <span class="section-tag small">Entry Scanner</span>
+                    <h2 class="section-title small">Scan Attendee Pass</h2>
+                    <p class="section-subtitle small">Point camera at QR Pass</p>
                 </div>
-                <div class="pass-container" style="max-width: 600px;">
-                    <div class="pass-body" style="display: block; grid-template-columns: 1fr;">
-                        <form id="addPassForm">
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" id="userName" required>
-                            </div>
-                            <div class="form-group">
-                                <label>Phone Number</label>
-                                <input type="tel" id="userPhone" required>
-                            </div>
-                            <div class="form-group">
+                <div class="scanner-wrapper">
+                    <div id="reader" class="scanner-viewfinder"></div>
+                    
+                    <div class="scanner-controls">
+                        <button id="startScannerBtn" class="btn btn-primary btn-sm">
+                            <i class="fas fa-camera"></i> Start Scanner
+                        </button>
+                        <button id="stopScannerBtn" class="btn btn-secondary btn-sm" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SECTION 2: Generate Pass -->
+            <div id="section-generate" class="section-content">
+                <div class="section-header compact">
+                    <span class="section-tag small">Registry</span>
+                    <h2 class="section-title small">Issue New Pass</h2>
+                </div>
+                <div class="pass-container compact-form">
+                    <form id="addPassForm">
+                        <div class="form-group compact">
+                            <label>Full Name</label>
+                            <input type="text" id="userName" required>
+                        </div>
+                        <div class="form-group compact">
+                            <label>Phone Number</label>
+                            <input type="tel" id="userPhone" required>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group compact half">
                                 <label>Gender</label>
                                 <select id="userGender" required>
                                     <option value="Male">Male</option>
                                     <option value="Female">Female</option>
                                 </select>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group compact half">
                                 <label>Batch</label>
                                 <select id="userBatch" required>
-                                    <option value="2026 AL Batch">2026 AL Batch</option>
-                                    <option value="2023 OL Batch">2023 OL Batch</option>
+                                    <option value="2026 AL Batch">2026 AL</option>
+                                    <option value="2023 OL Batch">2023 OL</option>
                                 </select>
                             </div>
-                            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">
-                                <i class="fas fa-ticket-alt"></i> Generate Pass ID
-                            </button>
-                        </form>
-                    </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
+                            <i class="fas fa-ticket-alt"></i> Generate Pass
+                        </button>
+                    </form>
                 </div>
             </div>
 
-            <!-- SECTION 2: Scan QR -->
-            <div id="section-scan" class="section-content">
-                <div class="section-header">
-                    <span class="section-tag">Entry Scanner</span>
-                    <h2 class="section-title">Scan Attendee Pass</h2>
-                    <p class="section-subtitle">Point the camera at the attendee's QR Pass to grant entry</p>
-                </div>
-                <div style="max-width: 600px; margin: 0 auto; text-align: center;">
-                    <div id="reader" style="width: 100%; border-radius: 16px; overflow: hidden; border: 3px solid var(--frost); min-height: 350px; background: #000;"></div>
-                    
-                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
-                        <button id="startScannerBtn" class="btn btn-primary"><i class="fas fa-camera"></i> Start Scanner</button>
-                        <button id="stopScannerBtn" class="btn btn-secondary" disabled><i class="fas fa-stop"></i> Stop</button>
-                    </div>
-                    
-                    <div id="scanResult" style="margin-top: 2rem; padding: 1.5rem; background: var(--cream); border-radius: 12px; display: none; border: 2px solid var(--frost);"></div>
-                </div>
-            </div>
-
-            <!-- SECTION 3: Generated Passes (NEW) -->
+            <!-- SECTION 3: Generated Passes -->
             <div id="section-registry" class="section-content">
-                <div class="section-header">
-                    <span class="section-tag">All Passes</span>
-                    <h2 class="section-title">Generated Passes Registry</h2>
-                    <p class="section-subtitle">View all passes that have been created</p>
+                <div class="section-header compact">
+                    <span class="section-tag small">All Passes</span>
+                    <h2 class="section-title small">Generated Passes</h2>
                 </div>
                 
-                <div style="text-align: right; margin-bottom: 1.5rem;">
-                    <button id="exportAllPdfBtn" class="btn btn-primary">
-                        <i class="fas fa-file-pdf"></i> Export All Passes to PDF
+                <div class="action-bar">
+                    <button id="exportAllPdfBtn" class="btn btn-primary btn-sm">
+                        <i class="fas fa-file-pdf"></i> Export PDF
                     </button>
                 </div>
 
-                <div style="overflow-x: auto;">
-                    <table class="admin-table" id="allPassesTable">
+                <div class="table-wrapper">
+                    <table class="admin-table compact" id="allPassesTable">
                         <thead>
                             <tr>
-                                <th>Pass ID</th>
+                                <th>ID</th>
                                 <th>Name</th>
-                                <th>Gender</th>
                                 <th>Batch</th>
-                                <th>Phone</th>
                                 <th>Status</th>
-                                <th>Created</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="7" style="text-align:center; padding:3rem;">Loading...</td></tr>
+                            <tr><td colspan="4" class="empty-state">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -170,32 +166,29 @@
 
             <!-- SECTION 4: Scanned Details -->
             <div id="section-details" class="section-content">
-                <div class="section-header">
-                    <span class="section-tag">Reports</span>
-                    <h2 class="section-title">Scanned Guests Registry</h2>
-                    <p class="section-subtitle">View and export all attendees who have been granted entry</p>
+                <div class="section-header compact">
+                    <span class="section-tag small">Reports</span>
+                    <h2 class="section-title small">Scanned Guests</h2>
                 </div>
                 
-                <div style="text-align: right; margin-bottom: 1.5rem;">
-                    <button id="exportPdfBtn" class="btn btn-primary">
-                        <i class="fas fa-file-pdf"></i> Export Scanned Data to PDF
+                <div class="action-bar">
+                    <button id="exportPdfBtn" class="btn btn-primary btn-sm">
+                        <i class="fas fa-file-pdf"></i> Export PDF
                     </button>
                 </div>
 
-                <div style="overflow-x: auto;">
-                    <table class="admin-table" id="scannedTable">
+                <div class="table-wrapper">
+                    <table class="admin-table compact" id="scannedTable">
                         <thead>
                             <tr>
-                                <th>Pass ID</th>
+                                <th>ID</th>
                                 <th>Name</th>
-                                <th>Gender</th>
                                 <th>Batch</th>
-                                <th>Phone</th>
-                                <th>Scanned Time</th>
+                                <th>Time</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="6" style="text-align:center; padding:3rem;">Loading...</td></tr>
+                            <tr><td colspan="4" class="empty-state">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -204,66 +197,102 @@
         </div>
     </main>
 
-    <!-- NEW: Pass ID Popup Modal -->
+    <!-- QR Scan Result Popup Modal -->
+    <div id="scanModal" class="modal-overlay">
+        <div class="modal-content scan-modal">
+            <div class="modal-header scan-header" id="scanModalHeader">
+                <i class="fas fa-check-circle" id="scanModalIcon"></i>
+                <h2 id="scanModalTitle">Access Granted</h2>
+            </div>
+            <div class="modal-body scan-body">
+                <div class="scan-guest-info">
+                    <div class="scan-field">
+                        <span class="scan-label">Name</span>
+                        <span class="scan-value" id="scanName">-</span>
+                    </div>
+                    <div class="scan-field">
+                        <span class="scan-label">Pass ID</span>
+                        <span class="scan-value pass-id-mono" id="scanPassId">-</span>
+                    </div>
+                    <div class="scan-field">
+                        <span class="scan-label">Batch</span>
+                        <span class="scan-value" id="scanBatch">-</span>
+                    </div>
+                    <div class="scan-field" id="scanTimeField" style="display: none;">
+                        <span class="scan-label">Previously Scanned</span>
+                        <span class="scan-value scan-time" id="scanTime">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer scan-footer">
+                <button id="scanAnotherBtn" class="btn btn-primary btn-sm full-width">
+                    <i class="fas fa-redo"></i> Scan Another
+                </button>
+                <button id="closeScanModalBtn" class="btn btn-secondary btn-sm full-width">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass ID Generated Popup Modal -->
     <div id="passIdModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header">
                 <i class="fas fa-check-circle"></i>
-                <h2>Pass Generated Successfully!</h2>
+                <h2>Pass Generated!</h2>
             </div>
             <div class="modal-body">
-                <p class="modal-subtitle">Share this Pass ID with the guest via WhatsApp</p>
+                <p class="modal-subtitle">Share this Pass ID via WhatsApp</p>
                 <div class="pass-id-display">
                     <span id="modalPassId">FL26XXXX</span>
-                    <button id="copyPassIdBtn" class="copy-btn" title="Copy to clipboard">
+                    <button id="copyPassIdBtn" class="copy-btn" title="Copy">
                         <i class="fas fa-copy"></i>
                     </button>
                 </div>
                 <div id="copySuccessMsg" class="copy-success">
-                    <i class="fas fa-check"></i> Copied to clipboard!
+                    <i class="fas fa-check"></i> Copied!
                 </div>
-                <div class="modal-details">
+                <div class="modal-details compact">
                     <p><strong>Name:</strong> <span id="modalName"></span></p>
                     <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
                     <p><strong>Batch:</strong> <span id="modalBatch"></span></p>
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="closeModalBtn" class="btn btn-primary">
+                <button id="closeModalBtn" class="btn btn-primary btn-sm full-width">
                     <i class="fas fa-check"></i> Done
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Hidden Template for PDF Export -->
-    <div id="pdf-export-template" style="display: none; padding: 40px; font-family: 'Raleway', sans-serif; color: #1B3A5C;">
-        <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1B3A5C; padding-bottom: 20px;">
-            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" style="height: 60px; margin-bottom: 15px;">
-            <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; margin: 0; color: #1B3A5C;">FLURRIES 26</h1>
-            <p style="font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #4A8AB5; margin-top: 5px;" id="pdf-report-title">Official Scanned Guests Report</p>
-            <p style="font-size: 12px; color: #666; margin-top: 10px;">Generated on: <span id="pdf-generation-date"></span></p>
+    <!-- Hidden PDF Template (positioned off-screen, NOT display:none) -->
+    <div id="pdf-export-template" class="pdf-template-hidden">
+        <div class="pdf-header">
+            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="pdf-logo">
+            <h1 class="pdf-title">FLURRIES 26</h1>
+            <p class="pdf-subtitle" id="pdf-report-title">Official Report</p>
+            <p class="pdf-date">Generated on: <span id="pdf-generation-date"></span></p>
         </div>
         
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px;">
+        <table class="pdf-table">
             <thead>
-                <tr style="background-color: #1B3A5C; color: white;" id="pdf-table-head">
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Pass ID</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Name</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Gender</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Batch</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Phone</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Time</th>
+                <tr id="pdf-table-head">
+                    <th>Pass ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Batch</th>
+                    <th>Phone</th>
+                    <th>Time</th>
                 </tr>
             </thead>
-            <tbody id="pdf-table-body">
-                <!-- Populated by JS -->
-            </tbody>
+            <tbody id="pdf-table-body"></tbody>
         </table>
 
-        <div style="text-align: center; border-top: 2px solid #1B3A5C; padding-top: 20px; margin-top: 40px;">
-            <p style="font-size: 12px; color: #4A8AB5; font-weight: bold; margin: 0;">Designed by Hexa Solutions | https://hexasolutions.online</p>
-            <p style="font-size: 11px; color: #888; margin-top: 5px;">© 2026 Flurries. All rights reserved. Confidential Document.</p>
+        <div class="pdf-footer">
+            <p class="pdf-footer-brand">Designed by Hexa Solutions | https://hexasolutions.online</p>
+            <p class="pdf-footer-copy">© 2026 Flurries. All rights reserved. Confidential Document.</p>
         </div>
     </div>
 
