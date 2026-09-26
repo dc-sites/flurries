@@ -107,45 +107,31 @@ document.addEventListener('DOMContentLoaded', () => {
     // ADMIN SECTION NAVIGATION (Sidebar + Bottom Nav)
     // ==========================================
     function switchSection(sectionId) {
-        // Update Sidebar
         document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
             item.classList.toggle('active', item.dataset.section === sectionId);
         });
-        // Update Bottom Nav
         document.querySelectorAll('.bottom-nav-item').forEach(item => {
             item.classList.toggle('active', item.dataset.section === sectionId);
         });
-        // Update Content
         document.querySelectorAll('.admin-section').forEach(section => {
             section.classList.toggle('active', section.id === `section-${sectionId}`);
         });
 
-        // Stop scanner if leaving scan tab
         if (sectionId !== 'scan' && html5QrcodeScanner) {
             html5QrcodeScanner.stop().catch(() => {});
             if (startScannerBtn) startScannerBtn.disabled = false;
             if (stopScannerBtn) stopScannerBtn.disabled = true;
         }
 
-        // Refresh data
         if (sectionId === 'registry') loadAllPasses();
         else if (sectionId === 'details') loadScannedData();
     }
 
-    // Attach listeners to Sidebar
     document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchSection(item.dataset.section);
-        });
+        item.addEventListener('click', (e) => { e.preventDefault(); switchSection(item.dataset.section); });
     });
-
-    // Attach listeners to Bottom Nav
     document.querySelectorAll('.bottom-nav-item').forEach(item => {
-        item.addEventListener('click', (e) => {
-            e.preventDefault();
-            switchSection(item.dataset.section);
-        });
+        item.addEventListener('click', (e) => { e.preventDefault(); switchSection(item.dataset.section); });
     });
 
     // 6. Add Pass Form
@@ -327,18 +313,20 @@ document.addEventListener('DOMContentLoaded', () => {
     function onScanFailure() {}
 
     // ==========================================
-    // 10. PDF EXPORT (Scanned)
+    // 10. PDF EXPORT (Scanned) - FIXED
     // ==========================================
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', async () => {
             exportPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportPdfBtn.disabled = true;
+            
             try {
                 const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
                 document.getElementById('pdf-report-title').textContent = 'Official Scanned Guests Report';
+                
                 let hasScanned = false;
                 snapshot.forEach(docSnap => {
                     const d = docSnap.data();
@@ -350,36 +338,86 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!hasScanned) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No scanned guests found.</td></tr>';
                 document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
                 
-                await html2pdf().set({ margin: 10, filename: `Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }).from(document.getElementById('pdf-export-template')).save();
-                showAlert('PDF exported!', 'success');
-            } catch (error) { showAlert('Error generating PDF.', 'error'); } 
-            finally { exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export'; exportPdfBtn.disabled = false; }
+                // Wait for DOM to paint the table rows
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const element = document.getElementById('pdf-export-template');
+                const opt = {
+                    margin: 10,
+                    filename: `Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    showAlert('PDF exported successfully!', 'success');
+                }).catch(err => {
+                    console.error(err);
+                    showAlert('Error generating PDF.', 'error');
+                }).finally(() => {
+                    exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export';
+                    exportPdfBtn.disabled = false;
+                });
+
+            } catch (error) { 
+                showAlert('Error generating PDF.', 'error'); 
+                exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export';
+                exportPdfBtn.disabled = false;
+            }
         });
     }
 
-    // 11. PDF EXPORT (All)
+    // 11. PDF EXPORT (All Passes) - FIXED
     const exportAllPdfBtn = document.getElementById('exportAllPdfBtn');
     if (exportAllPdfBtn) {
         exportAllPdfBtn.addEventListener('click', async () => {
             exportAllPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportAllPdfBtn.disabled = true;
+            
             try {
                 const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
                 document.getElementById('pdf-report-title').textContent = 'All Generated Passes Report';
-                if (snapshot.empty) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No passes found.</td></tr>';
-                else {
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No passes found.</td></tr>';
+                } else {
                     snapshot.forEach(docSnap => {
                         const d = docSnap.data();
                         tbody.innerHTML += `<tr><td><strong>${d.passId}</strong></td><td>${d.name}</td><td>${d.gender || 'N/A'}</td><td>${d.batch}</td><td>${d.phone}</td><td>${d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown'}</td></tr>`;
                     });
                 }
                 document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
-                await html2pdf().set({ margin: 10, filename: `Flurries26_AllPasses_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }).from(document.getElementById('pdf-export-template')).save();
-                showAlert('PDF exported!', 'success');
-            } catch (error) { showAlert('Error generating PDF.', 'error'); } 
-            finally { exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export'; exportAllPdfBtn.disabled = false; }
+                
+                // Wait for DOM to paint
+                await new Promise(resolve => setTimeout(resolve, 500));
+
+                const element = document.getElementById('pdf-export-template');
+                const opt = {
+                    margin: 10,
+                    filename: `Flurries26_AllPasses_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true, allowTaint: true, logging: false, backgroundColor: '#ffffff' },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                html2pdf().set(opt).from(element).save().then(() => {
+                    showAlert('PDF exported successfully!', 'success');
+                }).catch(err => {
+                    console.error(err);
+                    showAlert('Error generating PDF.', 'error');
+                }).finally(() => {
+                    exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export';
+                    exportAllPdfBtn.disabled = false;
+                });
+
+            } catch (error) { 
+                showAlert('Error generating PDF.', 'error'); 
+                exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export';
+                exportAllPdfBtn.disabled = false;
+            }
         });
     }
 });
