@@ -1333,86 +1333,31 @@ footer a:hover { color: var(--white); text-shadow: 0 0 15px rgba(123, 184, 217, 
 /* =========================================
    PDF TEMPLATE (Hidden but renderable)
    ========================================= */
+/* PDF Template Hidden - Fixed for html2canvas rendering */
 .pdf-template-hidden {
     position: absolute;
-    left: -9999px;
     top: 0;
+    left: 0;
     width: 210mm;
     background: white;
     padding: 30px;
     font-family: 'Raleway', sans-serif;
     color: #1B3A5C;
-    visibility: visible;
-    opacity: 1;
+    opacity: 0; /* Invisible but still rendered by the browser */
+    z-index: -1; /* Behind everything */
+    pointer-events: none;
 }
-.pdf-header {
-    text-align: center;
-    margin-bottom: 25px;
-    border-bottom: 3px solid #1B3A5C;
-    padding-bottom: 15px;
-}
-.pdf-logo {
-    height: 50px;
-    margin-bottom: 10px;
-}
-.pdf-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 24px;
-    margin: 0;
-    color: #1B3A5C;
-}
-.pdf-subtitle {
-    font-size: 12px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: #4A8AB5;
-    margin-top: 5px;
-}
-.pdf-date {
-    font-size: 11px;
-    color: #666;
-    margin-top: 8px;
-}
-.pdf-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-size: 11px;
-    margin-bottom: 25px;
-}
-.pdf-table th {
-    background-color: #1B3A5C;
-    color: white;
-    padding: 8px;
-    border: 1px solid #ddd;
-    text-align: left;
-    font-size: 10px;
-}
-.pdf-table td {
-    padding: 6px 8px;
-    border: 1px solid #ddd;
-    font-size: 10px;
-}
-.pdf-table tr:nth-child(even) {
-    background-color: #f8f9fa;
-}
-.pdf-footer {
-    text-align: center;
-    border-top: 2px solid #1B3A5C;
-    padding-top: 15px;
-    margin-top: 30px;
-}
-.pdf-footer-brand {
-    font-size: 11px;
-    color: #4A8AB5;
-    font-weight: bold;
-    margin: 0;
-}
-.pdf-footer-copy {
-    font-size: 10px;
-    color: #888;
-    margin-top: 4px;
-}
-
+.pdf-header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid #1B3A5C; padding-bottom: 15px; }
+.pdf-logo { height: 50px; margin-bottom: 10px; }
+.pdf-title { font-family: 'Playfair Display', serif; font-size: 24px; margin: 0; color: #1B3A5C; }
+.pdf-subtitle { font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: #4A8AB5; margin-top: 5px; }
+.pdf-date { font-size: 11px; color: #666; margin-top: 8px; }
+.pdf-table { width: 100%; border-collapse: collapse; font-size: 11px; margin-bottom: 25px; }
+.pdf-table th { background-color: #1B3A5C; color: white; padding: 8px; border: 1px solid #ddd; text-align: left; }
+.pdf-table td { padding: 6px 8px; border: 1px solid #ddd; }
+.pdf-footer { text-align: center; border-top: 2px solid #1B3A5C; padding-top: 15px; margin-top: 30px; }
+.pdf-footer-brand { font-size: 11px; color: #4A8AB5; font-weight: bold; margin: 0; }
+.pdf-footer-copy { font-size: 10px; color: #888; margin-top: 4px; }
 /* =========================================
    MOBILE RESPONSIVE
    ========================================= */
