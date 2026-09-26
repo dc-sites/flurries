@@ -2,7 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-
+// ==========================================
+// FIREBASE CONFIGURATION (flurries2)
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
   authDomain: "flurries2.firebaseapp.com",
@@ -25,12 +27,8 @@ document.addEventListener('DOMContentLoaded', () => {
         setTimeout(() => {
             preloader.classList.add('preloader-hidden');
             document.body.classList.remove('loading');
-            
-            // Completely remove from DOM after fade-out for performance
-            setTimeout(() => {
-                preloader.style.display = 'none';
-            }, 800);
-        }, 5000); // 5000 milliseconds = 5 seconds
+            setTimeout(() => { preloader.style.display = 'none'; }, 800);
+        }, 5000);
     }
 
     // 1. Navbar Scroll Effect
@@ -171,6 +169,113 @@ document.addEventListener('DOMContentLoaded', () => {
     // 8. Download Pass Button
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
+
+    // ==========================================
+    // 9. QR CODE SCANNER LOGIC (Admin)
+    // ==========================================
+    let html5QrcodeScanner = null;
+    const startScannerBtn = document.getElementById('startScannerBtn');
+    const stopScannerBtn = document.getElementById('stopScannerBtn');
+    const scanResultDiv = document.getElementById('scanResult');
+
+    if (startScannerBtn && stopScannerBtn) {
+        startScannerBtn.addEventListener('click', async () => {
+            if (!html5QrcodeScanner) {
+                html5QrcodeScanner = new Html5Qrcode("reader");
+            }
+            try {
+                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                await html5QrcodeScanner.start(
+                    { facingMode: "environment" }, 
+                    config, 
+                    onScanSuccess, 
+                    onScanFailure
+                );
+                startScannerBtn.disabled = true;
+                stopScannerBtn.disabled = false;
+                if (scanResultDiv) scanResultDiv.style.display = 'none';
+            } catch (err) {
+                showAlert('Camera access denied. Please allow permissions and ensure you are using HTTPS or localhost.', 'error');
+                console.error(err);
+            }
+        });
+
+        stopScannerBtn.addEventListener('click', async () => {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.stop();
+                startScannerBtn.disabled = false;
+                stopScannerBtn.disabled = true;
+            }
+        });
+    }
+
+    async function onScanSuccess(decodedText, decodedResult) {
+        // Stop scanner temporarily to process
+        if (html5QrcodeScanner) {
+            await html5QrcodeScanner.stop();
+            startScannerBtn.disabled = false;
+            stopScannerBtn.disabled = true;
+        }
+
+        // Parse the QR code data: FLURRIES26|PASSID|NAME|PHONE
+        const parts = decodedText.split('|');
+        if (parts.length >= 2 && parts[0] === 'FLURRIES26') {
+            const passId = parts[1];
+            const docRef = doc(db, 'passes', passId);
+            const docSnap = await getDoc(docRef);
+            
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.status === 'attended') {
+                    if (scanResultDiv) {
+                        scanResultDiv.innerHTML = `
+                            <h3 style="color: #dc2626; margin-bottom: 0.5rem;"><i class="fas fa-times-circle"></i> Already Scanned</h3>
+                            <p><strong>Name:</strong> ${data.name}</p>
+                            <p><strong>Pass ID:</strong> ${data.passId}</p>
+                            <p><strong>Scanned at:</strong> ${data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown'}</p>
+                        `;
+                        scanResultDiv.style.display = 'block';
+                    }
+                    showAlert('This pass has already been used!', 'error');
+                } else {
+                    // Mark as attended
+                    await setDoc(docRef, {
+                        ...data,
+                        status: 'attended',
+                        scannedAt: serverTimestamp()
+                    }, { merge: true });
+                    
+                    if (scanResultDiv) {
+                        scanResultDiv.innerHTML = `
+                            <h3 style="color: #16a34a; margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Access Granted</h3>
+                            <p><strong>Name:</strong> ${data.name}</p>
+                            <p><strong>Batch:</strong> ${data.batch}</p>
+                            <p><strong>Pass ID:</strong> ${data.passId}</p>
+                        `;
+                        scanResultDiv.style.display = 'block';
+                    }
+                    showAlert('Pass marked as attended successfully!', 'success');
+                    if (document.getElementById('allPassesTable')) loadAdminData();
+                }
+            } else {
+                if (scanResultDiv) {
+                    scanResultDiv.innerHTML = `<h3 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> Invalid Pass ID</h3>`;
+                    scanResultDiv.style.display = 'block';
+                }
+                showAlert('Pass ID not found in database.', 'error');
+            }
+        } else {
+            if (scanResultDiv) {
+                scanResultDiv.innerHTML = `<h3 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> Invalid QR Code</h3>`;
+                scanResultDiv.style.display = 'block';
+            }
+            showAlert('This is not a valid Flurries 26 QR code.', 'error');
+        }
+    }
+
+    function onScanFailure(error) {
+        // Console warning suppressed to prevent spam during scanning
+    }
 });
 
 // ==========================================
@@ -203,18 +308,13 @@ async function downloadPass() {
         const isMobile = window.innerWidth <= 768;
         let originalStyles = null;
 
-        // Mobile rendering trick: Temporarily expand to desktop size for crisp export
         if (isMobile) {
             originalStyles = {
-                width: passElement.style.width,
-                maxWidth: passElement.style.maxWidth,
-                position: passElement.style.position,
-                left: passElement.style.left,
-                top: passElement.style.top,
-                zIndex: passElement.style.zIndex,
+                width: passElement.style.width, maxWidth: passElement.style.maxWidth,
+                position: passElement.style.position, left: passElement.style.left,
+                top: passElement.style.top, zIndex: passElement.style.zIndex,
                 transform: passElement.style.transform
             };
-            
             passElement.style.width = '750px';
             passElement.style.maxWidth = '750px';
             passElement.style.position = 'absolute';
@@ -222,18 +322,13 @@ async function downloadPass() {
             passElement.style.top = '0';
             passElement.style.zIndex = '-1';
             passElement.style.transform = 'none';
-            
             await new Promise(resolve => setTimeout(resolve, 100));
         }
 
         const canvas = await html2canvas(passElement, { 
-            scale: isMobile ? 3 : 2, 
-            backgroundColor: '#ffffff', 
-            useCORS: true,
-            logging: false
+            scale: isMobile ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, logging: false
         });
 
-        // Restore original styles
         if (isMobile && originalStyles) {
             passElement.style.width = originalStyles.width || '';
             passElement.style.maxWidth = originalStyles.maxWidth || '';
