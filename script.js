@@ -2,16 +2,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
-// ==========================================
-// FIREBASE CONFIGURATION (flurries2)
-// ==========================================
 const firebaseConfig = {
-  apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
-  authDomain: "flurries2.firebaseapp.com",
-  projectId: "flurries2",
-  storageBucket: "flurries2.firebasestorage.app",
-  messagingSenderId: "267044553050",
-  appId: "1:267044553050:web:32937f10a904b931f2b363"
+    apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
+    authDomain: "flurries-32408.firebaseapp.com",
+    projectId: "flurries-32408",
+    storageBucket: "flurries-32408.firebasestorage.app",
+    messagingSenderId: "459835238527",
+    appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -109,11 +106,35 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user && adminContent && loginFormEl) {
             loginFormEl.classList.add('hidden');
             adminContent.classList.remove('hidden');
-            if (document.getElementById('allPassesTable')) loadAdminData();
+            loadScannedData(); // Load data when logged in
         } else if (!user && loginFormEl) {
             loginFormEl.classList.remove('hidden');
             adminContent.classList.add('hidden');
         }
+    });
+
+    // ==========================================
+    // NEW: ADMIN TAB SWITCHING LOGIC
+    // ==========================================
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const tabContents = document.querySelectorAll('.tab-content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            // Remove active class from all
+            tabBtns.forEach(b => b.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            
+            // Add active class to clicked
+            btn.classList.add('active');
+            const targetTab = document.getElementById(`tab-${btn.dataset.tab}`);
+            if (targetTab) targetTab.classList.add('active');
+            
+            // If switching to details tab, refresh data
+            if (btn.dataset.tab === 'details') {
+                loadScannedData();
+            }
+        });
     });
 
     // 6. Add Pass Form (Admin)
@@ -135,14 +156,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
                 addPassForm.reset();
-                if (document.getElementById('allPassesTable')) loadAdminData();
             } catch (error) { 
                 showAlert('Error: ' + error.message, 'error'); 
             }
         });
     }
 
-    // 7. Get Pass Form (User)
+    // 7. Get Pass Form (User - for getpass.html)
     const getPassForm = document.getElementById('getPassFormElement');
     if (getPassForm) {
         getPassForm.addEventListener('submit', async (e) => {
@@ -166,7 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 8. Download Pass Button
+    // 8. Download Pass Button (for getpass.html)
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 
@@ -210,14 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function onScanSuccess(decodedText, decodedResult) {
-        // Stop scanner temporarily to process
         if (html5QrcodeScanner) {
             await html5QrcodeScanner.stop();
             startScannerBtn.disabled = false;
             stopScannerBtn.disabled = true;
         }
 
-        // Parse the QR code data: FLURRIES26|PASSID|NAME|PHONE
         const parts = decodedText.split('|');
         if (parts.length >= 2 && parts[0] === 'FLURRIES26') {
             const passId = parts[1];
@@ -238,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     showAlert('This pass has already been used!', 'error');
                 } else {
-                    // Mark as attended
                     await setDoc(docRef, {
                         ...data,
                         status: 'attended',
@@ -255,7 +272,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         scanResultDiv.style.display = 'block';
                     }
                     showAlert('Pass marked as attended successfully!', 'success');
-                    if (document.getElementById('allPassesTable')) loadAdminData();
+                    loadScannedData(); // Refresh table
                 }
             } else {
                 if (scanResultDiv) {
@@ -274,7 +291,72 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onScanFailure(error) {
-        // Console warning suppressed to prevent spam during scanning
+        // Suppressed to prevent console spam during scanning
+    }
+
+    // ==========================================
+    // 10. PDF EXPORT LOGIC
+    // ==========================================
+    const exportPdfBtn = document.getElementById('exportPdfBtn');
+    if (exportPdfBtn) {
+        exportPdfBtn.addEventListener('click', async () => {
+            exportPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            exportPdfBtn.disabled = true;
+
+            try {
+                // 1. Fetch only attended users
+                const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(q);
+                
+                const tbody = document.getElementById('pdf-table-body');
+                tbody.innerHTML = '';
+                
+                let hasScanned = false;
+                snapshot.forEach(docSnap => {
+                    const d = docSnap.data();
+                    if (d.status === 'attended') {
+                        hasScanned = true;
+                        const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>${d.passId}</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.name}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.gender || 'N/A'}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.batch}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.phone}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${scanTime}</td>
+                            </tr>
+                        `;
+                    }
+                });
+
+                if (!hasScanned) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No scanned guests found.</td></tr>';
+                }
+
+                // 2. Set generation date
+                document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
+
+                // 3. Generate PDF
+                const element = document.getElementById('pdf-export-template');
+                const opt = {
+                    margin: 10,
+                    filename: `Flurries26_Scanned_Guests_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                await html2pdf().set(opt).from(element).save();
+                showAlert('PDF exported successfully!', 'success');
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                showAlert('Error generating PDF.', 'error');
+            } finally {
+                exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export Scanned Data to PDF';
+                exportPdfBtn.disabled = false;
+            }
+        });
     }
 });
 
@@ -366,32 +448,36 @@ function showAlert(message, type) {
     }, 4000);
 }
 
-async function loadAdminData() {
+async function loadScannedData() {
     const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
     const snapshot = await getDocs(q);
-    const table = document.getElementById('allPassesTable');
+    const table = document.getElementById('scannedTable');
     
     if (table) {
-        table.innerHTML = '';
-        if (snapshot.empty) { 
-            table.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
-            return; 
-        }
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+        
+        let hasScanned = false;
         snapshot.forEach(docSnap => {
             const d = docSnap.data();
-            const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Not Scanned';
-            const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
-            
-            table.innerHTML += `<tr>
-                <td><strong>${d.passId}</strong></td>
-                <td>${d.name}</td>
-                <td>${d.gender || 'N/A'}</td>
-                <td>${d.batch}</td>
-                <td>${d.phone}</td>
-                <td><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
-                <td>${scanTime}</td>
-            </tr>`;
+            if (d.status === 'attended') {
+                hasScanned = true;
+                const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Not Scanned';
+                
+                tbody.innerHTML += `<tr>
+                    <td><strong>${d.passId}</strong></td>
+                    <td>${d.name}</td>
+                    <td>${d.gender || 'N/A'}</td>
+                    <td>${d.batch}</td>
+                    <td>${d.phone}</td>
+                    <td>${scanTime}</td>
+                </tr>`;
+            }
         });
+
+        if (!hasScanned) {
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color: var(--navy-strong);">No guests have been scanned yet.</td></tr>`;
+        }
     }
 }
 
