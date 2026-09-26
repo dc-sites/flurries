@@ -106,7 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (user && adminContent && loginFormEl) {
             loginFormEl.classList.add('hidden');
             adminContent.classList.remove('hidden');
-            loadScannedData(); // Load data when logged in
+            loadAllPasses();
+            loadScannedData();
         } else if (!user && loginFormEl) {
             loginFormEl.classList.remove('hidden');
             adminContent.classList.add('hidden');
@@ -114,30 +115,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // NEW: ADMIN TAB SWITCHING LOGIC
+    // NEW: ADMIN SECTION MENU SWITCHING
     // ==========================================
-    const tabBtns = document.querySelectorAll('.tab-btn');
-    const tabContents = document.querySelectorAll('.tab-content');
+    const sectionMenuBtns = document.querySelectorAll('.section-menu-btn');
+    const sectionContents = document.querySelectorAll('.section-content');
     
-    tabBtns.forEach(btn => {
+    sectionMenuBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active class from all
-            tabBtns.forEach(b => b.classList.remove('active'));
-            tabContents.forEach(c => c.classList.remove('active'));
+            // Remove active from all
+            sectionMenuBtns.forEach(b => b.classList.remove('active'));
+            sectionContents.forEach(c => c.classList.remove('active'));
             
-            // Add active class to clicked
+            // Add active to clicked
             btn.classList.add('active');
-            const targetTab = document.getElementById(`tab-${btn.dataset.tab}`);
-            if (targetTab) targetTab.classList.add('active');
+            const targetSection = document.getElementById(`section-${btn.dataset.section}`);
+            if (targetSection) targetSection.classList.add('active');
             
-            // If switching to details tab, refresh data
-            if (btn.dataset.tab === 'details') {
+            // Refresh data based on section
+            if (btn.dataset.section === 'registry') {
+                loadAllPasses();
+            } else if (btn.dataset.section === 'details') {
                 loadScannedData();
             }
         });
     });
 
-    // 6. Add Pass Form (Admin)
+    // 6. Add Pass Form (Admin) - WITH POPUP
     const addPassForm = document.getElementById('addPassForm');
     if (addPassForm) {
         addPassForm.addEventListener('submit', async (e) => {
@@ -154,10 +157,77 @@ document.addEventListener('DOMContentLoaded', () => {
                     status: 'pending', scannedAt: null,
                     createdAt: serverTimestamp()
                 });
-                showAlert(`Pass created! ID: <strong>${passId}</strong>`, 'success');
+                
+                // Show popup with generated Pass ID
+                showPassIdModal(passId, name, phone, batch);
+                
                 addPassForm.reset();
+                loadAllPasses();
             } catch (error) { 
                 showAlert('Error: ' + error.message, 'error'); 
+            }
+        });
+    }
+
+    // ==========================================
+    // NEW: PASS ID POPUP MODAL LOGIC
+    // ==========================================
+    const passIdModal = document.getElementById('passIdModal');
+    const modalPassId = document.getElementById('modalPassId');
+    const modalName = document.getElementById('modalName');
+    const modalPhone = document.getElementById('modalPhone');
+    const modalBatch = document.getElementById('modalBatch');
+    const copyPassIdBtn = document.getElementById('copyPassIdBtn');
+    const copySuccessMsg = document.getElementById('copySuccessMsg');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function showPassIdModal(passId, name, phone, batch) {
+        if (passIdModal) {
+            modalPassId.textContent = passId;
+            modalName.textContent = name;
+            modalPhone.textContent = phone;
+            modalBatch.textContent = batch;
+            passIdModal.classList.add('active');
+            copySuccessMsg.classList.remove('show');
+        }
+    }
+
+    if (copyPassIdBtn) {
+        copyPassIdBtn.addEventListener('click', async () => {
+            const passId = modalPassId.textContent;
+            try {
+                await navigator.clipboard.writeText(passId);
+                copySuccessMsg.classList.add('show');
+                setTimeout(() => {
+                    copySuccessMsg.classList.remove('show');
+                }, 2000);
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = passId;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                copySuccessMsg.classList.add('show');
+                setTimeout(() => {
+                    copySuccessMsg.classList.remove('show');
+                }, 2000);
+            }
+        });
+    }
+
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', () => {
+            passIdModal.classList.remove('active');
+        });
+    }
+
+    // Close modal when clicking outside
+    if (passIdModal) {
+        passIdModal.addEventListener('click', (e) => {
+            if (e.target === passIdModal) {
+                passIdModal.classList.remove('active');
             }
         });
     }
@@ -272,7 +342,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         scanResultDiv.style.display = 'block';
                     }
                     showAlert('Pass marked as attended successfully!', 'success');
-                    loadScannedData(); // Refresh table
+                    loadAllPasses();
+                    loadScannedData();
                 }
             } else {
                 if (scanResultDiv) {
@@ -291,11 +362,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function onScanFailure(error) {
-        // Suppressed to prevent console spam during scanning
+        // Suppressed to prevent console spam
     }
 
     // ==========================================
-    // 10. PDF EXPORT LOGIC
+    // 10. PDF EXPORT LOGIC (Scanned Only)
     // ==========================================
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
@@ -304,12 +375,14 @@ document.addEventListener('DOMContentLoaded', () => {
             exportPdfBtn.disabled = true;
 
             try {
-                // 1. Fetch only attended users
                 const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
                 const snapshot = await getDocs(q);
                 
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
+                
+                // Set report title
+                document.getElementById('pdf-report-title').textContent = 'Official Scanned Guests Report';
                 
                 let hasScanned = false;
                 snapshot.forEach(docSnap => {
@@ -334,10 +407,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No scanned guests found.</td></tr>';
                 }
 
-                // 2. Set generation date
                 document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
 
-                // 3. Generate PDF
                 const element = document.getElementById('pdf-export-template');
                 const opt = {
                     margin: 10,
@@ -355,6 +426,67 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export Scanned Data to PDF';
                 exportPdfBtn.disabled = false;
+            }
+        });
+    }
+
+    // ==========================================
+    // NEW: PDF EXPORT LOGIC (All Passes)
+    // ==========================================
+    const exportAllPdfBtn = document.getElementById('exportAllPdfBtn');
+    if (exportAllPdfBtn) {
+        exportAllPdfBtn.addEventListener('click', async () => {
+            exportAllPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            exportAllPdfBtn.disabled = true;
+
+            try {
+                const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
+                const snapshot = await getDocs(q);
+                
+                const tbody = document.getElementById('pdf-table-body');
+                tbody.innerHTML = '';
+                
+                // Set report title
+                document.getElementById('pdf-report-title').textContent = 'All Generated Passes Report';
+                
+                if (snapshot.empty) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No passes found.</td></tr>';
+                } else {
+                    snapshot.forEach(docSnap => {
+                        const d = docSnap.data();
+                        const createdTime = d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown';
+                        tbody.innerHTML += `
+                            <tr>
+                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>${d.passId}</strong></td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.name}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.gender || 'N/A'}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.batch}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${d.phone}</td>
+                                <td style="padding: 8px; border: 1px solid #ddd;">${createdTime}</td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
+
+                const element = document.getElementById('pdf-export-template');
+                const opt = {
+                    margin: 10,
+                    filename: `Flurries26_All_Passes_${new Date().toISOString().slice(0,10)}.pdf`,
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2, useCORS: true },
+                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+                };
+
+                await html2pdf().set(opt).from(element).save();
+                showAlert('PDF exported successfully!', 'success');
+            } catch (error) {
+                console.error('PDF Export Error:', error);
+                showAlert('Error generating PDF.', 'error');
+            } finally {
+                exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export All Passes to PDF';
+                exportAllPdfBtn.disabled = false;
             }
         });
     }
@@ -446,6 +578,38 @@ function showAlert(message, type) {
         alertDiv.style.opacity = '0'; 
         setTimeout(() => alertDiv.remove(), 300); 
     }, 4000);
+}
+
+async function loadAllPasses() {
+    const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
+    const snapshot = await getDocs(q);
+    const table = document.getElementById('allPassesTable');
+    
+    if (table) {
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+        
+        if (snapshot.empty) { 
+            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
+            return; 
+        }
+        
+        snapshot.forEach(docSnap => {
+            const d = docSnap.data();
+            const createdTime = d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown';
+            const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
+            
+            tbody.innerHTML += `<tr>
+                <td><strong>${d.passId}</strong></td>
+                <td>${d.name}</td>
+                <td>${d.gender || 'N/A'}</td>
+                <td>${d.batch}</td>
+                <td>${d.phone}</td>
+                <td><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
+                <td>${createdTime}</td>
+            </tr>`;
+        });
+    }
 }
 
 async function loadScannedData() {
