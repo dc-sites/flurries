@@ -2,6 +2,14 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
+const firebaseConfig = {
+  apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
+  authDomain: "flurries2.firebaseapp.com",
+  projectId: "flurries2",
+  storageBucket: "flurries2.firebasestorage.app",
+  messagingSenderId: "267044553050",
+  appId: "1:267044553050:web:32937f10a904b931f2b363"
+};
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
@@ -142,14 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 });
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
-  authDomain: "flurries2.firebaseapp.com",
-  projectId: "flurries2",
-  storageBucket: "flurries2.firebasestorage.app",
-  messagingSenderId: "267044553050",
-  appId: "1:267044553050:web:32937f10a904b931f2b363"
-};
+
 
 // ==========================================
 // Helper Functions
