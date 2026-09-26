@@ -16,9 +16,7 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // ==========================================
-    // 5-SECOND VIKING PRELOADER LOGIC
-    // ==========================================
+    // 5-SECOND VIKING PRELOADER
     const preloader = document.getElementById('preloader');
     if (preloader) {
         setTimeout(() => {
@@ -115,32 +113,33 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // NEW: ADMIN SECTION MENU SWITCHING
+    // ADMIN SECTION MENU SWITCHING
     // ==========================================
     const sectionMenuBtns = document.querySelectorAll('.section-menu-btn');
     const sectionContents = document.querySelectorAll('.section-content');
     
     sectionMenuBtns.forEach(btn => {
         btn.addEventListener('click', () => {
-            // Remove active from all
             sectionMenuBtns.forEach(b => b.classList.remove('active'));
             sectionContents.forEach(c => c.classList.remove('active'));
             
-            // Add active to clicked
             btn.classList.add('active');
             const targetSection = document.getElementById(`section-${btn.dataset.section}`);
             if (targetSection) targetSection.classList.add('active');
             
-            // Refresh data based on section
-            if (btn.dataset.section === 'registry') {
-                loadAllPasses();
-            } else if (btn.dataset.section === 'details') {
-                loadScannedData();
+            // Stop scanner when leaving scan tab
+            if (btn.dataset.section !== 'scan' && html5QrcodeScanner) {
+                html5QrcodeScanner.stop().catch(() => {});
+                if (startScannerBtn) startScannerBtn.disabled = false;
+                if (stopScannerBtn) stopScannerBtn.disabled = true;
             }
+            
+            if (btn.dataset.section === 'registry') loadAllPasses();
+            else if (btn.dataset.section === 'details') loadScannedData();
         });
     });
 
-    // 6. Add Pass Form (Admin) - WITH POPUP
+    // 6. Add Pass Form - WITH POPUP
     const addPassForm = document.getElementById('addPassForm');
     if (addPassForm) {
         addPassForm.addEventListener('submit', async (e) => {
@@ -157,10 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     status: 'pending', scannedAt: null,
                     createdAt: serverTimestamp()
                 });
-                
-                // Show popup with generated Pass ID
                 showPassIdModal(passId, name, phone, batch);
-                
                 addPassForm.reset();
                 loadAllPasses();
             } catch (error) { 
@@ -170,7 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // NEW: PASS ID POPUP MODAL LOGIC
+    // PASS ID POPUP MODAL
     // ==========================================
     const passIdModal = document.getElementById('passIdModal');
     const modalPassId = document.getElementById('modalPassId');
@@ -198,11 +194,8 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await navigator.clipboard.writeText(passId);
                 copySuccessMsg.classList.add('show');
-                setTimeout(() => {
-                    copySuccessMsg.classList.remove('show');
-                }, 2000);
+                setTimeout(() => copySuccessMsg.classList.remove('show'), 2000);
             } catch (err) {
-                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = passId;
                 document.body.appendChild(textArea);
@@ -210,25 +203,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
                 copySuccessMsg.classList.add('show');
-                setTimeout(() => {
-                    copySuccessMsg.classList.remove('show');
-                }, 2000);
+                setTimeout(() => copySuccessMsg.classList.remove('show'), 2000);
             }
         });
     }
 
     if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => {
-            passIdModal.classList.remove('active');
-        });
+        closeModalBtn.addEventListener('click', () => passIdModal.classList.remove('active'));
     }
 
-    // Close modal when clicking outside
     if (passIdModal) {
         passIdModal.addEventListener('click', (e) => {
-            if (e.target === passIdModal) {
-                passIdModal.classList.remove('active');
-            }
+            if (e.target === passIdModal) passIdModal.classList.remove('active');
         });
     }
 
@@ -256,20 +242,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // 8. Download Pass Button (for getpass.html)
+    // 8. Download Pass Button
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 
     // ==========================================
-    // 9. QR CODE SCANNER LOGIC (Admin)
+    // 9. QR CODE SCANNER - IMPROVED FLOW
     // ==========================================
     let html5QrcodeScanner = null;
+    let isProcessing = false;
     const startScannerBtn = document.getElementById('startScannerBtn');
     const stopScannerBtn = document.getElementById('stopScannerBtn');
-    const scanResultDiv = document.getElementById('scanResult');
+    const scanModal = document.getElementById('scanModal');
+    const scanAnotherBtn = document.getElementById('scanAnotherBtn');
+    const closeScanModalBtn = document.getElementById('closeScanModalBtn');
 
     if (startScannerBtn && stopScannerBtn) {
         startScannerBtn.addEventListener('click', async () => {
+            if (isProcessing) return;
             if (!html5QrcodeScanner) {
                 html5QrcodeScanner = new Html5Qrcode("reader");
             }
@@ -283,9 +273,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 );
                 startScannerBtn.disabled = true;
                 stopScannerBtn.disabled = false;
-                if (scanResultDiv) scanResultDiv.style.display = 'none';
             } catch (err) {
-                showAlert('Camera access denied. Please allow permissions and ensure you are using HTTPS or localhost.', 'error');
+                showAlert('Camera access denied. Use HTTPS or localhost.', 'error');
                 console.error(err);
             }
         });
@@ -299,11 +288,46 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Resume scanning after modal close
+    if (scanAnotherBtn) {
+        scanAnotherBtn.addEventListener('click', async () => {
+            scanModal.classList.remove('active');
+            isProcessing = false;
+            // Auto-restart scanner
+            if (html5QrcodeScanner && startScannerBtn && !startScannerBtn.disabled) {
+                try {
+                    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+                    await html5QrcodeScanner.start(
+                        { facingMode: "environment" }, 
+                        config, 
+                        onScanSuccess, 
+                        onScanFailure
+                    );
+                    startScannerBtn.disabled = true;
+                    stopScannerBtn.disabled = false;
+                } catch (err) {
+                    console.error('Restart error:', err);
+                }
+            }
+        });
+    }
+
+    if (closeScanModalBtn) {
+        closeScanModalBtn.addEventListener('click', () => {
+            scanModal.classList.remove('active');
+            isProcessing = false;
+        });
+    }
+
     async function onScanSuccess(decodedText, decodedResult) {
+        if (isProcessing) return;
+        isProcessing = true;
+
+        // Stop scanner immediately
         if (html5QrcodeScanner) {
-            await html5QrcodeScanner.stop();
-            startScannerBtn.disabled = false;
-            stopScannerBtn.disabled = true;
+            try { await html5QrcodeScanner.stop(); } catch(e) {}
+            if (startScannerBtn) startScannerBtn.disabled = false;
+            if (stopScannerBtn) stopScannerBtn.disabled = true;
         }
 
         const parts = decodedText.split('|');
@@ -314,64 +338,77 @@ document.addEventListener('DOMContentLoaded', () => {
             
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
                 if (data.status === 'attended') {
-                    if (scanResultDiv) {
-                        scanResultDiv.innerHTML = `
-                            <h3 style="color: #dc2626; margin-bottom: 0.5rem;"><i class="fas fa-times-circle"></i> Already Scanned</h3>
-                            <p><strong>Name:</strong> ${data.name}</p>
-                            <p><strong>Pass ID:</strong> ${data.passId}</p>
-                            <p><strong>Scanned at:</strong> ${data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown'}</p>
-                        `;
-                        scanResultDiv.style.display = 'block';
-                    }
-                    showAlert('This pass has already been used!', 'error');
+                    // ALREADY SCANNED - Show warning with previous time
+                    const scanTime = data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown';
+                    showScanModal('warning', 'Already Scanned', data, scanTime);
                 } else {
+                    // NEW SCAN - Mark as attended
                     await setDoc(docRef, {
                         ...data,
                         status: 'attended',
                         scannedAt: serverTimestamp()
                     }, { merge: true });
                     
-                    if (scanResultDiv) {
-                        scanResultDiv.innerHTML = `
-                            <h3 style="color: #16a34a; margin-bottom: 0.5rem;"><i class="fas fa-check-circle"></i> Access Granted</h3>
-                            <p><strong>Name:</strong> ${data.name}</p>
-                            <p><strong>Batch:</strong> ${data.batch}</p>
-                            <p><strong>Pass ID:</strong> ${data.passId}</p>
-                        `;
-                        scanResultDiv.style.display = 'block';
-                    }
-                    showAlert('Pass marked as attended successfully!', 'success');
+                    showScanModal('success', 'Access Granted', data, null);
                     loadAllPasses();
                     loadScannedData();
                 }
             } else {
-                if (scanResultDiv) {
-                    scanResultDiv.innerHTML = `<h3 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> Invalid Pass ID</h3>`;
-                    scanResultDiv.style.display = 'block';
-                }
-                showAlert('Pass ID not found in database.', 'error');
+                showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null);
             }
         } else {
-            if (scanResultDiv) {
-                scanResultDiv.innerHTML = `<h3 style="color: #dc2626;"><i class="fas fa-exclamation-triangle"></i> Invalid QR Code</h3>`;
-                scanResultDiv.style.display = 'block';
-            }
-            showAlert('This is not a valid Flurries 26 QR code.', 'error');
+            showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null);
         }
     }
 
+    function showScanModal(type, title, data, previousTime) {
+        const header = document.getElementById('scanModalHeader');
+        const icon = document.getElementById('scanModalIcon');
+        const titleEl = document.getElementById('scanModalTitle');
+        const nameEl = document.getElementById('scanName');
+        const passIdEl = document.getElementById('scanPassId');
+        const batchEl = document.getElementById('scanBatch');
+        const timeField = document.getElementById('scanTimeField');
+        const timeEl = document.getElementById('scanTime');
+
+        // Reset classes
+        header.classList.remove('success', 'warning');
+        header.classList.add(type);
+
+        if (type === 'success') {
+            icon.className = 'fas fa-check-circle';
+        } else {
+            icon.className = 'fas fa-exclamation-triangle';
+        }
+
+        titleEl.textContent = title;
+        nameEl.textContent = data.name || '-';
+        passIdEl.textContent = data.passId || '-';
+        batchEl.textContent = data.batch || '-';
+
+        if (previousTime) {
+            timeField.style.display = 'flex';
+            timeEl.textContent = previousTime;
+        } else {
+            timeField.style.display = 'none';
+        }
+
+        scanModal.classList.add('active');
+    }
+
     function onScanFailure(error) {
-        // Suppressed to prevent console spam
+        // Suppressed
     }
 
     // ==========================================
-    // 10. PDF EXPORT LOGIC (Scanned Only)
+    // 10. PDF EXPORT - FIXED (Scanned Only)
     // ==========================================
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', async () => {
-            exportPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            exportPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportPdfBtn.disabled = true;
 
             try {
@@ -381,7 +418,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
                 
-                // Set report title
                 document.getElementById('pdf-report-title').textContent = 'Official Scanned Guests Report';
                 
                 let hasScanned = false;
@@ -392,12 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown';
                         tbody.innerHTML += `
                             <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>${d.passId}</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.name}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.gender || 'N/A'}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.batch}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.phone}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${scanTime}</td>
+                                <td><strong>${d.passId}</strong></td>
+                                <td>${d.name}</td>
+                                <td>${d.gender || 'N/A'}</td>
+                                <td>${d.batch}</td>
+                                <td>${d.phone}</td>
+                                <td>${scanTime}</td>
                             </tr>
                         `;
                     }
@@ -412,9 +448,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const element = document.getElementById('pdf-export-template');
                 const opt = {
                     margin: 10,
-                    filename: `Flurries26_Scanned_Guests_${new Date().toISOString().slice(0,10)}.pdf`,
+                    filename: `Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
 
@@ -424,19 +460,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('PDF Export Error:', error);
                 showAlert('Error generating PDF.', 'error');
             } finally {
-                exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export Scanned Data to PDF';
+                exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
                 exportPdfBtn.disabled = false;
             }
         });
     }
 
     // ==========================================
-    // NEW: PDF EXPORT LOGIC (All Passes)
+    // 11. PDF EXPORT - All Passes
     // ==========================================
     const exportAllPdfBtn = document.getElementById('exportAllPdfBtn');
     if (exportAllPdfBtn) {
         exportAllPdfBtn.addEventListener('click', async () => {
-            exportAllPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating PDF...';
+            exportAllPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportAllPdfBtn.disabled = true;
 
             try {
@@ -446,7 +482,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
                 
-                // Set report title
                 document.getElementById('pdf-report-title').textContent = 'All Generated Passes Report';
                 
                 if (snapshot.empty) {
@@ -457,12 +492,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         const createdTime = d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown';
                         tbody.innerHTML += `
                             <tr>
-                                <td style="padding: 8px; border: 1px solid #ddd;"><strong>${d.passId}</strong></td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.name}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.gender || 'N/A'}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.batch}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${d.phone}</td>
-                                <td style="padding: 8px; border: 1px solid #ddd;">${createdTime}</td>
+                                <td><strong>${d.passId}</strong></td>
+                                <td>${d.name}</td>
+                                <td>${d.gender || 'N/A'}</td>
+                                <td>${d.batch}</td>
+                                <td>${d.phone}</td>
+                                <td>${createdTime}</td>
                             </tr>
                         `;
                     });
@@ -473,9 +508,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const element = document.getElementById('pdf-export-template');
                 const opt = {
                     margin: 10,
-                    filename: `Flurries26_All_Passes_${new Date().toISOString().slice(0,10)}.pdf`,
+                    filename: `Flurries26_AllPasses_${new Date().toISOString().slice(0,10)}.pdf`,
                     image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true },
+                    html2canvas: { scale: 2, useCORS: true, logging: false },
                     jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
                 };
 
@@ -485,7 +520,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('PDF Export Error:', error);
                 showAlert('Error generating PDF.', 'error');
             } finally {
-                exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export All Passes to PDF';
+                exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
                 exportAllPdfBtn.disabled = false;
             }
         });
@@ -590,23 +625,19 @@ async function loadAllPasses() {
         tbody.innerHTML = '';
         
         if (snapshot.empty) { 
-            tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:3rem;">No passes issued yet</td></tr>`; 
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No passes issued yet</td></tr>`; 
             return; 
         }
         
         snapshot.forEach(docSnap => {
             const d = docSnap.data();
-            const createdTime = d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown';
             const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
             
             tbody.innerHTML += `<tr>
                 <td><strong>${d.passId}</strong></td>
                 <td>${d.name}</td>
-                <td>${d.gender || 'N/A'}</td>
                 <td>${d.batch}</td>
-                <td>${d.phone}</td>
                 <td><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
-                <td>${createdTime}</td>
             </tr>`;
         });
     }
@@ -631,16 +662,14 @@ async function loadScannedData() {
                 tbody.innerHTML += `<tr>
                     <td><strong>${d.passId}</strong></td>
                     <td>${d.name}</td>
-                    <td>${d.gender || 'N/A'}</td>
                     <td>${d.batch}</td>
-                    <td>${d.phone}</td>
                     <td>${scanTime}</td>
                 </tr>`;
             }
         });
 
         if (!hasScanned) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:3rem; color: var(--navy-strong);">No guests have been scanned yet.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No guests scanned yet</td></tr>`;
         }
     }
 }
