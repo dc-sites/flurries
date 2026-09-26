@@ -16,16 +16,6 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 5-SECOND VIKING PRELOADER
-    const preloader = document.getElementById('preloader');
-    if (preloader) {
-        setTimeout(() => {
-            preloader.classList.add('preloader-hidden');
-            document.body.classList.remove('loading');
-            setTimeout(() => { preloader.style.display = 'none'; }, 800);
-        }, 5000);
-    }
-
     // 1. Navbar Scroll Effect
     window.addEventListener('scroll', () => {
         const navbar = document.querySelector('.navbar');
@@ -35,7 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 2. Mobile Menu
+    // 2. Mobile Menu (Public Site)
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
     if (hamburger && navLinks) {
@@ -92,7 +82,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => { 
+        logoutBtn.addEventListener('click', (e) => { 
+            e.preventDefault();
             signOut(auth); 
             window.location.href = 'index.html'; 
         });
@@ -113,33 +104,51 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ==========================================
-    // ADMIN SECTION MENU SWITCHING
+    // ADMIN SECTION NAVIGATION (Sidebar + Bottom Nav)
     // ==========================================
-    const sectionMenuBtns = document.querySelectorAll('.section-menu-btn');
-    const sectionContents = document.querySelectorAll('.section-content');
-    
-    sectionMenuBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            sectionMenuBtns.forEach(b => b.classList.remove('active'));
-            sectionContents.forEach(c => c.classList.remove('active'));
-            
-            btn.classList.add('active');
-            const targetSection = document.getElementById(`section-${btn.dataset.section}`);
-            if (targetSection) targetSection.classList.add('active');
-            
-            // Stop scanner when leaving scan tab
-            if (btn.dataset.section !== 'scan' && html5QrcodeScanner) {
-                html5QrcodeScanner.stop().catch(() => {});
-                if (startScannerBtn) startScannerBtn.disabled = false;
-                if (stopScannerBtn) stopScannerBtn.disabled = true;
-            }
-            
-            if (btn.dataset.section === 'registry') loadAllPasses();
-            else if (btn.dataset.section === 'details') loadScannedData();
+    function switchSection(sectionId) {
+        // Update Sidebar
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === sectionId);
+        });
+        // Update Bottom Nav
+        document.querySelectorAll('.bottom-nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === sectionId);
+        });
+        // Update Content
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.classList.toggle('active', section.id === `section-${sectionId}`);
+        });
+
+        // Stop scanner if leaving scan tab
+        if (sectionId !== 'scan' && html5QrcodeScanner) {
+            html5QrcodeScanner.stop().catch(() => {});
+            if (startScannerBtn) startScannerBtn.disabled = false;
+            if (stopScannerBtn) stopScannerBtn.disabled = true;
+        }
+
+        // Refresh data
+        if (sectionId === 'registry') loadAllPasses();
+        else if (sectionId === 'details') loadScannedData();
+    }
+
+    // Attach listeners to Sidebar
+    document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection(item.dataset.section);
         });
     });
 
-    // 6. Add Pass Form - WITH POPUP
+    // Attach listeners to Bottom Nav
+    document.querySelectorAll('.bottom-nav-item').forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            switchSection(item.dataset.section);
+        });
+    });
+
+    // 6. Add Pass Form
     const addPassForm = document.getElementById('addPassForm');
     if (addPassForm) {
         addPassForm.addEventListener('submit', async (e) => {
@@ -166,23 +175,20 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // PASS ID POPUP MODAL
+    // PASS ID MODAL
     // ==========================================
     const passIdModal = document.getElementById('passIdModal');
     const modalPassId = document.getElementById('modalPassId');
-    const modalName = document.getElementById('modalName');
-    const modalPhone = document.getElementById('modalPhone');
-    const modalBatch = document.getElementById('modalBatch');
     const copyPassIdBtn = document.getElementById('copyPassIdBtn');
     const copySuccessMsg = document.getElementById('copySuccessMsg');
     const closeModalBtn = document.getElementById('closeModalBtn');
 
     function showPassIdModal(passId, name, phone, batch) {
         if (passIdModal) {
+            document.getElementById('modalName').textContent = name;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalBatch').textContent = batch;
             modalPassId.textContent = passId;
-            modalName.textContent = name;
-            modalPhone.textContent = phone;
-            modalBatch.textContent = batch;
             passIdModal.classList.add('active');
             copySuccessMsg.classList.remove('show');
         }
@@ -190,14 +196,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (copyPassIdBtn) {
         copyPassIdBtn.addEventListener('click', async () => {
-            const passId = modalPassId.textContent;
             try {
-                await navigator.clipboard.writeText(passId);
+                await navigator.clipboard.writeText(modalPassId.textContent);
                 copySuccessMsg.classList.add('show');
                 setTimeout(() => copySuccessMsg.classList.remove('show'), 2000);
             } catch (err) {
                 const textArea = document.createElement('textarea');
-                textArea.value = passId;
+                textArea.value = modalPassId.textContent;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
@@ -208,17 +213,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (closeModalBtn) {
-        closeModalBtn.addEventListener('click', () => passIdModal.classList.remove('active'));
-    }
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => passIdModal.classList.remove('active'));
+    if (passIdModal) passIdModal.addEventListener('click', (e) => { if (e.target === passIdModal) passIdModal.classList.remove('active'); });
 
-    if (passIdModal) {
-        passIdModal.addEventListener('click', (e) => {
-            if (e.target === passIdModal) passIdModal.classList.remove('active');
-        });
-    }
-
-    // 7. Get Pass Form (User - for getpass.html)
+    // 7. Get Pass Form (User)
     const getPassForm = document.getElementById('getPassFormElement');
     if (getPassForm) {
         getPassForm.addEventListener('submit', async (e) => {
@@ -228,26 +226,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const originalHTML = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...'; 
             btn.disabled = true;
-            
             try {
                 const docSnap = await getDoc(doc(db, 'passes', passId));
                 if (docSnap.exists()) displayPass(docSnap.data());
                 else showAlert('Invalid Pass ID.', 'error');
-            } catch (error) { 
-                showAlert('Connection error.', 'error'); 
-            } finally { 
-                btn.innerHTML = originalHTML; 
-                btn.disabled = false; 
-            }
+            } catch (error) { showAlert('Connection error.', 'error'); } 
+            finally { btn.innerHTML = originalHTML; btn.disabled = false; }
         });
     }
 
-    // 8. Download Pass Button
+    // 8. Download Pass
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 
     // ==========================================
-    // 9. QR CODE SCANNER - IMPROVED FLOW
+    // 9. QR SCANNER
     // ==========================================
     let html5QrcodeScanner = null;
     let isProcessing = false;
@@ -260,23 +253,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (startScannerBtn && stopScannerBtn) {
         startScannerBtn.addEventListener('click', async () => {
             if (isProcessing) return;
-            if (!html5QrcodeScanner) {
-                html5QrcodeScanner = new Html5Qrcode("reader");
-            }
+            if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader");
             try {
-                const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-                await html5QrcodeScanner.start(
-                    { facingMode: "environment" }, 
-                    config, 
-                    onScanSuccess, 
-                    onScanFailure
-                );
+                await html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
                 startScannerBtn.disabled = true;
                 stopScannerBtn.disabled = false;
-            } catch (err) {
-                showAlert('Camera access denied. Use HTTPS or localhost.', 'error');
-                console.error(err);
-            }
+            } catch (err) { showAlert('Camera access denied. Use HTTPS.', 'error'); }
         });
 
         stopScannerBtn.addEventListener('click', async () => {
@@ -288,249 +270,121 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Resume scanning after modal close
     if (scanAnotherBtn) {
         scanAnotherBtn.addEventListener('click', async () => {
             scanModal.classList.remove('active');
             isProcessing = false;
-            // Auto-restart scanner
             if (html5QrcodeScanner && startScannerBtn && !startScannerBtn.disabled) {
                 try {
-                    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-                    await html5QrcodeScanner.start(
-                        { facingMode: "environment" }, 
-                        config, 
-                        onScanSuccess, 
-                        onScanFailure
-                    );
+                    await html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
                     startScannerBtn.disabled = true;
                     stopScannerBtn.disabled = false;
-                } catch (err) {
-                    console.error('Restart error:', err);
-                }
+                } catch (err) { console.error('Restart error:', err); }
             }
         });
     }
 
-    if (closeScanModalBtn) {
-        closeScanModalBtn.addEventListener('click', () => {
-            scanModal.classList.remove('active');
-            isProcessing = false;
-        });
-    }
+    if (closeScanModalBtn) closeScanModalBtn.addEventListener('click', () => { scanModal.classList.remove('active'); isProcessing = false; });
 
-    async function onScanSuccess(decodedText, decodedResult) {
+    async function onScanSuccess(decodedText) {
         if (isProcessing) return;
         isProcessing = true;
-
-        // Stop scanner immediately
-        if (html5QrcodeScanner) {
-            try { await html5QrcodeScanner.stop(); } catch(e) {}
-            if (startScannerBtn) startScannerBtn.disabled = false;
-            if (stopScannerBtn) stopScannerBtn.disabled = true;
-        }
+        if (html5QrcodeScanner) { try { await html5QrcodeScanner.stop(); } catch(e) {} startScannerBtn.disabled = false; stopScannerBtn.disabled = true; }
 
         const parts = decodedText.split('|');
         if (parts.length >= 2 && parts[0] === 'FLURRIES26') {
             const passId = parts[1];
-            const docRef = doc(db, 'passes', passId);
-            const docSnap = await getDoc(docRef);
-            
+            const docSnap = await getDoc(doc(db, 'passes', passId));
             if (docSnap.exists()) {
                 const data = docSnap.data();
-                
                 if (data.status === 'attended') {
-                    // ALREADY SCANNED - Show warning with previous time
-                    const scanTime = data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown';
-                    showScanModal('warning', 'Already Scanned', data, scanTime);
+                    showScanModal('warning', 'Already Scanned', data, data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown');
                 } else {
-                    // NEW SCAN - Mark as attended
-                    await setDoc(docRef, {
-                        ...data,
-                        status: 'attended',
-                        scannedAt: serverTimestamp()
-                    }, { merge: true });
-                    
+                    await setDoc(doc(db, 'passes', passId), { ...data, status: 'attended', scannedAt: serverTimestamp() }, { merge: true });
                     showScanModal('success', 'Access Granted', data, null);
-                    loadAllPasses();
-                    loadScannedData();
+                    loadAllPasses(); loadScannedData();
                 }
-            } else {
-                showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null);
-            }
-        } else {
-            showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null);
-        }
+            } else { showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null); }
+        } else { showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null); }
     }
 
     function showScanModal(type, title, data, previousTime) {
         const header = document.getElementById('scanModalHeader');
-        const icon = document.getElementById('scanModalIcon');
-        const titleEl = document.getElementById('scanModalTitle');
-        const nameEl = document.getElementById('scanName');
-        const passIdEl = document.getElementById('scanPassId');
-        const batchEl = document.getElementById('scanBatch');
+        header.className = `modal-header scan-header ${type}`;
+        document.getElementById('scanModalIcon').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+        document.getElementById('scanModalTitle').textContent = title;
+        document.getElementById('scanName').textContent = data.name || '-';
+        document.getElementById('scanPassId').textContent = data.passId || '-';
+        document.getElementById('scanBatch').textContent = data.batch || '-';
+        
         const timeField = document.getElementById('scanTimeField');
-        const timeEl = document.getElementById('scanTime');
-
-        // Reset classes
-        header.classList.remove('success', 'warning');
-        header.classList.add(type);
-
-        if (type === 'success') {
-            icon.className = 'fas fa-check-circle';
-        } else {
-            icon.className = 'fas fa-exclamation-triangle';
-        }
-
-        titleEl.textContent = title;
-        nameEl.textContent = data.name || '-';
-        passIdEl.textContent = data.passId || '-';
-        batchEl.textContent = data.batch || '-';
-
-        if (previousTime) {
-            timeField.style.display = 'flex';
-            timeEl.textContent = previousTime;
-        } else {
-            timeField.style.display = 'none';
-        }
-
+        if (previousTime) { timeField.style.display = 'flex'; document.getElementById('scanTime').textContent = previousTime; } 
+        else { timeField.style.display = 'none'; }
+        
         scanModal.classList.add('active');
     }
 
-    function onScanFailure(error) {
-        // Suppressed
-    }
+    function onScanFailure() {}
 
     // ==========================================
-    // 10. PDF EXPORT - FIXED (Scanned Only)
+    // 10. PDF EXPORT (Scanned)
     // ==========================================
     const exportPdfBtn = document.getElementById('exportPdfBtn');
     if (exportPdfBtn) {
         exportPdfBtn.addEventListener('click', async () => {
             exportPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportPdfBtn.disabled = true;
-
             try {
-                const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
-                const snapshot = await getDocs(q);
-                
+                const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
-                
                 document.getElementById('pdf-report-title').textContent = 'Official Scanned Guests Report';
-                
                 let hasScanned = false;
                 snapshot.forEach(docSnap => {
                     const d = docSnap.data();
                     if (d.status === 'attended') {
                         hasScanned = true;
-                        const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><strong>${d.passId}</strong></td>
-                                <td>${d.name}</td>
-                                <td>${d.gender || 'N/A'}</td>
-                                <td>${d.batch}</td>
-                                <td>${d.phone}</td>
-                                <td>${scanTime}</td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><strong>${d.passId}</strong></td><td>${d.name}</td><td>${d.gender || 'N/A'}</td><td>${d.batch}</td><td>${d.phone}</td><td>${d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown'}</td></tr>`;
                     }
                 });
-
-                if (!hasScanned) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No scanned guests found.</td></tr>';
-                }
-
+                if (!hasScanned) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No scanned guests found.</td></tr>';
                 document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
-
-                const element = document.getElementById('pdf-export-template');
-                const opt = {
-                    margin: 10,
-                    filename: `Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                };
-
-                await html2pdf().set(opt).from(element).save();
-                showAlert('PDF exported successfully!', 'success');
-            } catch (error) {
-                console.error('PDF Export Error:', error);
-                showAlert('Error generating PDF.', 'error');
-            } finally {
-                exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
-                exportPdfBtn.disabled = false;
-            }
+                
+                await html2pdf().set({ margin: 10, filename: `Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }).from(document.getElementById('pdf-export-template')).save();
+                showAlert('PDF exported!', 'success');
+            } catch (error) { showAlert('Error generating PDF.', 'error'); } 
+            finally { exportPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export'; exportPdfBtn.disabled = false; }
         });
     }
 
-    // ==========================================
-    // 11. PDF EXPORT - All Passes
-    // ==========================================
+    // 11. PDF EXPORT (All)
     const exportAllPdfBtn = document.getElementById('exportAllPdfBtn');
     if (exportAllPdfBtn) {
         exportAllPdfBtn.addEventListener('click', async () => {
             exportAllPdfBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             exportAllPdfBtn.disabled = true;
-
             try {
-                const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
-                const snapshot = await getDocs(q);
-                
+                const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
                 const tbody = document.getElementById('pdf-table-body');
                 tbody.innerHTML = '';
-                
                 document.getElementById('pdf-report-title').textContent = 'All Generated Passes Report';
-                
-                if (snapshot.empty) {
-                    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No passes found.</td></tr>';
-                } else {
+                if (snapshot.empty) tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding: 20px;">No passes found.</td></tr>';
+                else {
                     snapshot.forEach(docSnap => {
                         const d = docSnap.data();
-                        const createdTime = d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown';
-                        tbody.innerHTML += `
-                            <tr>
-                                <td><strong>${d.passId}</strong></td>
-                                <td>${d.name}</td>
-                                <td>${d.gender || 'N/A'}</td>
-                                <td>${d.batch}</td>
-                                <td>${d.phone}</td>
-                                <td>${createdTime}</td>
-                            </tr>
-                        `;
+                        tbody.innerHTML += `<tr><td><strong>${d.passId}</strong></td><td>${d.name}</td><td>${d.gender || 'N/A'}</td><td>${d.batch}</td><td>${d.phone}</td><td>${d.createdAt ? d.createdAt.toDate().toLocaleString() : 'Unknown'}</td></tr>`;
                     });
                 }
-
                 document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
-
-                const element = document.getElementById('pdf-export-template');
-                const opt = {
-                    margin: 10,
-                    filename: `Flurries26_AllPasses_${new Date().toISOString().slice(0,10)}.pdf`,
-                    image: { type: 'jpeg', quality: 0.98 },
-                    html2canvas: { scale: 2, useCORS: true, logging: false },
-                    jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-                };
-
-                await html2pdf().set(opt).from(element).save();
-                showAlert('PDF exported successfully!', 'success');
-            } catch (error) {
-                console.error('PDF Export Error:', error);
-                showAlert('Error generating PDF.', 'error');
-            } finally {
-                exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
-                exportAllPdfBtn.disabled = false;
-            }
+                await html2pdf().set({ margin: 10, filename: `Flurries26_AllPasses_${new Date().toISOString().slice(0,10)}.pdf`, image: { type: 'jpeg', quality: 0.98 }, html2canvas: { scale: 2, useCORS: true }, jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' } }).from(document.getElementById('pdf-export-template')).save();
+                showAlert('PDF exported!', 'success');
+            } catch (error) { showAlert('Error generating PDF.', 'error'); } 
+            finally { exportAllPdfBtn.innerHTML = '<i class="fas fa-file-pdf"></i> Export'; exportAllPdfBtn.disabled = false; }
         });
     }
 });
 
-// ==========================================
 // Helper Functions
-// ==========================================
-
 function generatePassId() {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     let result = 'FL26';
@@ -540,67 +394,30 @@ function generatePassId() {
 
 function generateQRCode(data, elementId) {
     const el = document.getElementById(elementId);
-    if(el) {
-        el.innerHTML = '';
-        new QRCode(el, { text: data, width: 150, height: 150, colorDark: "#1B3A5C", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H });
-    }
+    if(el) { el.innerHTML = ''; new QRCode(el, { text: data, width: 150, height: 150, colorDark: "#1B3A5C", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H }); }
 }
 
 async function downloadPass() {
     const passElement = document.getElementById('passTemplate');
     const btn = document.getElementById('downloadBtn');
     const originalHTML = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; 
-    btn.disabled = true;
-    
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; btn.disabled = true;
     try {
         const isMobile = window.innerWidth <= 768;
         let originalStyles = null;
-
         if (isMobile) {
-            originalStyles = {
-                width: passElement.style.width, maxWidth: passElement.style.maxWidth,
-                position: passElement.style.position, left: passElement.style.left,
-                top: passElement.style.top, zIndex: passElement.style.zIndex,
-                transform: passElement.style.transform
-            };
-            passElement.style.width = '750px';
-            passElement.style.maxWidth = '750px';
-            passElement.style.position = 'absolute';
-            passElement.style.left = '-9999px';
-            passElement.style.top = '0';
-            passElement.style.zIndex = '-1';
-            passElement.style.transform = 'none';
+            originalStyles = { width: passElement.style.width, maxWidth: passElement.style.maxWidth, position: passElement.style.position, left: passElement.style.left, top: passElement.style.top, zIndex: passElement.style.zIndex, transform: passElement.style.transform };
+            passElement.style.width = '750px'; passElement.style.maxWidth = '750px'; passElement.style.position = 'absolute'; passElement.style.left = '-9999px'; passElement.style.top = '0'; passElement.style.zIndex = '-1'; passElement.style.transform = 'none';
             await new Promise(resolve => setTimeout(resolve, 100));
         }
-
-        const canvas = await html2canvas(passElement, { 
-            scale: isMobile ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, logging: false
-        });
-
-        if (isMobile && originalStyles) {
-            passElement.style.width = originalStyles.width || '';
-            passElement.style.maxWidth = originalStyles.maxWidth || '';
-            passElement.style.position = originalStyles.position || '';
-            passElement.style.left = originalStyles.left || '';
-            passElement.style.top = originalStyles.top || '';
-            passElement.style.zIndex = originalStyles.zIndex || '';
-            passElement.style.transform = originalStyles.transform || '';
-        }
-
+        const canvas = await html2canvas(passElement, { scale: isMobile ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+        if (isMobile && originalStyles) { passElement.style.width = originalStyles.width || ''; passElement.style.maxWidth = originalStyles.maxWidth || ''; passElement.style.position = originalStyles.position || ''; passElement.style.left = originalStyles.left || ''; passElement.style.top = originalStyles.top || ''; passElement.style.zIndex = originalStyles.zIndex || ''; passElement.style.transform = originalStyles.transform || ''; }
         const link = document.createElement('a');
-        const passId = document.getElementById('displayPassId').textContent;
-        link.download = `Flurries26_Pass_${passId}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showAlert('Pass downloaded successfully!', 'success');
-    } catch (error) { 
-        console.error('Download error:', error);
-        showAlert('Error downloading pass.', 'error'); 
-    } finally { 
-        btn.innerHTML = originalHTML; 
-        btn.disabled = false; 
-    }
+        link.download = `Flurries26_Pass_${document.getElementById('displayPassId').textContent}.png`;
+        link.href = canvas.toDataURL('image/png'); link.click();
+        showAlert('Pass downloaded!', 'success');
+    } catch (error) { showAlert('Error downloading pass.', 'error'); } 
+    finally { btn.innerHTML = originalHTML; btn.disabled = false; }
 }
 
 function showAlert(message, type) {
@@ -609,69 +426,48 @@ function showAlert(message, type) {
     alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
     const container = document.querySelector('.container') || document.body;
     container.insertBefore(alertDiv, container.firstChild);
-    setTimeout(() => { 
-        alertDiv.style.opacity = '0'; 
-        setTimeout(() => alertDiv.remove(), 300); 
-    }, 4000);
+    setTimeout(() => { alertDiv.style.opacity = '0'; setTimeout(() => alertDiv.remove(), 300); }, 4000);
 }
 
 async function loadAllPasses() {
-    const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
     const table = document.getElementById('allPassesTable');
-    
-    if (table) {
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = '';
-        
-        if (snapshot.empty) { 
-            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No passes issued yet</td></tr>`; 
-            return; 
-        }
-        
-        snapshot.forEach(docSnap => {
-            const d = docSnap.data();
-            const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
-            
-            tbody.innerHTML += `<tr>
-                <td><strong>${d.passId}</strong></td>
-                <td>${d.name}</td>
-                <td>${d.batch}</td>
-                <td><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
-            </tr>`;
-        });
-    }
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
+    if (snapshot.empty) { tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No passes issued yet</td></tr>`; return; }
+    snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
+        tbody.innerHTML += `<tr>
+            <td data-label="Pass ID"><strong>${d.passId}</strong></td>
+            <td data-label="Name">${d.name}</td>
+            <td data-label="Batch">${d.batch}</td>
+            <td data-label="Status"><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
+        </tr>`;
+    });
 }
 
 async function loadScannedData() {
-    const q = query(collection(db, 'passes'), orderBy('createdAt', 'desc'));
-    const snapshot = await getDocs(q);
     const table = document.getElementById('scannedTable');
-    
-    if (table) {
-        const tbody = table.querySelector('tbody');
-        tbody.innerHTML = '';
-        
-        let hasScanned = false;
-        snapshot.forEach(docSnap => {
-            const d = docSnap.data();
-            if (d.status === 'attended') {
-                hasScanned = true;
-                const scanTime = d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Not Scanned';
-                
-                tbody.innerHTML += `<tr>
-                    <td><strong>${d.passId}</strong></td>
-                    <td>${d.name}</td>
-                    <td>${d.batch}</td>
-                    <td>${scanTime}</td>
-                </tr>`;
-            }
-        });
-
-        if (!hasScanned) {
-            tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No guests scanned yet</td></tr>`;
+    if (!table) return;
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = '';
+    const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
+    let hasScanned = false;
+    snapshot.forEach(docSnap => {
+        const d = docSnap.data();
+        if (d.status === 'attended') {
+            hasScanned = true;
+            tbody.innerHTML += `<tr>
+                <td data-label="Pass ID"><strong>${d.passId}</strong></td>
+                <td data-label="Name">${d.name}</td>
+                <td data-label="Batch">${d.batch}</td>
+                <td data-label="Entry Time">${d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown'}</td>
+            </tr>`;
         }
-    }
+    });
+    if (!hasScanned) tbody.innerHTML = `<tr><td colspan="4" class="empty-state">No guests scanned yet</td></tr>`;
 }
 
 function displayPass(data) {
@@ -680,14 +476,8 @@ function displayPass(data) {
     document.getElementById('displayGender').textContent = data.gender || 'N/A';
     document.getElementById('displayBatch').textContent = data.batch;
     document.getElementById('displayPassId').textContent = data.passId;
-    
-    const qrData = `FLURRIES26|${data.passId}|${data.name}|${data.phone}`;
-    generateQRCode(qrData, 'qrcode');
-    
+    generateQRCode(`FLURRIES26|${data.passId}|${data.name}|${data.phone}`, 'qrcode');
     document.getElementById('passDisplay').classList.remove('hidden');
     document.getElementById('getPassForm').classList.add('hidden');
-    
-    setTimeout(() => {
-        document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    setTimeout(() => document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 }
