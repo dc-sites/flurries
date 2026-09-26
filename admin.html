@@ -6,9 +6,7 @@
     <title>Admin Dashboard | Flurries 26</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- HTML5 QR Code Scanner Library -->
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <!-- HTML2PDF Library for Professional PDF Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 <body>
@@ -50,18 +48,35 @@
             </div>
         </div>
 
-        <!-- Admin Content (Hidden by default until logged in) -->
+        <!-- Admin Content (Hidden by default) -->
         <div id="adminContent" class="hidden">
             
-            <!-- Professional Tab Menu -->
-            <div class="admin-tabs">
-                <button class="tab-btn active" data-tab="generate"><i class="fas fa-plus-circle"></i> Generate Pass</button>
-                <button class="tab-btn" data-tab="scan"><i class="fas fa-qrcode"></i> Scan QR</button>
-                <button class="tab-btn" data-tab="details"><i class="fas fa-list-check"></i> Scanned Details</button>
+            <!-- Mobile-Friendly Section Menu (Hamburger Style) -->
+            <div class="admin-section-menu">
+                <button class="section-menu-btn active" data-section="generate">
+                    <i class="fas fa-plus-circle"></i>
+                    <span>Generate Pass</span>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </button>
+                <button class="section-menu-btn" data-section="scan">
+                    <i class="fas fa-qrcode"></i>
+                    <span>Scan QR</span>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </button>
+                <button class="section-menu-btn" data-section="registry">
+                    <i class="fas fa-id-card"></i>
+                    <span>Generated Passes</span>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </button>
+                <button class="section-menu-btn" data-section="details">
+                    <i class="fas fa-list-check"></i>
+                    <span>Scanned Details</span>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </button>
             </div>
 
             <!-- SECTION 1: Generate Pass -->
-            <div id="tab-generate" class="tab-content active">
+            <div id="section-generate" class="section-content active">
                 <div class="section-header">
                     <span class="section-tag">Registry</span>
                     <h2 class="section-title">Issue New Pass</h2>
@@ -101,7 +116,7 @@
             </div>
 
             <!-- SECTION 2: Scan QR -->
-            <div id="tab-scan" class="tab-content">
+            <div id="section-scan" class="section-content">
                 <div class="section-header">
                     <span class="section-tag">Entry Scanner</span>
                     <h2 class="section-title">Scan Attendee Pass</h2>
@@ -110,7 +125,7 @@
                 <div style="max-width: 600px; margin: 0 auto; text-align: center;">
                     <div id="reader" style="width: 100%; border-radius: 16px; overflow: hidden; border: 3px solid var(--frost); min-height: 350px; background: #000;"></div>
                     
-                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center;">
+                    <div style="margin-top: 1.5rem; display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
                         <button id="startScannerBtn" class="btn btn-primary"><i class="fas fa-camera"></i> Start Scanner</button>
                         <button id="stopScannerBtn" class="btn btn-secondary" disabled><i class="fas fa-stop"></i> Stop</button>
                     </div>
@@ -119,8 +134,42 @@
                 </div>
             </div>
 
-            <!-- SECTION 3: Scanned Details -->
-            <div id="tab-details" class="tab-content">
+            <!-- SECTION 3: Generated Passes (NEW) -->
+            <div id="section-registry" class="section-content">
+                <div class="section-header">
+                    <span class="section-tag">All Passes</span>
+                    <h2 class="section-title">Generated Passes Registry</h2>
+                    <p class="section-subtitle">View all passes that have been created</p>
+                </div>
+                
+                <div style="text-align: right; margin-bottom: 1.5rem;">
+                    <button id="exportAllPdfBtn" class="btn btn-primary">
+                        <i class="fas fa-file-pdf"></i> Export All Passes to PDF
+                    </button>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="admin-table" id="allPassesTable">
+                        <thead>
+                            <tr>
+                                <th>Pass ID</th>
+                                <th>Name</th>
+                                <th>Gender</th>
+                                <th>Batch</th>
+                                <th>Phone</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr><td colspan="7" style="text-align:center; padding:3rem;">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- SECTION 4: Scanned Details -->
+            <div id="section-details" class="section-content">
                 <div class="section-header">
                     <span class="section-tag">Reports</span>
                     <h2 class="section-title">Scanned Guests Registry</h2>
@@ -146,7 +195,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr><td colspan="6" style="text-align:center; padding:3rem;">Loading scanned data...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; padding:3rem;">Loading...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -155,24 +204,56 @@
         </div>
     </main>
 
+    <!-- NEW: Pass ID Popup Modal -->
+    <div id="passIdModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>Pass Generated Successfully!</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Share this Pass ID with the guest via WhatsApp</p>
+                <div class="pass-id-display">
+                    <span id="modalPassId">FL26XXXX</span>
+                    <button id="copyPassIdBtn" class="copy-btn" title="Copy to clipboard">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div id="copySuccessMsg" class="copy-success">
+                    <i class="fas fa-check"></i> Copied to clipboard!
+                </div>
+                <div class="modal-details">
+                    <p><strong>Name:</strong> <span id="modalName"></span></p>
+                    <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>Batch:</strong> <span id="modalBatch"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeModalBtn" class="btn btn-primary">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Hidden Template for PDF Export -->
     <div id="pdf-export-template" style="display: none; padding: 40px; font-family: 'Raleway', sans-serif; color: #1B3A5C;">
         <div style="text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1B3A5C; padding-bottom: 20px;">
             <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" style="height: 60px; margin-bottom: 15px;">
             <h1 style="font-family: 'Playfair Display', serif; font-size: 28px; margin: 0; color: #1B3A5C;">FLURRIES 26</h1>
-            <p style="font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #4A8AB5; margin-top: 5px;">Official Scanned Guests Report</p>
+            <p style="font-size: 14px; letter-spacing: 3px; text-transform: uppercase; color: #4A8AB5; margin-top: 5px;" id="pdf-report-title">Official Scanned Guests Report</p>
             <p style="font-size: 12px; color: #666; margin-top: 10px;">Generated on: <span id="pdf-generation-date"></span></p>
         </div>
         
         <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 30px;">
             <thead>
-                <tr style="background-color: #1B3A5C; color: white;">
+                <tr style="background-color: #1B3A5C; color: white;" id="pdf-table-head">
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Pass ID</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Name</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Gender</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Batch</th>
                     <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Phone</th>
-                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Scanned Time</th>
+                    <th style="padding: 10px; border: 1px solid #ddd; text-align: left;">Time</th>
                 </tr>
             </thead>
             <tbody id="pdf-table-body">
