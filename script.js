@@ -2,6 +2,9 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/fireba
 import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
 
+// ==========================================
+// NEW FIREBASE CONFIGURATION (flurries2)
+// ==========================================
 const firebaseConfig = {
   apiKey: "AIzaSyDgUqWsiyeYkH8iXhtu-rTszt_gz2Yu9aE",
   authDomain: "flurries2.firebaseapp.com",
@@ -16,6 +19,22 @@ const db = getFirestore(app);
 const auth = getAuth(app);
 
 document.addEventListener('DOMContentLoaded', () => {
+    // ==========================================
+    // 5-SECOND VIKING PRELOADER LOGIC
+    // ==========================================
+    const preloader = document.getElementById('preloader');
+    if (preloader) {
+        setTimeout(() => {
+            preloader.classList.add('preloader-hidden');
+            document.body.classList.remove('loading');
+            
+            // Completely remove from DOM after fade-out for performance
+            setTimeout(() => {
+                preloader.style.display = 'none';
+            }, 800);
+        }, 5000); // 5000 milliseconds = 5 seconds
+    }
+
     // 1. Navbar Scroll Effect
     window.addEventListener('scroll', () => {
         const navbar = document.querySelector('.navbar');
@@ -81,7 +100,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) logoutBtn.addEventListener('click', () => { signOut(auth); window.location.href = 'index.html'; });
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', () => { 
+            signOut(auth); 
+            window.location.href = 'index.html'; 
+        });
+    }
 
     onAuthStateChanged(auth, (user) => {
         const adminContent = document.getElementById('adminContent');
@@ -140,7 +164,8 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (error) { 
                 showAlert('Connection error.', 'error'); 
             } finally { 
-                btn.innerHTML = originalHTML; btn.disabled = false; 
+                btn.innerHTML = originalHTML; 
+                btn.disabled = false; 
             }
         });
     }
@@ -149,8 +174,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const downloadBtn = document.getElementById('downloadBtn');
     if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
 });
-
-
 
 // ==========================================
 // Helper Functions
