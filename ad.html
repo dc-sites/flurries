@@ -7,7 +7,8 @@
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- SheetJS Library for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     
     <style>
         /* Filter Bar Styling to match your premium theme */
@@ -178,8 +179,8 @@
                             <h1>All Passes</h1>
                             <p>View all generated credentials</p>
                         </div>
-                        <button id="exportAllPdfBtn" class="btn btn-outline">
-                            <i class="fas fa-file-pdf"></i> Export PDF
+                        <button id="exportAllExcelBtn" class="btn btn-outline">
+                            <i class="fas fa-file-excel"></i> Export Excel
                         </button>
                     </div>
 
@@ -228,8 +229,8 @@
                             <h1>Scanned Guests</h1>
                             <p>Attendees who have entered the venue</p>
                         </div>
-                        <button id="exportPdfBtn" class="btn btn-outline">
-                            <i class="fas fa-file-pdf"></i> Export PDF
+                        <button id="exportExcelBtn" class="btn btn-outline">
+                            <i class="fas fa-file-excel"></i> Export Excel
                         </button>
                     </div>
 
@@ -341,24 +342,6 @@
         </div>
     </div>
 
-    <!-- Hidden PDF Template -->
-    <div id="pdf-export-template" class="pdf-template-hidden">
-        <div class="pdf-header">
-            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="pdf-logo">
-            <h1 class="pdf-title">FLURRIES 26</h1>
-            <p class="pdf-subtitle" id="pdf-report-title">Official Report</p>
-            <p class="pdf-date">Generated on: <span id="pdf-generation-date"></span></p>
-        </div>
-        <table class="pdf-table">
-            <thead><tr id="pdf-table-head"></tr></thead>
-            <tbody id="pdf-table-body"></tbody>
-        </table>
-        <div class="pdf-footer">
-            <p class="pdf-footer-brand">Designed by Hexa Solutions | https://hexasolutions.online</p>
-            <p class="pdf-footer-copy">© 2026 Flurries. All rights reserved. Confidential Document.</p>
-        </div>
-    </div>
-
-    <script src="script1.js" type="module"></script>
+    <script src="script.js" type="module"></script>
 </body>
 </html>
