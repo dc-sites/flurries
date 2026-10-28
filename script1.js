@@ -3,13 +3,14 @@
 // ⚠️ REPLACE WITH YOUR ACTUAL FIREBASE PROJECT CONFIG
 // ==========================================
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
+    authDomain: "flurries-32408.firebaseapp.com",
+    projectId: "flurries-32408",
+    storageBucket: "flurries-32408.firebasestorage.app",
+    messagingSenderId: "459835238527",
+    appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
 };
+
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
