@@ -20,6 +20,7 @@
             padding: 1rem;
             border-radius: 12px;
             border: 1px solid var(--frost);
+            align-items: center;
         }
         .filter-bar input, .filter-bar select {
             padding: 0.8rem 1rem;
@@ -45,7 +46,7 @@
 </head>
 <body>
 
-    <!-- Top Navbar (Always visible) -->
+    <!-- Top Navbar -->
     <nav class="navbar">
         <a href="index.html">
             <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="logo">
@@ -83,7 +84,7 @@
         <!-- MAIN CONTENT AREA -->
         <main class="admin-main">
             
-            <!-- Login Form (Shown when not authenticated) -->
+            <!-- Login Form -->
             <div id="loginForm" class="login-container">
                 <div class="login-card">
                     <div class="login-header">
@@ -107,7 +108,7 @@
                 </div>
             </div>
 
-            <!-- Admin Content (Hidden until logged in) -->
+            <!-- Admin Content -->
             <div id="adminContent" class="hidden">
                 
                 <!-- SECTION 1: SCAN QR -->
@@ -116,7 +117,6 @@
                         <h1>Entry Scanner</h1>
                         <p>Scan attendee QR codes to grant entry</p>
                     </div>
-                    
                     <div class="scanner-card">
                         <div id="reader" class="scanner-viewfinder"></div>
                         <div class="scanner-actions">
@@ -136,7 +136,6 @@
                         <h1>Generate Pass</h1>
                         <p>Create a new VIP credential for an attendee</p>
                     </div>
-
                     <div class="form-card">
                         <form id="addPassForm" class="admin-form">
                             <div class="form-grid">
@@ -186,6 +185,11 @@
 
                     <div class="filter-bar">
                         <input type="text" id="registrySearch" placeholder="Search by Name or Pass ID...">
+                        <select id="registryGenderFilter">
+                            <option value="all">All Genders</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
                         <select id="registryBatchFilter">
                             <option value="all">All Batches</option>
                             <option value="2026 AL Batch">2026 AL Batch</option>
@@ -193,9 +197,10 @@
                         </select>
                         <select id="registryStatusFilter">
                             <option value="all">All Statuses</option>
-                            <option value="Scanned">Scanned</option>
-                            <option value="Not Scanned">Not Scanned</option>
+                            <option value="attended">Attended</option>
+                            <option value="pending">Pending</option>
                         </select>
+                        <span id="registryCount" style="margin-left: auto; align-self: center; font-weight: 700; color: var(--navy-deep);">0 passes</span>
                     </div>
 
                     <div class="table-card">
@@ -230,11 +235,17 @@
 
                     <div class="filter-bar">
                         <input type="text" id="scannedSearch" placeholder="Search by Name or Pass ID...">
+                        <select id="scannedGenderFilter">
+                            <option value="all">All Genders</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
                         <select id="scannedBatchFilter">
                             <option value="all">All Batches</option>
                             <option value="2026 AL Batch">2026 AL Batch</option>
                             <option value="2023 OL Batch">2023 OL Batch</option>
                         </select>
+                        <span id="scannedCount" style="margin-left: auto; align-self: center; font-weight: 700; color: var(--navy-deep);">0 guests</span>
                     </div>
 
                     <div class="table-card">
@@ -280,11 +291,7 @@
 
     </div>
 
-    <!-- ==========================================
-         MODALS & HIDDEN TEMPLATES
-    ========================================== -->
-
-    <!-- QR Scan Result Modal -->
+    <!-- MODALS & HIDDEN TEMPLATES -->
     <div id="scanModal" class="modal-overlay">
         <div class="modal-content scan-modal">
             <div class="modal-header scan-header" id="scanModalHeader">
@@ -293,18 +300,9 @@
             </div>
             <div class="modal-body scan-body">
                 <div class="scan-guest-info">
-                    <div class="scan-field">
-                        <span class="scan-label">Name</span>
-                        <span class="scan-value" id="scanName">-</span>
-                    </div>
-                    <div class="scan-field">
-                        <span class="scan-label">Pass ID</span>
-                        <span class="scan-value pass-id-mono" id="scanPassId">-</span>
-                    </div>
-                    <div class="scan-field">
-                        <span class="scan-label">Batch</span>
-                        <span class="scan-value" id="scanBatch">-</span>
-                    </div>
+                    <div class="scan-field"><span class="scan-label">Name</span><span class="scan-value" id="scanName">-</span></div>
+                    <div class="scan-field"><span class="scan-label">Pass ID</span><span class="scan-value pass-id-mono" id="scanPassId">-</span></div>
+                    <div class="scan-field"><span class="scan-label">Batch</span><span class="scan-value" id="scanBatch">-</span></div>
                     <div class="scan-field" id="scanTimeField" style="display: none;">
                         <span class="scan-label">Previously Scanned</span>
                         <span class="scan-value scan-time" id="scanTime">-</span>
@@ -312,17 +310,12 @@
                 </div>
             </div>
             <div class="modal-footer scan-footer">
-                <button id="scanAnotherBtn" class="btn btn-primary btn-block">
-                    <i class="fas fa-redo"></i> Scan Another
-                </button>
-                <button id="closeScanModalBtn" class="btn btn-secondary btn-block">
-                    <i class="fas fa-times"></i> Close
-                </button>
+                <button id="scanAnotherBtn" class="btn btn-primary btn-block"><i class="fas fa-redo"></i> Scan Another</button>
+                <button id="closeScanModalBtn" class="btn btn-secondary btn-block"><i class="fas fa-times"></i> Close</button>
             </div>
         </div>
     </div>
 
-    <!-- Pass ID Generated Modal -->
     <div id="passIdModal" class="modal-overlay">
         <div class="modal-content">
             <div class="modal-header success-header">
@@ -333,13 +326,9 @@
                 <p class="modal-subtitle">Share this Pass ID via WhatsApp</p>
                 <div class="pass-id-display">
                     <span id="modalPassId">FL26XXXX</span>
-                    <button id="copyPassIdBtn" class="copy-btn" title="Copy">
-                        <i class="fas fa-copy"></i>
-                    </button>
+                    <button id="copyPassIdBtn" class="copy-btn" title="Copy"><i class="fas fa-copy"></i></button>
                 </div>
-                <div id="copySuccessMsg" class="copy-success">
-                    <i class="fas fa-check"></i> Copied to clipboard!
-                </div>
+                <div id="copySuccessMsg" class="copy-success"><i class="fas fa-check"></i> Copied to clipboard!</div>
                 <div class="modal-details compact">
                     <p><strong>Name:</strong> <span id="modalName"></span></p>
                     <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
@@ -347,9 +336,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button id="closeModalBtn" class="btn btn-primary btn-block">
-                    <i class="fas fa-check"></i> Done
-                </button>
+                <button id="closeModalBtn" class="btn btn-primary btn-block"><i class="fas fa-check"></i> Done</button>
             </div>
         </div>
     </div>
@@ -363,11 +350,7 @@
             <p class="pdf-date">Generated on: <span id="pdf-generation-date"></span></p>
         </div>
         <table class="pdf-table">
-            <thead>
-                <tr id="pdf-table-head">
-                    <!-- Dynamically populated by JS -->
-                </tr>
-            </thead>
+            <thead><tr id="pdf-table-head"></tr></thead>
             <tbody id="pdf-table-body"></tbody>
         </table>
         <div class="pdf-footer">
