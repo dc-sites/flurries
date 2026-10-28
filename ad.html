@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Dashboard | Flurries 26</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
+    <style>
+        /* Filter Bar Styling to match your premium theme */
+        .filter-bar {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            background: var(--white);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--frost);
+        }
+        .filter-bar input, .filter-bar select {
+            padding: 0.8rem 1rem;
+            border: 2px solid var(--frost);
+            border-radius: 8px;
+            font-family: 'Raleway', sans-serif;
+            font-size: 0.9rem;
+            color: var(--navy-deep);
+            transition: all 0.3s ease;
+        }
+        .filter-bar input { flex: 1; min-width: 200px; }
+        .filter-bar input:focus, .filter-bar select:focus {
+            outline: none;
+            border-color: var(--ocean);
+            box-shadow: 0 0 0 4px rgba(74, 138, 181, 0.15);
+        }
+        .filter-bar select {
+            min-width: 150px;
+            background: var(--white);
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Navbar (Always visible) -->
+    <nav class="navbar">
+        <a href="index.html">
+            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="logo">
+        </a>
+        <div class="nav-right">
+            <span class="admin-badge"><i class="fas fa-shield-alt"></i> Admin</span>
+            <a href="#" id="logoutBtn" class="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+        </div>
+    </nav>
+
+    <!-- Admin Layout Wrapper -->
+    <div class="admin-layout">
+        
+        <!-- DESKTOP SIDEBAR -->
+        <aside class="admin-sidebar">
+            <div class="sidebar-header">
+                <h3>Dashboard</h3>
+            </div>
+            <ul class="sidebar-nav">
+                <li class="nav-item active" data-section="scan">
+                    <a href="#"><i class="fas fa-qrcode"></i> <span>Scan QR</span></a>
+                </li>
+                <li class="nav-item" data-section="generate">
+                    <a href="#"><i class="fas fa-plus-circle"></i> <span>Generate Pass</span></a>
+                </li>
+                <li class="nav-item" data-section="registry">
+                    <a href="#"><i class="fas fa-id-card"></i> <span>All Passes</span></a>
+                </li>
+                <li class="nav-item" data-section="details">
+                    <a href="#"><i class="fas fa-list-check"></i> <span>Scanned Guests</span></a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- MAIN CONTENT AREA -->
+        <main class="admin-main">
+            
+            <!-- Login Form (Shown when not authenticated) -->
+            <div id="loginForm" class="login-container">
+                <div class="login-card">
+                    <div class="login-header">
+                        <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Logo">
+                        <h2>Welcome Back</h2>
+                        <p>Sign in to access the admin dashboard</p>
+                    </div>
+                    <form id="loginFormElement" class="login-form">
+                        <div class="form-group">
+                            <label for="adminEmail">Email Address</label>
+                            <input type="email" id="adminEmail" required placeholder="admin@flurries26.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="adminPassword">Password</label>
+                            <input type="password" id="adminPassword" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-lock-open"></i> Sign In
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Admin Content (Hidden until logged in) -->
+            <div id="adminContent" class="hidden">
+                
+                <!-- SECTION 1: SCAN QR -->
+                <section id="section-scan" class="admin-section active">
+                    <div class="section-header">
+                        <h1>Entry Scanner</h1>
+                        <p>Scan attendee QR codes to grant entry</p>
+                    </div>
+                    
+                    <div class="scanner-card">
+                        <div id="reader" class="scanner-viewfinder"></div>
+                        <div class="scanner-actions">
+                            <button id="startScannerBtn" class="btn btn-primary">
+                                <i class="fas fa-camera"></i> Start Camera
+                            </button>
+                            <button id="stopScannerBtn" class="btn btn-secondary" disabled>
+                                <i class="fas fa-stop-circle"></i> Stop Camera
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2: GENERATE PASS -->
+                <section id="section-generate" class="admin-section">
+                    <div class="section-header">
+                        <h1>Generate Pass</h1>
+                        <p>Create a new VIP credential for an attendee</p>
+                    </div>
+
+                    <div class="form-card">
+                        <form id="addPassForm" class="admin-form">
+                            <div class="form-grid">
+                                <div class="form-group full-width">
+                                    <label for="userName">Full Name</label>
+                                    <input type="text" id="userName" required placeholder="John Doe">
+                                </div>
+                                <div class="form-group full-width">
+                                    <label for="userPhone">Phone Number</label>
+                                    <input type="tel" id="userPhone" required placeholder="+94 77 123 4567">
+                                </div>
+                                <div class="form-group">
+                                    <label for="userGender">Gender</label>
+                                    <select id="userGender" required>
+                                        <option value="" disabled selected>Select Gender</option>
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="userBatch">Batch</label>
+                                    <select id="userBatch" required>
+                                        <option value="" disabled selected>Select Batch</option>
+                                        <option value="2026 AL Batch">2026 AL Batch</option>
+                                        <option value="2023 OL Batch">2023 OL Batch</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-ticket-alt"></i> Generate Pass ID
+                            </button>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- SECTION 3: ALL PASSES -->
+                <section id="section-registry" class="admin-section">
+                    <div class="section-header flex-between">
+                        <div>
+                            <h1>All Passes</h1>
+                            <p>View all generated credentials</p>
+                        </div>
+                        <button id="exportAllPdfBtn" class="btn btn-outline">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+
+                    <div class="filter-bar">
+                        <input type="text" id="registrySearch" placeholder="Search by Name or Pass ID...">
+                        <select id="registryBatchFilter">
+                            <option value="all">All Batches</option>
+                            <option value="2026 AL Batch">2026 AL Batch</option>
+                            <option value="2023 OL Batch">2023 OL Batch</option>
+                        </select>
+                        <select id="registryStatusFilter">
+                            <option value="all">All Statuses</option>
+                            <option value="Scanned">Scanned</option>
+                            <option value="Not Scanned">Not Scanned</option>
+                        </select>
+                    </div>
+
+                    <div class="table-card">
+                        <table class="admin-table" id="allPassesTable">
+                            <thead>
+                                <tr>
+                                    <th>Pass ID</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Batch</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="5" class="empty-state">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- SECTION 4: SCANNED DETAILS -->
+                <section id="section-details" class="admin-section">
+                    <div class="section-header flex-between">
+                        <div>
+                            <h1>Scanned Guests</h1>
+                            <p>Attendees who have entered the venue</p>
+                        </div>
+                        <button id="exportPdfBtn" class="btn btn-outline">
+                            <i class="fas fa-file-pdf"></i> Export PDF
+                        </button>
+                    </div>
+
+                    <div class="filter-bar">
+                        <input type="text" id="scannedSearch" placeholder="Search by Name or Pass ID...">
+                        <select id="scannedBatchFilter">
+                            <option value="all">All Batches</option>
+                            <option value="2026 AL Batch">2026 AL Batch</option>
+                            <option value="2023 OL Batch">2023 OL Batch</option>
+                        </select>
+                    </div>
+
+                    <div class="table-card">
+                        <table class="admin-table" id="scannedTable">
+                            <thead>
+                                <tr>
+                                    <th>Pass ID</th>
+                                    <th>Name</th>
+                                    <th>Gender</th>
+                                    <th>Batch</th>
+                                    <th>Entry Time</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr><td colspan="5" class="empty-state">Loading data...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </div>
+        </main>
+
+        <!-- MOBILE BOTTOM NAVIGATION -->
+        <nav class="admin-bottom-nav">
+            <a href="#" class="bottom-nav-item active" data-section="scan">
+                <i class="fas fa-qrcode"></i>
+                <span>Scan</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-section="generate">
+                <i class="fas fa-plus-circle"></i>
+                <span>Generate</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-section="registry">
+                <i class="fas fa-id-card"></i>
+                <span>All</span>
+            </a>
+            <a href="#" class="bottom-nav-item" data-section="details">
+                <i class="fas fa-list-check"></i>
+                <span>Scanned</span>
+            </a>
+        </nav>
+
+    </div>
+
+    <!-- ==========================================
+         MODALS & HIDDEN TEMPLATES
+    ========================================== -->
+
+    <!-- QR Scan Result Modal -->
+    <div id="scanModal" class="modal-overlay">
+        <div class="modal-content scan-modal">
+            <div class="modal-header scan-header" id="scanModalHeader">
+                <i class="fas fa-check-circle" id="scanModalIcon"></i>
+                <h2 id="scanModalTitle">Access Granted</h2>
+            </div>
+            <div class="modal-body scan-body">
+                <div class="scan-guest-info">
+                    <div class="scan-field">
+                        <span class="scan-label">Name</span>
+                        <span class="scan-value" id="scanName">-</span>
+                    </div>
+                    <div class="scan-field">
+                        <span class="scan-label">Pass ID</span>
+                        <span class="scan-value pass-id-mono" id="scanPassId">-</span>
+                    </div>
+                    <div class="scan-field">
+                        <span class="scan-label">Batch</span>
+                        <span class="scan-value" id="scanBatch">-</span>
+                    </div>
+                    <div class="scan-field" id="scanTimeField" style="display: none;">
+                        <span class="scan-label">Previously Scanned</span>
+                        <span class="scan-value scan-time" id="scanTime">-</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer scan-footer">
+                <button id="scanAnotherBtn" class="btn btn-primary btn-block">
+                    <i class="fas fa-redo"></i> Scan Another
+                </button>
+                <button id="closeScanModalBtn" class="btn btn-secondary btn-block">
+                    <i class="fas fa-times"></i> Close
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pass ID Generated Modal -->
+    <div id="passIdModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header success-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>Pass Generated!</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Share this Pass ID via WhatsApp</p>
+                <div class="pass-id-display">
+                    <span id="modalPassId">FL26XXXX</span>
+                    <button id="copyPassIdBtn" class="copy-btn" title="Copy">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+                <div id="copySuccessMsg" class="copy-success">
+                    <i class="fas fa-check"></i> Copied to clipboard!
+                </div>
+                <div class="modal-details compact">
+                    <p><strong>Name:</strong> <span id="modalName"></span></p>
+                    <p><strong>Phone:</strong> <span id="modalPhone"></span></p>
+                    <p><strong>Batch:</strong> <span id="modalBatch"></span></p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeModalBtn" class="btn btn-primary btn-block">
+                    <i class="fas fa-check"></i> Done
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden PDF Template -->
+    <div id="pdf-export-template" class="pdf-template-hidden">
+        <div class="pdf-header">
+            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="pdf-logo">
+            <h1 class="pdf-title">FLURRIES 26</h1>
+            <p class="pdf-subtitle" id="pdf-report-title">Official Report</p>
+            <p class="pdf-date">Generated on: <span id="pdf-generation-date"></span></p>
+        </div>
+        <table class="pdf-table">
+            <thead>
+                <tr id="pdf-table-head">
+                    <!-- Dynamically populated by JS -->
+                </tr>
+            </thead>
+            <tbody id="pdf-table-body"></tbody>
+        </table>
+        <div class="pdf-footer">
+            <p class="pdf-footer-brand">Designed by Hexa Solutions | https://hexasolutions.online</p>
+            <p class="pdf-footer-copy">© 2026 Flurries. All rights reserved. Confidential Document.</p>
+        </div>
+    </div>
+
+    <script src="script.js" type="module"></script>
+</body>
+</html>
