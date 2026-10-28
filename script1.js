@@ -15,6 +15,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
+// Global data store for instant filtering
 let allPassesData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -314,7 +315,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function onScanFailure() {}
 
     // ==========================================
-    // 10. DATA LOADING & FILTERING (FIXED)
+    // 10. DATA LOADING & FILTERING
     // ==========================================
     async function loadAllPasses() {
         const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
@@ -413,82 +414,50 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('scannedBatchFilter')?.addEventListener('change', renderScannedGuests);
 
     // ==========================================
-    // 11. PROFESSIONAL PDF EXPORT (FIXED)
+    // 11. EXCEL EXPORT (FIXED & RELIABLE)
     // ==========================================
-    function exportTableToPDF(tableId, reportTitle) {
+    function exportTableToExcel(tableId, filename) {
         const table = document.getElementById(tableId);
-        const rows = table.querySelectorAll('tbody tr');
+        if (!table) return;
         
+        const rows = table.querySelectorAll('tbody tr');
         if (rows.length === 0 || rows[0].querySelector('.empty-state')) {
             showAlert('No data to export. Adjust filters or add data.', 'error');
             return;
         }
 
-        const pdfTemplate = document.getElementById('pdf-export-template');
-        document.getElementById('pdf-report-title').textContent = reportTitle;
-        document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
-        
-        const pdfTbody = document.getElementById('pdf-table-body');
-        const pdfThead = document.getElementById('pdf-table-head');
-        pdfTbody.innerHTML = '';
-        
-        // Dynamically match headers to the visible table
-        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
-        pdfThead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
-        
-        rows.forEach(row => {
-            if (row.querySelector('.empty-state')) return;
-            const tr = document.createElement('tr');
-            const cells = row.querySelectorAll('td');
-            cells.forEach(cell => {
-                const td = document.createElement('td');
-                td.innerHTML = cell.innerHTML; // Preserves bold tags and status badges
-                tr.appendChild(td);
-            });
-            pdfTbody.appendChild(tr);
-        });
-
-        // Save original styles and make visible to html2canvas safely
-        const originalStyle = pdfTemplate.style.cssText;
-        pdfTemplate.style.position = 'fixed';
-        pdfTemplate.style.left = '0';
-        pdfTemplate.style.top = '0';
-        pdfTemplate.style.width = '210mm';
-        pdfTemplate.style.zIndex = '-9999';
-        pdfTemplate.style.opacity = '1';
-        pdfTemplate.style.visibility = 'visible';
-
-        const opt = {
-            margin: 10,
-            filename: `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
-        };
-
-        const btn = tableId === 'allPassesTable' ? document.getElementById('exportAllPdfBtn') : document.getElementById('exportPdfBtn');
+        const btn = tableId === 'allPassesTable' ? document.getElementById('exportAllExcelBtn') : document.getElementById('exportExcelBtn');
         if (btn) {
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
             btn.disabled = true;
         }
 
-        html2pdf().set(opt).from(pdfTemplate).save().then(() => {
-            showAlert('PDF exported successfully!', 'success');
-        }).catch(err => {
+        try {
+            // Create a new workbook
+            const wb = XLSX.utils.book_new();
+            // Convert the visible HTML table to a worksheet
+            const ws = XLSX.utils.table_to_sheet(table);
+            
+            // Append the worksheet to the workbook
+            XLSX.utils.book_append_sheet(wb, ws, "Report");
+            
+            // Generate Excel file and trigger download
+            XLSX.writeFile(wb, `${filename}_${new Date().toISOString().slice(0,10)}.xlsx`);
+            
+            showAlert('Excel exported successfully!', 'success');
+        } catch (err) {
             console.error(err);
-            showAlert('Error generating PDF.', 'error');
-        }).finally(() => {
-            // Restore original hidden state
-            pdfTemplate.style.cssText = originalStyle;
+            showAlert('Error generating Excel file.', 'error');
+        } finally {
             if (btn) {
-                btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
+                btn.innerHTML = '<i class="fas fa-file-excel"></i> Export Excel';
                 btn.disabled = false;
             }
-        });
+        }
     }
 
-    document.getElementById('exportAllPdfBtn')?.addEventListener('click', () => exportTableToPDF('allPassesTable', 'All Generated Passes Report'));
-    document.getElementById('exportPdfBtn')?.addEventListener('click', () => exportTableToPDF('scannedTable', 'Scanned Guests Entry Report'));
+    document.getElementById('exportAllExcelBtn')?.addEventListener('click', () => exportTableToExcel('allPassesTable', 'All_Generated_Passes'));
+    document.getElementById('exportExcelBtn')?.addEventListener('click', () => exportTableToExcel('scannedTable', 'Scanned_Guests_Entry'));
 });
 
 // ==========================================
@@ -505,7 +474,6 @@ function generateQRCode(data, elementId) {
     const el = document.getElementById(elementId);
     if(el) { 
         el.innerHTML = ''; 
-        // Ensure QRCode library is loaded on the page using this function
         if (typeof QRCode !== 'undefined') {
             new QRCode(el, { text: data, width: 150, height: 150, colorDark: "#1B3A5C", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H }); 
         }
