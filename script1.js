@@ -1,7 +1,7 @@
-// ==========================================
-// FIREBASE CONFIGURATION 
-// ⚠️ REPLACE WITH YOUR ACTUAL FIREBASE PROJECT CONFIG
-// ==========================================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-firestore.js";
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.19.0/firebase-auth.js";
+
 const firebaseConfig = {
     apiKey: "AIzaSyDYDFZOUwH2K5wzoYcEECTtfFMoOMJv3Gs",
     authDomain: "flurries-32408.firebaseapp.com",
@@ -11,413 +11,548 @@ const firebaseConfig = {
     appId: "1:459835238527:web:fb9666e57f6d66457ab74a"
 };
 
-
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, updateDoc, serverTimestamp, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
-
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
 const db = getFirestore(app);
+const auth = getAuth(app);
 
-// ==========================================
-// DOM ELEMENTS
-// ==========================================
-const loginForm = document.getElementById("loginForm");
-const adminContent = document.getElementById("adminContent");
-const loginFormElement = document.getElementById("loginFormElement");
-const logoutBtn = document.getElementById("logoutBtn");
+// Global data store for instant filtering
+let allPassesData = [];
 
-const navItems = document.querySelectorAll(".nav-item, .bottom-nav-item");
-const sections = document.querySelectorAll(".admin-section");
-
-const startScannerBtn = document.getElementById("startScannerBtn");
-const stopScannerBtn = document.getElementById("stopScannerBtn");
-let html5QrcodeScanner = null;
-
-const scanModal = document.getElementById("scanModal");
-const closeScanModalBtn = document.getElementById("closeScanModalBtn");
-const scanAnotherBtn = document.getElementById("scanAnotherBtn");
-const passIdModal = document.getElementById("passIdModal");
-const closeModalBtn = document.getElementById("closeModalBtn");
-const copyPassIdBtn = document.getElementById("copyPassIdBtn");
-
-const addPassForm = document.getElementById("addPassForm");
-
-const allPassesTableBody = document.querySelector("#allPassesTable tbody");
-const scannedTableBody = document.querySelector("#scannedTable tbody");
-
-const registrySearch = document.getElementById("registrySearch");
-const registryBatchFilter = document.getElementById("registryBatchFilter");
-const registryStatusFilter = document.getElementById("registryStatusFilter");
-
-const scannedSearch = document.getElementById("scannedSearch");
-const scannedBatchFilter = document.getElementById("scannedBatchFilter");
-
-const exportAllPdfBtn = document.getElementById("exportAllPdfBtn");
-const exportPdfBtn = document.getElementById("exportPdfBtn");
-
-// ==========================================
-// AUTHENTICATION
-// ==========================================
-onAuthStateChanged(auth, (user) => {
-    if (user) {
-        loginForm.classList.add("hidden");
-        adminContent.classList.remove("hidden");
-        loadAllPasses();
-        loadScannedGuests();
-    } else {
-        loginForm.classList.remove("hidden");
-        adminContent.classList.add("hidden");
-    }
-});
-
-loginFormElement.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const email = document.getElementById("adminEmail").value;
-    const password = document.getElementById("adminPassword").value;
-    try {
-        await signInWithEmailAndPassword(auth, email, password);
-    } catch (error) {
-        alert("Login failed: " + error.message);
-    }
-});
-
-logoutBtn.addEventListener("click", (e) => {
-    e.preventDefault();
-    signOut(auth);
-});
-
-// ==========================================
-// NAVIGATION
-// ==========================================
-navItems.forEach(item => {
-    item.addEventListener("click", (e) => {
-        e.preventDefault();
-        const targetSection = item.getAttribute("data-section");
-        
-        navItems.forEach(nav => nav.classList.remove("active"));
-        document.querySelectorAll(`[data-section="${targetSection}"]`).forEach(nav => nav.classList.add("active"));
-        
-        sections.forEach(section => {
-            section.classList.remove("active");
-            if (section.id === `section-${targetSection}`) {
-                section.classList.add("active");
-            }
-        });
-
-        if (targetSection !== "scan" && html5QrcodeScanner) {
-            stopScanner();
+document.addEventListener('DOMContentLoaded', () => {
+    // 1. Navbar Scroll Effect
+    window.addEventListener('scroll', () => {
+        const navbar = document.querySelector('.navbar');
+        if (navbar) {
+            if (window.scrollY > 50) navbar.classList.add('scrolled');
+            else navbar.classList.remove('scrolled');
         }
     });
+
+    // 2. Mobile Menu (Public Site)
+    const hamburger = document.querySelector('.hamburger');
+    const navLinks = document.querySelector('.nav-links');
+    if (hamburger && navLinks) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                hamburger.classList.remove('active');
+                navLinks.classList.remove('active');
+            });
+        });
+    }
+
+    // 3. Snowflakes
+    function createSnowflake() {
+        const snowflake = document.createElement('div');
+        snowflake.classList.add('snowflake');
+        snowflake.innerHTML = '❄';
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = Math.random() * 5 + 5 + 's';
+        snowflake.style.fontSize = Math.random() * 15 + 10 + 'px';
+        snowflake.style.opacity = Math.random() * 0.6 + 0.2;
+        document.body.appendChild(snowflake);
+        setTimeout(() => snowflake.remove(), 10000);
+    }
+    setInterval(createSnowflake, 150);
+
+    // 4. Scroll Reveal
+    function revealOnScroll() {
+        document.querySelectorAll('.reveal').forEach(el => {
+            if (el.getBoundingClientRect().top < window.innerHeight - 150) {
+                el.classList.add('active');
+            }
+        });
+    }
+    window.addEventListener('scroll', revealOnScroll);
+    revealOnScroll();
+
+    // 5. Admin Login
+    const loginForm = document.getElementById('loginFormElement');
+    if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await signInWithEmailAndPassword(auth, document.getElementById('adminEmail').value, document.getElementById('adminPassword').value);
+                showAlert('Access granted. Welcome aboard!', 'success');
+            } catch (error) {
+                showAlert('Invalid credentials.', 'error');
+            }
+        });
+    }
+
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => { 
+            e.preventDefault();
+            signOut(auth); 
+            window.location.href = 'index.html'; 
+        });
+    }
+
+    onAuthStateChanged(auth, (user) => {
+        const adminContent = document.getElementById('adminContent');
+        const loginFormEl = document.getElementById('loginForm');
+        if (user && adminContent && loginFormEl) {
+            loginFormEl.classList.add('hidden');
+            adminContent.classList.remove('hidden');
+            loadAllPasses(); // Loads data and renders both tables
+        } else if (!user && loginFormEl) {
+            loginFormEl.classList.remove('hidden');
+            adminContent.classList.add('hidden');
+        }
+    });
+
+    // ==========================================
+    // ADMIN SECTION NAVIGATION
+    // ==========================================
+    let html5QrcodeScanner = null;
+
+    function switchSection(sectionId) {
+        document.querySelectorAll('.sidebar-nav .nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === sectionId);
+        });
+        document.querySelectorAll('.bottom-nav-item').forEach(item => {
+            item.classList.toggle('active', item.dataset.section === sectionId);
+        });
+        document.querySelectorAll('.admin-section').forEach(section => {
+            section.classList.toggle('active', section.id === `section-${sectionId}`);
+        });
+
+        if (sectionId !== 'scan' && html5QrcodeScanner) {
+            html5QrcodeScanner.stop().catch(() => {});
+            const startBtn = document.getElementById('startScannerBtn');
+            const stopBtn = document.getElementById('stopScannerBtn');
+            if (startBtn) startBtn.disabled = false;
+            if (stopBtn) stopBtn.disabled = true;
+        }
+
+        if (sectionId === 'registry') renderAllPasses();
+        else if (sectionId === 'details') renderScannedGuests();
+    }
+
+    document.querySelectorAll('.sidebar-nav .nav-item, .bottom-nav-item').forEach(item => {
+        item.addEventListener('click', (e) => { e.preventDefault(); switchSection(item.dataset.section); });
+    });
+
+    // 6. Add Pass Form
+    const addPassForm = document.getElementById('addPassForm');
+    if (addPassForm) {
+        addPassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('userName').value;
+            const phone = document.getElementById('userPhone').value;
+            const gender = document.getElementById('userGender').value;
+            const batch = document.getElementById('userBatch').value;
+            const passId = generatePassId();
+            
+            try {
+                await setDoc(doc(db, 'passes', passId), {
+                    name, phone, gender, batch, passId, 
+                    status: 'pending', scannedAt: null,
+                    createdAt: serverTimestamp()
+                });
+                showPassIdModal(passId, name, phone, batch);
+                addPassForm.reset();
+                await loadAllPasses(); // Refresh data
+            } catch (error) { 
+                showAlert('Error: ' + error.message, 'error'); 
+            }
+        });
+    }
+
+    // ==========================================
+    // PASS ID MODAL
+    // ==========================================
+    const passIdModal = document.getElementById('passIdModal');
+    const modalPassId = document.getElementById('modalPassId');
+    const copyPassIdBtn = document.getElementById('copyPassIdBtn');
+    const copySuccessMsg = document.getElementById('copySuccessMsg');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+
+    function showPassIdModal(passId, name, phone, batch) {
+        if (passIdModal) {
+            document.getElementById('modalName').textContent = name;
+            document.getElementById('modalPhone').textContent = phone;
+            document.getElementById('modalBatch').textContent = batch;
+            modalPassId.textContent = passId;
+            passIdModal.classList.add('active');
+            copySuccessMsg.classList.remove('show');
+        }
+    }
+
+    if (copyPassIdBtn) {
+        copyPassIdBtn.addEventListener('click', async () => {
+            try {
+                await navigator.clipboard.writeText(modalPassId.textContent);
+                copySuccessMsg.classList.add('show');
+                setTimeout(() => copySuccessMsg.classList.remove('show'), 2000);
+            } catch (err) {
+                const textArea = document.createElement('textarea');
+                textArea.value = modalPassId.textContent;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                copySuccessMsg.classList.add('show');
+                setTimeout(() => copySuccessMsg.classList.remove('show'), 2000);
+            }
+        });
+    }
+
+    if (closeModalBtn) closeModalBtn.addEventListener('click', () => passIdModal.classList.remove('active'));
+    if (passIdModal) passIdModal.addEventListener('click', (e) => { if (e.target === passIdModal) passIdModal.classList.remove('active'); });
+
+    // 7. Get Pass Form (User)
+    const getPassForm = document.getElementById('getPassFormElement');
+    if (getPassForm) {
+        getPassForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const passId = document.getElementById('passIdInput').value.toUpperCase().trim();
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...'; 
+            btn.disabled = true;
+            try {
+                const docSnap = await getDoc(doc(db, 'passes', passId));
+                if (docSnap.exists()) displayPass(docSnap.data());
+                else showAlert('Invalid Pass ID.', 'error');
+            } catch (error) { showAlert('Connection error.', 'error'); } 
+            finally { btn.innerHTML = originalHTML; btn.disabled = false; }
+        });
+    }
+
+    // 8. Download Pass
+    const downloadBtn = document.getElementById('downloadBtn');
+    if (downloadBtn) downloadBtn.addEventListener('click', downloadPass);
+
+    // ==========================================
+    // 9. QR SCANNER
+    // ==========================================
+    let isProcessing = false;
+    const startScannerBtn = document.getElementById('startScannerBtn');
+    const stopScannerBtn = document.getElementById('stopScannerBtn');
+    const scanModal = document.getElementById('scanModal');
+    const scanAnotherBtn = document.getElementById('scanAnotherBtn');
+    const closeScanModalBtn = document.getElementById('closeScanModalBtn');
+
+    if (startScannerBtn && stopScannerBtn) {
+        startScannerBtn.addEventListener('click', async () => {
+            if (isProcessing) return;
+            if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode("reader");
+            try {
+                await html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
+                startScannerBtn.disabled = true;
+                stopScannerBtn.disabled = false;
+            } catch (err) { showAlert('Camera access denied. Use HTTPS.', 'error'); }
+        });
+
+        stopScannerBtn.addEventListener('click', async () => {
+            if (html5QrcodeScanner) {
+                await html5QrcodeScanner.stop();
+                startScannerBtn.disabled = false;
+                stopScannerBtn.disabled = true;
+            }
+        });
+    }
+
+    if (scanAnotherBtn) {
+        scanAnotherBtn.addEventListener('click', async () => {
+            scanModal.classList.remove('active');
+            isProcessing = false;
+            if (html5QrcodeScanner && startScannerBtn && !startScannerBtn.disabled) {
+                try {
+                    await html5QrcodeScanner.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess, onScanFailure);
+                    startScannerBtn.disabled = true;
+                    stopScannerBtn.disabled = false;
+                } catch (err) { console.error('Restart error:', err); }
+            }
+        });
+    }
+
+    if (closeScanModalBtn) closeScanModalBtn.addEventListener('click', () => { scanModal.classList.remove('active'); isProcessing = false; });
+
+    async function onScanSuccess(decodedText) {
+        if (isProcessing) return;
+        isProcessing = true;
+        if (html5QrcodeScanner) { try { await html5QrcodeScanner.stop(); } catch(e) {} startScannerBtn.disabled = false; stopScannerBtn.disabled = true; }
+
+        const parts = decodedText.split('|');
+        if (parts.length >= 2 && parts[0] === 'FLURRIES26') {
+            const passId = parts[1];
+            const docSnap = await getDoc(doc(db, 'passes', passId));
+            if (docSnap.exists()) {
+                const data = docSnap.data();
+                if (data.status === 'attended') {
+                    showScanModal('warning', 'Already Scanned', data, data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown');
+                } else {
+                    await setDoc(doc(db, 'passes', passId), { ...data, status: 'attended', scannedAt: serverTimestamp() }, { merge: true });
+                    showScanModal('success', 'Access Granted', data, null);
+                    await loadAllPasses(); // Refresh tables instantly
+                }
+            } else { showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null); }
+        } else { showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null); }
+    }
+
+    function showScanModal(type, title, data, previousTime) {
+        const header = document.getElementById('scanModalHeader');
+        header.className = `modal-header scan-header ${type}`;
+        document.getElementById('scanModalIcon').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
+        document.getElementById('scanModalTitle').textContent = title;
+        document.getElementById('scanName').textContent = data.name || '-';
+        document.getElementById('scanPassId').textContent = data.passId || '-';
+        document.getElementById('scanBatch').textContent = data.batch || '-';
+        
+        const timeField = document.getElementById('scanTimeField');
+        if (previousTime) { timeField.style.display = 'flex'; document.getElementById('scanTime').textContent = previousTime; } 
+        else { timeField.style.display = 'none'; }
+        
+        scanModal.classList.add('active');
+    }
+
+    function onScanFailure() {}
+
+    // ==========================================
+    // 10. DATA LOADING & FILTERING (FIXED)
+    // ==========================================
+    async function loadAllPasses() {
+        const snapshot = await getDocs(query(collection(db, 'passes'), orderBy('createdAt', 'desc')));
+        allPassesData = [];
+        snapshot.forEach(docSnap => {
+            allPassesData.push(docSnap.data());
+        });
+        renderAllPasses();
+        renderScannedGuests();
+    }
+
+    function renderAllPasses() {
+        const table = document.getElementById('allPassesTable');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        const search = document.getElementById('registrySearch')?.value.toLowerCase() || '';
+        const gender = document.getElementById('registryGenderFilter')?.value || 'all';
+        const batch = document.getElementById('registryBatchFilter')?.value || 'all';
+        const status = document.getElementById('registryStatusFilter')?.value || 'all';
+
+        const filtered = allPassesData.filter(d => {
+            const matchSearch = d.name.toLowerCase().includes(search) || d.passId.toLowerCase().includes(search);
+            const matchGender = gender === 'all' || d.gender === gender;
+            const matchBatch = batch === 'all' || d.batch === batch;
+            const matchStatus = status === 'all' || d.status === status;
+            return matchSearch && matchGender && matchBatch && matchStatus;
+        });
+
+        const countEl = document.getElementById('registryCount');
+        if (countEl) countEl.textContent = `${filtered.length} passes found`;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No passes found matching your filters.</td></tr>`;
+            return;
+        }
+
+        filtered.forEach(d => {
+            const statusClass = d.status === 'attended' ? 'status-badge attended' : 'status-badge pending';
+            tbody.innerHTML += `<tr>
+                <td data-label="Pass ID"><strong>${d.passId}</strong></td>
+                <td data-label="Name">${d.name}</td>
+                <td data-label="Gender">${d.gender || 'N/A'}</td>
+                <td data-label="Batch">${d.batch}</td>
+                <td data-label="Status"><span class="${statusClass}">${d.status.toUpperCase()}</span></td>
+            </tr>`;
+        });
+    }
+
+    function renderScannedGuests() {
+        const table = document.getElementById('scannedTable');
+        if (!table) return;
+        const tbody = table.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        const search = document.getElementById('scannedSearch')?.value.toLowerCase() || '';
+        const gender = document.getElementById('scannedGenderFilter')?.value || 'all';
+        const batch = document.getElementById('scannedBatchFilter')?.value || 'all';
+
+        const filtered = allPassesData.filter(d => {
+            if (d.status !== 'attended') return false;
+            const matchSearch = d.name.toLowerCase().includes(search) || d.passId.toLowerCase().includes(search);
+            const matchGender = gender === 'all' || d.gender === gender;
+            const matchBatch = batch === 'all' || d.batch === batch;
+            return matchSearch && matchGender && matchBatch;
+        });
+
+        const countEl = document.getElementById('scannedCount');
+        if (countEl) countEl.textContent = `${filtered.length} guests found`;
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="empty-state">No scanned guests found matching your filters.</td></tr>`;
+            return;
+        }
+
+        filtered.forEach(d => {
+            tbody.innerHTML += `<tr>
+                <td data-label="Pass ID"><strong>${d.passId}</strong></td>
+                <td data-label="Name">${d.name}</td>
+                <td data-label="Gender">${d.gender || 'N/A'}</td>
+                <td data-label="Batch">${d.batch}</td>
+                <td data-label="Entry Time">${d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown'}</td>
+            </tr>`;
+        });
+    }
+
+    // Filter Event Listeners
+    document.getElementById('registrySearch')?.addEventListener('input', renderAllPasses);
+    document.getElementById('registryGenderFilter')?.addEventListener('change', renderAllPasses);
+    document.getElementById('registryBatchFilter')?.addEventListener('change', renderAllPasses);
+    document.getElementById('registryStatusFilter')?.addEventListener('change', renderAllPasses);
+
+    document.getElementById('scannedSearch')?.addEventListener('input', renderScannedGuests);
+    document.getElementById('scannedGenderFilter')?.addEventListener('change', renderScannedGuests);
+    document.getElementById('scannedBatchFilter')?.addEventListener('change', renderScannedGuests);
+
+    // ==========================================
+    // 11. PROFESSIONAL PDF EXPORT (FIXED)
+    // ==========================================
+    function exportTableToPDF(tableId, reportTitle) {
+        const table = document.getElementById(tableId);
+        const rows = table.querySelectorAll('tbody tr');
+        
+        if (rows.length === 0 || rows[0].querySelector('.empty-state')) {
+            showAlert('No data to export. Adjust filters or add data.', 'error');
+            return;
+        }
+
+        const pdfTemplate = document.getElementById('pdf-export-template');
+        document.getElementById('pdf-report-title').textContent = reportTitle;
+        document.getElementById('pdf-generation-date').textContent = new Date().toLocaleString();
+        
+        const pdfTbody = document.getElementById('pdf-table-body');
+        const pdfThead = document.getElementById('pdf-table-head');
+        pdfTbody.innerHTML = '';
+        
+        // Dynamically match headers to the visible table
+        const headers = Array.from(table.querySelectorAll('thead th')).map(th => th.textContent);
+        pdfThead.innerHTML = headers.map(h => `<th>${h}</th>`).join('');
+        
+        rows.forEach(row => {
+            if (row.querySelector('.empty-state')) return;
+            const tr = document.createElement('tr');
+            const cells = row.querySelectorAll('td');
+            cells.forEach(cell => {
+                const td = document.createElement('td');
+                td.innerHTML = cell.innerHTML; // Preserves bold tags and status badges
+                tr.appendChild(td);
+            });
+            pdfTbody.appendChild(tr);
+        });
+
+        // Save original styles and make visible to html2canvas safely
+        const originalStyle = pdfTemplate.style.cssText;
+        pdfTemplate.style.position = 'fixed';
+        pdfTemplate.style.left = '0';
+        pdfTemplate.style.top = '0';
+        pdfTemplate.style.width = '210mm';
+        pdfTemplate.style.zIndex = '-9999';
+        pdfTemplate.style.opacity = '1';
+        pdfTemplate.style.visibility = 'visible';
+
+        const opt = {
+            margin: 10,
+            filename: `${reportTitle.replace(/\s+/g, '_')}_${new Date().toISOString().slice(0,10)}.pdf`,
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+
+        const btn = tableId === 'allPassesTable' ? document.getElementById('exportAllPdfBtn') : document.getElementById('exportPdfBtn');
+        if (btn) {
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+            btn.disabled = true;
+        }
+
+        html2pdf().set(opt).from(pdfTemplate).save().then(() => {
+            showAlert('PDF exported successfully!', 'success');
+        }).catch(err => {
+            console.error(err);
+            showAlert('Error generating PDF.', 'error');
+        }).finally(() => {
+            // Restore original hidden state
+            pdfTemplate.style.cssText = originalStyle;
+            if (btn) {
+                btn.innerHTML = '<i class="fas fa-file-pdf"></i> Export PDF';
+                btn.disabled = false;
+            }
+        });
+    }
+
+    document.getElementById('exportAllPdfBtn')?.addEventListener('click', () => exportTableToPDF('allPassesTable', 'All Generated Passes Report'));
+    document.getElementById('exportPdfBtn')?.addEventListener('click', () => exportTableToPDF('scannedTable', 'Scanned Guests Entry Report'));
 });
 
 // ==========================================
-// PASS GENERATION
+// HELPER FUNCTIONS
 // ==========================================
 function generatePassId() {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    let result = "FL26-";
-    for (let i = 0; i < 6; i++) {
-        result += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
+    const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    let result = 'FL26';
+    for (let i = 0; i < 4; i++) result += chars.charAt(Math.floor(Math.random() * chars.length));
     return result;
 }
 
-addPassForm.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const name = document.getElementById("userName").value.trim();
-    const phone = document.getElementById("userPhone").value.trim();
-    const gender = document.getElementById("userGender").value;
-    const batch = document.getElementById("userBatch").value;
-    const passId = generatePassId();
-
-    try {
-        await setDoc(doc(db, "passes", passId), {
-            passId: passId,
-            name: name,
-            phone: phone,
-            gender: gender,
-            batch: batch,
-            status: "Not Scanned",
-            scannedAt: null,
-            createdAt: serverTimestamp()
-        });
-
-        document.getElementById("modalPassId").innerText = passId;
-        document.getElementById("modalName").innerText = name;
-        document.getElementById("modalPhone").innerText = phone;
-        document.getElementById("modalBatch").innerText = batch;
-        passIdModal.classList.add("active");
-        
-        addPassForm.reset();
-        loadAllPasses();
-    } catch (err) {
-        alert("Error saving pass: " + err.message);
-    }
-});
-
-closeModalBtn.addEventListener("click", () => {
-    passIdModal.classList.remove("active");
-    document.getElementById("copySuccessMsg").classList.remove("show");
-});
-
-copyPassIdBtn.addEventListener("click", () => {
-    const passId = document.getElementById("modalPassId").innerText;
-    navigator.clipboard.writeText(passId).then(() => {
-        document.getElementById("copySuccessMsg").classList.add("show");
-        setTimeout(() => document.getElementById("copySuccessMsg").classList.remove("show"), 2000);
-    });
-});
-
-// ==========================================
-// QR SCANNER
-// ==========================================
-startScannerBtn.addEventListener("click", () => {
-    html5QrcodeScanner = new Html5Qrcode("reader");
-    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-    
-    html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        config,
-        onScanSuccess,
-        () => {} // Ignore scan failures (continuous scanning)
-    ).then(() => {
-        startScannerBtn.disabled = true;
-        stopScannerBtn.disabled = false;
-    }).catch(err => {
-        alert("Camera error: " + err);
-    });
-});
-
-stopScannerBtn.addEventListener("click", stopScanner);
-
-function stopScanner() {
-    if (html5QrcodeScanner) {
-        html5QrcodeScanner.stop().then(() => {
-            html5QrcodeScanner.clear();
-            html5QrcodeScanner = null;
-            startScannerBtn.disabled = false;
-            stopScannerBtn.disabled = true;
-        }).catch(err => console.error("Failed to stop", err));
-    }
-}
-
-async function onScanSuccess(decodedText) {
-    await stopScanner(); // Prevent multiple rapid scans
-    
-    const passId = decodedText.trim().toUpperCase();
-    const docRef = doc(db, "passes", passId);
-    const docSnap = await getDoc(docRef);
-
-    const header = document.getElementById("scanModalHeader");
-    const icon = document.getElementById("scanModalIcon");
-    const title = document.getElementById("scanModalTitle");
-    const timeField = document.getElementById("scanTimeField");
-
-    if (docSnap.exists()) {
-        const data = docSnap.data();
-        document.getElementById("scanName").innerText = data.name;
-        document.getElementById("scanPassId").innerText = data.passId;
-        document.getElementById("scanBatch").innerText = data.batch;
-
-        if (data.status === "Scanned") {
-            header.className = "modal-header scan-header warning";
-            icon.className = "fas fa-exclamation-triangle";
-            title.innerText = "Already Scanned";
-            timeField.style.display = "flex";
-            document.getElementById("scanTime").innerText = data.scannedAt ? new Date(data.scannedAt.toDate()).toLocaleString() : "Unknown";
-        } else {
-            await updateDoc(docRef, {
-                status: "Scanned",
-                scannedAt: serverTimestamp()
-            });
-            header.className = "modal-header scan-header success";
-            icon.className = "fas fa-check-circle";
-            title.innerText = "Access Granted";
-            timeField.style.display = "none";
-            
-            loadAllPasses();
-            loadScannedGuests();
+function generateQRCode(data, elementId) {
+    const el = document.getElementById(elementId);
+    if(el) { 
+        el.innerHTML = ''; 
+        // Ensure QRCode library is loaded on the page using this function
+        if (typeof QRCode !== 'undefined') {
+            new QRCode(el, { text: data, width: 150, height: 150, colorDark: "#1B3A5C", colorLight: "#ffffff", correctLevel: QRCode.CorrectLevel.H }); 
         }
-    } else {
-        header.className = "modal-header scan-header warning";
-        icon.className = "fas fa-times-circle";
-        title.innerText = "Invalid Pass";
-        document.getElementById("scanName").innerText = "-";
-        document.getElementById("scanPassId").innerText = passId;
-        document.getElementById("scanBatch").innerText = "-";
-        timeField.style.display = "none";
     }
-
-    scanModal.classList.add("active");
 }
 
-closeScanModalBtn.addEventListener("click", () => scanModal.classList.remove("active"));
-scanAnotherBtn.addEventListener("click", () => {
-    scanModal.classList.remove("active");
-    startScannerBtn.click();
-});
-
-// ==========================================
-// DATA LOADING & FILTERING
-// ==========================================
-let allPassesData = [];
-let scannedGuestsData = [];
-
-async function loadAllPasses() {
-    const q = query(collection(db, "passes"), orderBy("createdAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    allPassesData = [];
-    querySnapshot.forEach((doc) => allPassesData.push(doc.data()));
-    renderAllPasses();
+async function downloadPass() {
+    const passElement = document.getElementById('passTemplate');
+    const btn = document.getElementById('downloadBtn');
+    const originalHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...'; btn.disabled = true;
+    try {
+        const isMobile = window.innerWidth <= 768;
+        let originalStyles = null;
+        if (isMobile) {
+            originalStyles = { width: passElement.style.width, maxWidth: passElement.style.maxWidth, position: passElement.style.position, left: passElement.style.left, top: passElement.style.top, zIndex: passElement.style.zIndex, transform: passElement.style.transform };
+            passElement.style.width = '750px'; passElement.style.maxWidth = '750px'; passElement.style.position = 'absolute'; passElement.style.left = '-9999px'; passElement.style.top = '0'; passElement.style.zIndex = '-1'; passElement.style.transform = 'none';
+            await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        const canvas = await html2canvas(passElement, { scale: isMobile ? 3 : 2, backgroundColor: '#ffffff', useCORS: true, logging: false });
+        if (isMobile && originalStyles) { passElement.style.width = originalStyles.width || ''; passElement.style.maxWidth = originalStyles.maxWidth || ''; passElement.style.position = originalStyles.position || ''; passElement.style.left = originalStyles.left || ''; passElement.style.top = originalStyles.top || ''; passElement.style.zIndex = originalStyles.zIndex || ''; passElement.style.transform = originalStyles.transform || ''; }
+        const link = document.createElement('a');
+        link.download = `Flurries26_Pass_${document.getElementById('displayPassId').textContent}.png`;
+        link.href = canvas.toDataURL('image/png'); link.click();
+        showAlert('Pass downloaded!', 'success');
+    } catch (error) { showAlert('Error downloading pass.', 'error'); } 
+    finally { btn.innerHTML = originalHTML; btn.disabled = false; }
 }
 
-async function loadScannedGuests() {
-    const q = query(collection(db, "passes"), orderBy("scannedAt", "desc"));
-    const querySnapshot = await getDocs(q);
-    scannedGuestsData = [];
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (data.status === "Scanned") scannedGuestsData.push(data);
-    });
-    renderScannedGuests();
+function showAlert(message, type) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type}`;
+    alertDiv.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
+    const container = document.querySelector('.container') || document.body;
+    container.insertBefore(alertDiv, container.firstChild);
+    setTimeout(() => { alertDiv.style.opacity = '0'; setTimeout(() => alertDiv.remove(), 300); }, 4000);
 }
 
-function renderAllPasses() {
-    const search = registrySearch.value.toLowerCase();
-    const batch = registryBatchFilter.value;
-    const status = registryStatusFilter.value;
-
-    const filtered = allPassesData.filter(pass => {
-        const matchSearch = pass.name.toLowerCase().includes(search) || pass.passId.toLowerCase().includes(search);
-        const matchBatch = batch === "all" || pass.batch === batch;
-        const matchStatus = status === "all" || pass.status === status;
-        return matchSearch && matchBatch && matchStatus;
-    });
-
-    allPassesTableBody.innerHTML = "";
-    if (filtered.length === 0) {
-        allPassesTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No passes found matching your filters.</td></tr>`;
-        return;
-    }
-
-    filtered.forEach(pass => {
-        const tr = document.createElement("tr");
-        const statusColor = pass.status === "Scanned" ? "#16a34a" : "#dc2626";
-        tr.innerHTML = `
-            <td data-label="Pass ID"><strong>${pass.passId}</strong></td>
-            <td data-label="Name">${pass.name}</td>
-            <td data-label="Gender">${pass.gender}</td>
-            <td data-label="Batch">${pass.batch}</td>
-            <td data-label="Status"><span style="color: ${statusColor}; font-weight: 700;">${pass.status}</span></td>
-        `;
-        allPassesTableBody.appendChild(tr);
-    });
+function displayPass(data) {
+    document.getElementById('displayName').textContent = data.name;
+    document.getElementById('displayPhone').textContent = data.phone;
+    document.getElementById('displayGender').textContent = data.gender || 'N/A';
+    document.getElementById('displayBatch').textContent = data.batch;
+    document.getElementById('displayPassId').textContent = data.passId;
+    generateQRCode(`FLURRIES26|${data.passId}|${data.name}|${data.phone}`, 'qrcode');
+    document.getElementById('passDisplay').classList.remove('hidden');
+    document.getElementById('getPassForm').classList.add('hidden');
+    setTimeout(() => document.getElementById('passDisplay').scrollIntoView({ behavior: 'smooth', block: 'center' }), 100);
 }
-
-function renderScannedGuests() {
-    const search = scannedSearch.value.toLowerCase();
-    const batch = scannedBatchFilter.value;
-
-    const filtered = scannedGuestsData.filter(pass => {
-        const matchSearch = pass.name.toLowerCase().includes(search) || pass.passId.toLowerCase().includes(search);
-        const matchBatch = batch === "all" || pass.batch === batch;
-        return matchSearch && matchBatch;
-    });
-
-    scannedTableBody.innerHTML = "";
-    if (filtered.length === 0) {
-        scannedTableBody.innerHTML = `<tr><td colspan="5" class="empty-state">No scanned guests found matching your filters.</td></tr>`;
-        return;
-    }
-
-    filtered.forEach(pass => {
-        const tr = document.createElement("tr");
-        const entryTime = pass.scannedAt ? new Date(pass.scannedAt.toDate()).toLocaleString() : "Unknown";
-        tr.innerHTML = `
-            <td data-label="Pass ID"><strong>${pass.passId}</strong></td>
-            <td data-label="Name">${pass.name}</td>
-            <td data-label="Gender">${pass.gender}</td>
-            <td data-label="Batch">${pass.batch}</td>
-            <td data-label="Entry Time">${entryTime}</td>
-        `;
-        scannedTableBody.appendChild(tr);
-    });
-}
-
-// Filter Event Listeners
-registrySearch.addEventListener("input", renderAllPasses);
-registryBatchFilter.addEventListener("change", renderAllPasses);
-registryStatusFilter.addEventListener("change", renderAllPasses);
-
-scannedSearch.addEventListener("input", renderScannedGuests);
-scannedBatchFilter.addEventListener("change", renderScannedGuests);
-
-// ==========================================
-// PROFESSIONAL PDF EXPORT
-// ==========================================
-function exportToPDF(tableId, reportTitle) {
-    const element = document.getElementById("pdf-export-template");
-    document.getElementById("pdf-report-title").innerText = reportTitle;
-    document.getElementById("pdf-generation-date").innerText = new Date().toLocaleString();
-    
-    const table = document.getElementById(tableId);
-    const rows = table.querySelectorAll("tbody tr");
-    const pdfTbody = document.getElementById("pdf-table-body");
-    const pdfThead = document.getElementById("pdf-table-head");
-    
-    pdfTbody.innerHTML = "";
-    
-    // Dynamically set headers based on report type
-    if (reportTitle.includes("Scanned")) {
-        pdfThead.innerHTML = `<th>Pass ID</th><th>Name</th><th>Gender</th><th>Batch</th><th>Entry Time</th>`;
-    } else {
-        pdfThead.innerHTML = `<th>Pass ID</th><th>Name</th><th>Gender</th><th>Batch</th><th>Status</th>`;
-    }
-
-    let hasData = false;
-    rows.forEach(row => {
-        if (row.classList.contains("empty-state")) return;
-        hasData = true;
-        const tr = document.createElement("tr");
-        const cells = row.querySelectorAll("td");
-        cells.forEach(cell => {
-            const td = document.createElement("td");
-            td.innerText = cell.innerText;
-            tr.appendChild(td);
-        });
-        pdfTbody.appendChild(tr);
-    });
-
-    if (!hasData) {
-        alert("No data to export! Adjust your filters or add passes first.");
-        return;
-    }
-
-    // Temporarily make visible for html2pdf to capture
-    element.style.position = "absolute";
-    element.style.left = "0";
-    element.style.top = "0";
-    element.style.opacity = "1";
-    element.style.zIndex = "9999";
-
-    const opt = {
-        margin: 10,
-        filename: `${reportTitle.replace(/\s+/g, "_")}_${Date.now()}.pdf`,
-        image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
-        jsPDF: { unit: "mm", format: "a4", orientation: "landscape" }
-    };
-
-    html2pdf().set(opt).from(element).save().then(() => {
-        // Hide again after export
-        element.style.position = "absolute";
-        element.style.left = "-9999px";
-        element.style.opacity = "0";
-        element.style.zIndex = "-1";
-    });
-}
-
-exportAllPdfBtn.addEventListener("click", () => exportToPDF("allPassesTable", "All Passes Registry Report"));
-exportPdfBtn.addEventListener("click", () => exportToPDF("scannedTable", "Scanned Guests Entry Report"));
