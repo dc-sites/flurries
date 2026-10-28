@@ -15,7 +15,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const auth = getAuth(app);
 
-// Global data store for instant filtering
 let allPassesData = [];
 
 document.addEventListener('DOMContentLoaded', () => {
