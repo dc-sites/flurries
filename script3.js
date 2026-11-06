@@ -622,7 +622,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.setTextColor(150);
-            doc.text('Flurries 26 Official Document', 14, doc.internal.pageSize.height - 10);
+            doc.text('Flurries 26 Official Document | Dilakshana Rathnayake', 14, doc.internal.pageSize.height - 10);
             doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 10);
         }
 
@@ -684,11 +684,11 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setPage(i);
             doc.setFontSize(8);
             doc.setTextColor(150);
-            doc.text('Flurries 26 Official Document', 14, doc.internal.pageSize.height - 10);
+            doc.text('Flurries 26 Official Document | Dilakshana Rathnayake', 14, doc.internal.pageSize.height - 10);
             doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 10);
         }
 
-        doc.save(`Flurries26_Signed_Agreements_${new Date().toISOString().slice(0,10)}.pdf`);
+        doc.save(`Flurries26_Signed_${new Date().toISOString().slice(0,10)}.pdf`);
     });
 
     // ==========================================
