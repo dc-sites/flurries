@@ -538,11 +538,15 @@ async function exportSignedGuestsPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     
-    // Filter passes that have a signature and agreement timestamp
-    const signedGuests = allPassesData.filter(d => d.signature && d.agreedAt);
+    // Relaxed filter: catches passes that have a signature OR agreement timestamp OR 'agreed' status
+    const signedGuests = allPassesData.filter(d => d.signature || d.agreedAt || d.status === 'agreed');
+    
+    // DEBUG: Check your browser console (F12) to see if data is actually loading
+    console.log("Total passes loaded:", allPassesData.length);
+    console.log("Signed passes found:", signedGuests.length);
     
     if (signedGuests.length === 0) {
-        showAlert('No signed agreements found to export.', 'error');
+        showAlert('No signed agreements found to export. Ensure guests have completed the conditions form.', 'error');
         return;
     }
 
@@ -568,8 +572,8 @@ async function exportSignedGuestsPDF() {
             guest.name,
             guest.batch,
             guest.gender || 'N/A',
-            guest.agreedAt ? guest.agreedAt.toDate().toLocaleString() : 'Unknown',
-            "Yes (Stored in DB)"
+            guest.agreedAt ? guest.agreedAt.toDate().toLocaleString() : 'Pending',
+            guest.signature ? "Yes (Stored in DB)" : "No"
         ]);
 
         // Generate Table
@@ -604,8 +608,8 @@ async function exportSignedGuestsPDF() {
         doc.save(`Flurries26_Signed_Agreements_${new Date().toISOString().slice(0,10)}.pdf`);
         showAlert('PDF exported successfully!', 'success');
     } catch (err) {
-        console.error(err);
-        showAlert('Error generating PDF file.', 'error');
+        console.error("PDF Export Error:", err);
+        showAlert('Error generating PDF file. Check console for details.', 'error');
     } finally {
         btn.innerHTML = originalHTML;
         btn.disabled = false;
