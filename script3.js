@@ -331,7 +331,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (agreedField && agreedValue) {
             if (agreementRequired) {
                 agreedField.style.display = 'flex';
-                agreedValue.innerHTML = '<i class="fas fa-exclamation-circle"></i> ACTION REQUIRED';
+                agreedValue.innerHTML = 'ACTION REQUIRED';
                 agreedValue.className = 'scan-value scan-agreed-no';
             } else if (data.agreed) {
                 agreedField.style.display = 'flex';
@@ -359,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <i class="fas fa-info-circle"></i>
                 <div>
                     <strong>This guest must sign the agreement first!</strong>
-                    <p>Direct them to: <code>flurries.online/conditions.html</code></p>
+                    
                 </div>
             `;
         } else {
