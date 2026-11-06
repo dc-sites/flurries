@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
         submitBtn.disabled = !agreeCheckbox.checked;
     });
 
-    // Canvas Setup
+    // Canvas 
     canvas = document.getElementById('signatureCanvas');
     ctx = canvas.getContext('2d');
     resizeCanvas();
