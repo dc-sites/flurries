@@ -565,6 +565,70 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportAllExcelBtn')?.addEventListener('click', () => exportTableToExcel('allPassesTable', 'All_Generated_Passes'));
     document.getElementById('exportExcelBtn')?.addEventListener('click', () => exportTableToExcel('scannedTable', 'Scanned_Guests_Entry'));
 
+
+        // ==========================================
+    // PDF EXPORT FOR SCANNED GUESTS
+    // ==========================================
+    document.getElementById('exportScannedPdfBtn')?.addEventListener('click', () => {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        
+        doc.setFontSize(18);
+        doc.setTextColor(27, 58, 92);
+        doc.text("Flurries 26 - Scanned Guests Report", 14, 20);
+        
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 28);
+        
+        const search = document.getElementById('scannedSearch')?.value.toLowerCase() || '';
+        const gender = document.getElementById('scannedGenderFilter')?.value || 'all';
+        const batch = document.getElementById('scannedBatchFilter')?.value || 'all';
+        
+        const filtered = allPassesData.filter(d => {
+            if (d.status !== 'attended') return false;
+            const matchSearch = d.name.toLowerCase().includes(search) || (d.passId && d.passId.toLowerCase().includes(search));
+            const matchGender = gender === 'all' || d.gender === gender;
+            const matchBatch = batch === 'all' || d.batch === batch;
+            return matchSearch && matchGender && matchBatch;
+        });
+
+        if (filtered.length === 0) {
+            doc.text("No scanned guests found for the selected filters.", 14, 45);
+        } else {
+            const tableData = filtered.map(d => [
+                d.passId,
+                d.gender || 'N/A',
+                d.batch,
+                d.scannedAt ? d.scannedAt.toDate().toLocaleString() : 'Unknown'
+            ]);
+
+            doc.autoTable({
+                startY: 35,
+                head: [['Pass ID', 'Gender', 'Batch', 'Scanned Time']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: { fillColor: [27, 58, 92], textColor: 255 },
+                styles: { fontSize: 9, cellPadding: 3 },
+                columnStyles: {
+                    0: { cellWidth: 25 },
+                    4: { cellWidth: 45 }
+                }
+            });
+        }
+
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(8);
+            doc.setTextColor(150);
+            doc.text('Flurries 26 Official Document', 14, doc.internal.pageSize.height - 10);
+            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 35, doc.internal.pageSize.height - 10);
+        }
+
+        doc.save(`Flurries26_Scanned_${new Date().toISOString().slice(0,10)}.pdf`);
+    });
+    
     // ==========================================
     // PDF EXPORT FOR SIGNED AGREEMENTS
     // ==========================================
