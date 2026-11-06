@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Terms & Conditions | Flurries 26</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .conditions-container { max-width: 800px; margin: 120px auto 4rem; padding: 0 1.5rem; }
+        .verify-card, .agreement-card {
+            background: var(--white); border-radius: 20px; padding: 2.5rem;
+            box-shadow: 0 10px 40px rgba(27, 58, 92, 0.1); border: 2px solid var(--frost); margin-bottom: 2rem;
+        }
+        .user-details-grid {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;
+            margin-bottom: 2rem; background: var(--cream); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--frost);
+        }
+        .detail-item strong {
+            display: block; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1.5px;
+            color: var(--navy-strong); margin-bottom: 0.3rem;
+        }
+        .detail-item span { font-size: 1.1rem; font-weight: 700; color: var(--navy-deep); }
+        
+        .terms-box {
+            height: 300px; overflow-y: auto; background: var(--cream); border: 2px solid var(--frost);
+            border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.8; color: var(--navy-strong);
+        }
+        .terms-box h4 { color: var(--navy-deep); margin: 1.5rem 0 0.5rem; font-family: 'Playfair Display', serif; }
+        .terms-box h4:first-child { margin-top: 0; }
+        
+        .checkbox-group { display: flex; align-items: flex-start; gap: 1rem; margin-bottom: 2rem; cursor: pointer; }
+        .checkbox-group input[type="checkbox"] { width: 24px; height: 24px; margin-top: 2px; accent-color: var(--navy-deep); cursor: pointer; }
+        .checkbox-group label { font-weight: 600; color: var(--navy-deep); cursor: pointer; line-height: 1.5; }
+        
+        .signature-container { margin-bottom: 2rem; }
+        .signature-container label { display: block; font-weight: 700; color: var(--navy-deep); margin-bottom: 0.75rem; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; }
+        .canvas-wrapper { position: relative; border: 2px dashed var(--ice); border-radius: 12px; background: var(--white); overflow: hidden; }
+        #signatureCanvas { width: 100%; height: 200px; cursor: crosshair; display: block; touch-action: none; }
+        
+        .canvas-actions { display: flex; justify-content: flex-end; padding: 0.75rem; background: var(--cream); border-top: 1px solid var(--frost); }
+        .btn-clear {
+            background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.5rem 1rem;
+            border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; gap: 0.5rem;
+        }
+        .btn-clear:hover { background: #dc2626; color: var(--white); }
+        
+        @media (max-width: 768px) {
+            .conditions-container { margin-top: 90px; }
+            .verify-card, .agreement-card { padding: 1.5rem; }
+            .terms-box { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <a href="index.html">
+            <img src="https://i.postimg.cc/K8XWjKht/AIRetouch-20260924-162352481.png" alt="Flurries 26 Logo" class="logo">
+        </a>
+        <div class="nav-right">
+            <a href="index.html" class="logout-link"><i class="fas fa-arrow-left"></i> Back to Home</a>
+        </div>
+    </nav>
+
+    <div class="conditions-container">
+        <!-- Step 1: Verify Pass ID -->
+        <div id="verifySection" class="verify-card">
+            <div class="section-header" style="margin-bottom: 2rem;">
+                <h1 style="font-size: 2rem;">Verify Your Pass</h1>
+                <p>Enter your Pass ID to access the Terms & Conditions</p>
+            </div>
+            <form id="verifyForm" class="admin-form">
+                <div class="form-group">
+                    <label for="verifyPassId">Pass ID</label>
+                    <input type="text" id="verifyPassId" required placeholder="e.g., FL26A1B2" style="text-transform: uppercase;">
+                </div>
+                <button type="submit" class="btn btn-primary btn-block">
+                    <i class="fas fa-search"></i> Verify & Proceed
+                </button>
+            </form>
+        </div>
+
+        <!-- Step 2: Agreement Dashboard -->
+        <div id="agreementSection" class="agreement-card hidden">
+            <div class="section-header" style="margin-bottom: 2rem;">
+                <h1 style="font-size: 2rem;">Terms & Conditions</h1>
+                <p>Please review your details, read the terms, and provide your digital signature.</p>
+            </div>
+
+            <div class="user-details-grid">
+                <div class="detail-item"><strong>Pass ID</strong><span id="displayPassId">-</span></div>
+                <div class="detail-item"><strong>Full Name</strong><span id="displayName">-</span></div>
+                <div class="detail-item"><strong>Batch</strong><span id="displayBatch">-</span></div>
+                <div class="detail-item"><strong>Phone</strong><span id="displayPhone">-</span></div>
+            </div>
+
+            <div class="terms-box">
+                <h4>1. Code of Conduct</h4>
+                <p>All attendees must maintain a respectful and safe environment. Any form of harassment, vandalism, or disruptive behavior will result in immediate expulsion from the event without a refund.</p>
+                <h4>2. Entry & Re-entry</h4>
+                <p>Your Pass ID is unique and non-transferable. It must be presented upon entry. Re-entry is permitted only with a valid hand stamp and the same Pass ID.</p>
+                <h4>3. Liability & Safety</h4>
+                <p>The organizers of Flurries 26 are not liable for any loss, theft, or damage to personal belongings. Attendees participate in all activities at their own risk. Medical assistance will be available on-site.</p>
+                <h4>4. Media & Photography Consent</h4>
+                <p>By attending, you grant the organizers the right to use any photographs, videos, or recordings taken of you during the event for promotional and archival purposes without compensation.</p>
+                <h4>5. Prohibited Items</h4>
+                <p>For safety reasons, the following items are strictly prohibited: outside food and beverages, weapons, illegal substances, professional camera equipment (without prior approval), and any items deemed dangerous by security personnel.</p>
+                <h4>6. Refund Policy</h4>
+                <p>All pass purchases are final. No refunds or exchanges will be provided under any circumstances, including event cancellation due to unforeseen forces majeure.</p>
+                <h4>7. Amendments</h4>
+                <p>The organizers reserve the right to modify these terms and conditions at any time. Continued attendance constitutes acceptance of any changes.</p>
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="agreeCheckbox" required>
+                <label for="agreeCheckbox">I have read, understood, and agree to the Terms and Conditions stated above. I understand that my signature below serves as a legally binding agreement.</label>
+            </div>
+
+            <div class="signature-container">
+                <label>Digital Signature</label>
+                <div class="canvas-wrapper">
+                    <canvas id="signatureCanvas"></canvas>
+                    <div class="canvas-actions">
+                        <button type="button" id="clearSignatureBtn" class="btn-clear">
+                            <i class="fas fa-eraser"></i> Clear Signature
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <button id="submitAgreementBtn" class="btn btn-primary btn-block" disabled>
+                <i class="fas fa-file-signature"></i> Submit Agreement
+            </button>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-header success-header">
+                <i class="fas fa-check-circle"></i>
+                <h2>Agreement Submitted!</h2>
+            </div>
+            <div class="modal-body">
+                <p class="modal-subtitle">Your terms and conditions agreement has been securely saved.</p>
+                <p style="color: var(--navy-strong); margin-bottom: 1.5rem;">You may now proceed to the event. Please keep your Pass ID handy for entry.</p>
+            </div>
+            <div class="modal-footer">
+                <button id="closeSuccessModalBtn" class="btn btn-primary btn-block"><i class="fas fa-check"></i> Done</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="conditions.js"></script>
+</body>
+</html>
