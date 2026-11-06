@@ -18,7 +18,6 @@ let isDrawing = false;
 let canvas, ctx;
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Auto-fill if accessed via URL like: conditions.html?passId=FL26XXXX
     const urlParams = new URLSearchParams(window.location.search);
     const passIdFromUrl = urlParams.get('passId');
     if (passIdFromUrl) {
@@ -33,28 +32,31 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const agreeCheckbox = document.getElementById('agreeCheckbox');
     const submitBtn = document.getElementById('submitAgreementBtn');
-    agreeCheckbox.addEventListener('change', () => {
-        submitBtn.disabled = !agreeCheckbox.checked;
-    });
+    
+    // Enable submit ONLY if checkbox is checked AND canvas is not empty
+    agreeCheckbox.addEventListener('change', updateSubmitButtonState);
 
-    // Canvas 
+    // Canvas Setup
     canvas = document.getElementById('signatureCanvas');
     ctx = canvas.getContext('2d');
     resizeCanvas();
-    window.addEventListener('resize', resizeCanvas);
 
     // Mouse Events
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
-    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseup', () => { stopDrawing(); updateSubmitButtonState(); });
     canvas.addEventListener('mouseout', stopDrawing);
     
     // Touch Events (Mobile)
     canvas.addEventListener('touchstart', handleTouchStart, { passive: false });
     canvas.addEventListener('touchmove', handleTouchMove, { passive: false });
-    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchend', () => { stopDrawing(); updateSubmitButtonState(); });
 
-    document.getElementById('clearSignatureBtn').addEventListener('click', clearCanvas);
+    document.getElementById('clearSignatureBtn').addEventListener('click', () => {
+        clearCanvas();
+        updateSubmitButtonState();
+    });
+    
     submitBtn.addEventListener('click', submitAgreement);
 
     document.getElementById('closeSuccessModalBtn').addEventListener('click', () => {
@@ -62,6 +64,22 @@ document.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'index.html';
     });
 });
+
+function updateSubmitButtonState() {
+    const agreeCheckbox = document.getElementById('agreeCheckbox');
+    const submitBtn = document.getElementById('submitAgreementBtn');
+    const isCanvasBlank = isCanvasEmpty();
+    
+    // Button is enabled only if checkbox is checked AND canvas has drawing
+    submitBtn.disabled = !(agreeCheckbox.checked && !isCanvasBlank);
+}
+
+function isCanvasEmpty() {
+    const blank = document.createElement('canvas');
+    blank.width = canvas.width;
+    blank.height = canvas.height;
+    return canvas.toDataURL() === blank.toDataURL();
+}
 
 async function verifyPass(passId) {
     const btn = document.querySelector('#verifyForm button');
@@ -82,13 +100,31 @@ async function verifyPass(passId) {
 
             document.getElementById('verifySection').classList.add('hidden');
             document.getElementById('agreementSection').classList.remove('hidden');
-            
-            if (data.agreedAt) {
-                document.querySelector('.checkbox-group label').textContent = "You have already signed the agreement on " + new Date(data.agreedAt.toDate()).toLocaleString();
-                document.getElementById('agreeCheckbox').checked = true;
-                document.getElementById('agreeCheckbox').disabled = true;
-                submitBtn.textContent = "Already Submitted";
+
+            // CHECK IF ALREADY SUBMITTED
+            if (data.agreedAt && data.signature) {
+                // Show saved signature, hide canvas
+                document.getElementById('savedSignatureImg').src = data.signature;
+                document.getElementById('savedSignatureImg').style.display = 'block';
+                document.getElementById('signatureCanvas').style.display = 'none';
+                document.getElementById('canvasActions').style.display = 'none';
+                
+                // Lock checkbox and update label
+                const agreeCheckbox = document.getElementById('agreeCheckbox');
+                agreeCheckbox.checked = true;
+                agreeCheckbox.disabled = true;
+                document.getElementById('agreeLabel').innerHTML = `✅ You have already signed the agreement on <strong>${new Date(data.agreedAt.toDate()).toLocaleString()}</strong>`;
+                
+                // Lock submit button
+                const submitBtn = document.getElementById('submitAgreementBtn');
+                submitBtn.innerHTML = '<i class="fas fa-check-circle"></i> Already Submitted';
                 submitBtn.disabled = true;
+            } else {
+                // Normal flow: ensure canvas is visible and button is disabled initially
+                document.getElementById('savedSignatureImg').style.display = 'none';
+                document.getElementById('signatureCanvas').style.display = 'block';
+                document.getElementById('canvasActions').style.display = 'flex';
+                updateSubmitButtonState();
             }
         } else {
             showAlert('Invalid Pass ID. Please check and try again.');
@@ -153,11 +189,7 @@ function clearCanvas() {
 async function submitAgreement() {
     if (!currentPassId) return;
     
-    // Check if canvas is empty
-    const blank = document.createElement('canvas');
-    blank.width = canvas.width;
-    blank.height = canvas.height;
-    if (canvas.toDataURL() === blank.toDataURL()) {
+    if (isCanvasEmpty()) {
         showAlert('Please provide your signature before submitting.');
         return;
     }
