@@ -228,50 +228,55 @@
                     </div>
                 </section>
 
-                <!-- SECTION 4: SCANNED DETAILS -->
-                <section id="section-details" class="admin-section">
-                    <div class="section-header flex-between">
-                        <div>
-                            <h1>Scanned Guests</h1>
-                            <p>Attendees who have entered the venue</p>
-                        </div>
-                        <button id="exportExcelBtn" class="btn btn-outline">
-                            <i class="fas fa-file-excel"></i> Export Excel
-                        </button>
-                    </div>
+               <!-- SECTION 4: SCANNED DETAILS -->
+<section id="section-details" class="admin-section">
+    <div class="section-header flex-between">
+        <div>
+            <h1>Scanned Guests</h1>
+            <p>Attendees who have entered the venue</p>
+        </div>
+        <div style="display: flex; gap: 0.75rem;">
+            <button id="exportScannedPdfBtn" class="btn btn-outline">
+                <i class="fas fa-file-pdf"></i> Export PDF
+            </button>
+            <button id="exportExcelBtn" class="btn btn-outline">
+                <i class="fas fa-file-excel"></i> Export Excel
+            </button>
+        </div>
+    </div>
 
-                    <div class="filter-bar">
-                        <input type="text" id="scannedSearch" placeholder="Search by Name or Pass ID...">
-                        <select id="scannedGenderFilter">
-                            <option value="all">All Genders</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                        <select id="scannedBatchFilter">
-                            <option value="all">All Batches</option>
-                            <option value="2026 AL Batch">2026 AL Batch</option>
-                            <option value="2023 OL Batch">2023 OL Batch</option>
-                        </select>
-                        <span id="scannedCount" style="margin-left: auto; align-self: center; font-weight: 700; color: var(--navy-deep);">0 guests</span>
-                    </div>
+    <div class="filter-bar">
+        <input type="text" id="scannedSearch" placeholder="Search by Name or Pass ID...">
+        <select id="scannedGenderFilter">
+            <option value="all">All Genders</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+        </select>
+        <select id="scannedBatchFilter">
+            <option value="all">All Batches</option>
+            <option value="2026 AL Batch">2026 AL Batch</option>
+            <option value="2023 OL Batch">2023 OL Batch</option>
+        </select>
+        <span id="scannedCount" style="margin-left: auto; align-self: center; font-weight: 700; color: var(--navy-deep);">0 guests</span>
+    </div>
 
-                    <div class="table-card">
-                        <table class="admin-table" id="scannedTable">
-                            <thead>
-                                <tr>
-                                    <th>Pass ID</th>
-                                    <th>Name</th>
-                                    <th>Gender</th>
-                                    <th>Batch</th>
-                                    <th>Entry Time</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr><td colspan="5" class="empty-state">Loading data...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </section>
+    <div class="table-card">
+        <table class="admin-table" id="scannedTable">
+            <thead>
+                <tr>
+                    <th>Pass ID</th>
+                    <th>Name</th>
+                    <th>Gender</th>
+                    <th>Batch</th>
+                    <th>Entry Time</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td colspan="5" class="empty-state">Loading data...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
 <!-- SECTION 5: SIGNED AGREEMENTS -->
 <section id="section-signed" class="admin-section">
     <div class="section-header flex-between">
