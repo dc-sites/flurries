@@ -38,6 +38,12 @@
         .canvas-wrapper { position: relative; border: 2px dashed var(--ice); border-radius: 12px; background: var(--white); overflow: hidden; }
         #signatureCanvas { width: 100%; height: 200px; cursor: crosshair; display: block; touch-action: none; }
         
+        /* Saved Signature Display */
+        #savedSignatureImg {
+            width: 100%; max-height: 200px; object-fit: contain; background: var(--white);
+            border-radius: 12px; border: 2px solid var(--frost); display: none;
+        }
+        
         .canvas-actions { display: flex; justify-content: flex-end; padding: 0.75rem; background: var(--cream); border-top: 1px solid var(--frost); }
         .btn-clear {
             background: transparent; color: #dc2626; border: 1px solid #dc2626; padding: 0.5rem 1rem;
@@ -63,7 +69,7 @@
     </nav>
 
     <div class="conditions-container">
-        
+        <!-- Step 1: Verify Pass ID -->
         <div id="verifySection" class="verify-card">
             <div class="section-header" style="margin-bottom: 2rem;">
                 <h1 style="font-size: 2rem;">Verify Your Pass</h1>
@@ -80,7 +86,7 @@
             </form>
         </div>
 
-     
+        <!-- Step 2: Agreement Dashboard -->
         <div id="agreementSection" class="agreement-card hidden">
             <div class="section-header" style="margin-bottom: 2rem;">
                 <h1 style="font-size: 2rem;">Terms & Conditions</h1>
@@ -113,14 +119,15 @@
 
             <div class="checkbox-group">
                 <input type="checkbox" id="agreeCheckbox" required>
-                <label for="agreeCheckbox">I have read, understood, and agree to the Terms and Conditions stated above. I understand that my signature below serves as a legally binding agreement.</label>
+                <label for="agreeCheckbox" id="agreeLabel">I have read, understood, and agree to the Terms and Conditions stated above. I understand that my signature below serves as a legally binding agreement.</label>
             </div>
 
             <div class="signature-container">
                 <label>Digital Signature</label>
                 <div class="canvas-wrapper">
                     <canvas id="signatureCanvas"></canvas>
-                    <div class="canvas-actions">
+                    <img id="savedSignatureImg" alt="Saved Signature">
+                    <div class="canvas-actions" id="canvasActions">
                         <button type="button" id="clearSignatureBtn" class="btn-clear">
                             <i class="fas fa-eraser"></i> Clear Signature
                         </button>
