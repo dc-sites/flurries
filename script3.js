@@ -130,7 +130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (sectionId === 'registry') renderAllPasses();
         else if (sectionId === 'details') renderScannedGuests();
-        else if (sectionId === 'signed') renderSignedGuests(); // NEW
+        else if (sectionId === 'signed') renderSignedGuests();
     }
 
     document.querySelectorAll('.sidebar-nav .nav-item, .bottom-nav-item').forEach(item => {
@@ -285,6 +285,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const docSnap = await getDoc(doc(db, 'passes', passId));
             if (docSnap.exists()) {
                 const data = docSnap.data();
+                
+                // NEW CHECK: Block entry if agreement not signed
+                if (!data.agreed) {
+                    showScanModal('warning', 'Agreement Required', data, null, true);
+                    isProcessing = false;
+                    return;
+                }
+                
                 if (data.status === 'attended') {
                     showScanModal('warning', 'Already Scanned', data, data.scannedAt ? data.scannedAt.toDate().toLocaleString() : 'Unknown');
                 } else {
@@ -292,11 +300,15 @@ document.addEventListener('DOMContentLoaded', () => {
                     showScanModal('success', 'Access Granted', data, null);
                     await loadAllPasses();
                 }
-            } else { showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null); }
-        } else { showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null); }
+            } else { 
+                showScanModal('warning', 'Invalid Pass', { name: 'Not Found', passId: passId, batch: '-' }, null); 
+            }
+        } else { 
+            showScanModal('warning', 'Invalid QR', { name: 'Unknown', passId: '-', batch: '-' }, null); 
+        }
     }
 
-    function showScanModal(type, title, data, previousTime) {
+    function showScanModal(type, title, data, previousTime, agreementRequired = false) {
         const header = document.getElementById('scanModalHeader');
         header.className = `modal-header scan-header ${type}`;
         document.getElementById('scanModalIcon').className = type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-triangle';
@@ -306,8 +318,53 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('scanBatch').textContent = data.batch || '-';
         
         const timeField = document.getElementById('scanTimeField');
-        if (previousTime) { timeField.style.display = 'flex'; document.getElementById('scanTime').textContent = previousTime; } 
-        else { timeField.style.display = 'none'; }
+        if (previousTime) { 
+            timeField.style.display = 'flex'; 
+            document.getElementById('scanTime').textContent = previousTime; 
+        } else { 
+            timeField.style.display = 'none'; 
+        }
+        
+        // Agreement Status
+        const agreedField = document.getElementById('scanAgreedField');
+        const agreedValue = document.getElementById('scanAgreedValue');
+        if (agreedField && agreedValue) {
+            if (agreementRequired) {
+                agreedField.style.display = 'flex';
+                agreedValue.innerHTML = '<i class="fas fa-exclamation-circle"></i> ACTION REQUIRED';
+                agreedValue.className = 'scan-value scan-agreed-no';
+            } else if (data.agreed) {
+                agreedField.style.display = 'flex';
+                agreedValue.innerHTML = '<i class="fas fa-check-circle"></i> Signed';
+                agreedValue.className = 'scan-value scan-agreed-yes';
+            } else {
+                agreedField.style.display = 'flex';
+                agreedValue.innerHTML = '<i class="fas fa-times-circle"></i> Not Signed';
+                agreedValue.className = 'scan-value scan-agreed-no';
+            }
+        }
+        
+        // Show agreement warning message if needed
+        let warningMsg = document.getElementById('scanWarningMsg');
+        if (!warningMsg) {
+            warningMsg = document.createElement('div');
+            warningMsg.id = 'scanWarningMsg';
+            warningMsg.className = 'scan-warning-msg';
+            document.querySelector('.scan-body').appendChild(warningMsg);
+        }
+        
+        if (agreementRequired) {
+            warningMsg.style.display = 'block';
+            warningMsg.innerHTML = `
+                <i class="fas fa-info-circle"></i>
+                <div>
+                    <strong>This guest must sign the agreement first!</strong>
+                    <p>Direct them to: <code>flurries.online/conditions.html</code></p>
+                </div>
+            `;
+        } else {
+            warningMsg.style.display = 'none';
+        }
         
         scanModal.classList.add('active');
     }
@@ -325,7 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         renderAllPasses();
         renderScannedGuests();
-        renderSignedGuests(); // NEW
+        renderSignedGuests();
     }
 
     function renderAllPasses() {
@@ -405,7 +462,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ==========================================
-    // NEW: SIGNED GUESTS RENDERING
+    // SIGNED GUESTS RENDERING
     // ==========================================
     function renderSignedGuests() {
         const table = document.getElementById('signedTable');
@@ -466,7 +523,6 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('scannedGenderFilter')?.addEventListener('change', renderScannedGuests);
     document.getElementById('scannedBatchFilter')?.addEventListener('change', renderScannedGuests);
 
-    // NEW: Signed Filter Listeners
     document.getElementById('signedSearch')?.addEventListener('input', renderSignedGuests);
     document.getElementById('signedBatchFilter')?.addEventListener('change', renderSignedGuests);
 
@@ -510,14 +566,14 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('exportExcelBtn')?.addEventListener('click', () => exportTableToExcel('scannedTable', 'Scanned_Guests_Entry'));
 
     // ==========================================
-    // NEW: PDF EXPORT FOR SIGNED AGREEMENTS
+    // PDF EXPORT FOR SIGNED AGREEMENTS
     // ==========================================
     document.getElementById('exportSignedPdfBtn')?.addEventListener('click', () => {
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         
         doc.setFontSize(18);
-        doc.setTextColor(27, 58, 92); // navy-deep
+        doc.setTextColor(27, 58, 92);
         doc.text("Flurries 26 - Signed Agreements", 14, 20);
         
         doc.setFontSize(10);
@@ -559,7 +615,6 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Add footer
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
