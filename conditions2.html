@@ -22,56 +22,88 @@
             display: block;
         }
         .terms-box {
-            height: 300px; 
-            overflow: hidden; 
+            height: 350px; /* Increased to accommodate full terms */
+            overflow-y: auto; 
             border: 2px solid var(--frost); 
             border-radius: 8px; 
-            background: var(--white); 
+            padding: 1rem; 
+            background: var(--cream); 
+            font-size: 0.9rem; 
+            color: var(--navy-strong); 
             margin-bottom: 1rem;
-            position: relative;
         }
-        .terms-box iframe {
-            width: 100%;
-            height: 100%;
-            border: none;
-            border-radius: 6px;
+        .terms-box h4 { 
+            color: var(--navy-deep); 
+            margin-bottom: 1rem; 
+            border-bottom: 2px solid var(--ice); 
+            padding-bottom: 0.5rem; 
         }
-        .terms-fallback {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: var(--navy-strong);
-            padding: 1rem;
-            display: none;
+        .terms-box p {
+            line-height: 1.5;
         }
-        
-        /* Faded Button State */
-        .btn-faded {
-            opacity: 0.5 !important;
-            cursor: not-allowed !important;
-            pointer-events: auto !important; /* Allows click to trigger popup */
+        /* Custom scrollbar for terms box */
+        .terms-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .terms-box::-webkit-scrollbar-track {
+            background: var(--frost);
+            border-radius: 3px;
+        }
+        .terms-box::-webkit-scrollbar-thumb {
+            background: var(--ice);
+            border-radius: 3px;
+        }
+        .terms-box::-webkit-scrollbar-thumb:hover {
+            background: var(--sky);
         }
 
-        /* Custom Warning Modal */
-        .warning-modal-content {
-            max-width: 400px;
-            text-align: center;
+        /* Popup Modal Styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(27, 58, 92, 0.6); /* Navy deep with opacity */
+            backdrop-filter: blur(4px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 1;
+            transition: opacity 0.3s ease;
         }
-        .warning-modal-content .modal-header {
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
+        .popup-overlay.hidden {
+            display: none;
+            opacity: 0;
         }
-        .warning-modal-content .modal-header i {
-            color: white;
-        }
-        .warning-modal-content .modal-body {
+        .popup-content {
+            background: var(--white, #ffffff);
             padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            border: 2px solid var(--ice, #e0f2fe);
+            animation: popIn 0.3s ease;
         }
-        .warning-modal-content .modal-body p {
-            color: var(--navy-strong);
-            font-size: 1rem;
-            line-height: 1.6;
+        @keyframes popIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* Faded & Unclickable Submit Button State */
+        .submit-wrapper {
+            position: relative;
+            width: 100%;
+        }
+        #submitAgreementBtn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            filter: grayscale(0.5);
+            pointer-events: none; /* Prevents native click, wrapper handles it */
+        }
+        /* Re-enable pointer events on wrapper to catch clicks on disabled button */
+        .submit-wrapper {
+            pointer-events: auto;
         }
     </style>
 </head>
@@ -109,7 +141,7 @@
         <section id="agreementSection" class="form-card hidden">
             <div class="section-header">
                 <h1>Terms & Agreement</h1>
-                <p>Please review your details, read the full terms, and sign below.</p>
+                <p>Please review your details, read the terms, and sign below.</p>
             </div>
 
             <div class="modal-details compact" style="margin-bottom: 2rem;">
@@ -121,17 +153,57 @@
             <div class="form-group">
                 <label>Terms and Conditions / නියමයන් සහ කොන්දේසි</label>
                 <div class="terms-box">
-                    <iframe src="https://flurries26.online/terms.html" title="Terms and Conditions" onload="this.previousElementSibling.style.display='none'" onerror="this.previousElementSibling.style.display='block'"></iframe>
-                    <div class="terms-fallback" style="display: block;">
-                        <i class="fas fa-exclamation-circle" style="font-size: 2rem; color: var(--ocean); margin-bottom: 0.5rem;"></i>
-                        <p>Loading terms... If this does not load, please visit:<br>
-                        <a href="https://flurries26.online/terms.html" target="_blank" style="color: var(--ocean); font-weight: 700;">flurries26.online/terms.html</a></p>
+                    <h4 style="text-align: center; margin-bottom: 1.5rem;">
+                        Flurries 26 - Terms & Conditions<br>
+                        <span style="font-size: 0.9rem; font-weight: 500; color: var(--navy-strong);">Flurries 26 - නියමයන් සහ කොන්දේසි</span>
+                    </h4>
+                    
+                    <p style="margin-bottom: 1rem; font-weight: 600; color: var(--navy-deep);">
+                        By proceeding with attendance at this event, you acknowledge and accept all the conditions outlined below.<br>
+                        <span style="font-weight: 400; color: var(--navy-strong);">මෙම උත්සවයට සහභාගී වීම සඳහා පහත දැක්වෙන සියලුම කොන්දේසි ඔබ විසින් අවබෝධ කරගෙන පිළිගෙන ඇතැයි සලකනු ලැබේ.</span>
+                    </p>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <p style="margin-bottom: 0.25rem; font-weight: 700; color: var(--navy-deep);">1. Ticket Pricing / ප්‍රවේශ පත්‍ර මිල:</p>
+                        <p style="margin: 0 0 0.25rem 0;">The price of a ticket is Rs. 6000. No refunds will be made for any reason once payment is accepted.</p>
+                        <p style="margin: 0; color: var(--navy-strong); font-size: 0.85rem;">ප්‍රවේශ පත්‍රයක මිල රු. 6000 ක් වන අතර කිසිදු හේතුවක් මත මුදල් ආපසු ලබා දීමක් සිදු නොකෙරේ.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <p style="margin-bottom: 0.25rem; font-weight: 700; color: var(--navy-deep);">2. Non-Transferable Policy / පැවරීම තහනම් වීම:</p>
+                        <p style="margin: 0 0 0.25rem 0;">Tickets are strictly non-transferable and tied to the registered attendee's identity. Valid ID verification may be required at the venue entrance.</p>
+                        <p style="margin: 0; color: var(--navy-strong); font-size: 0.85rem;">ටිකට්පත් වෙනත් අයෙකුට පැවරීම සම්පූර්ණයෙන්ම තහනම් අතර එය ලියාපදිංචි සහභාගීවන්නාගේ අනන්‍යතාවය හා බැඳී පවතී. ස්ථානයේදී වලංගු හැඳුනුම්පත් සත්‍යාපනය අවශ්‍ය විය හැක.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <p style="margin-bottom: 0.25rem; font-weight: 700; color: var(--navy-deep);">3. Liability & Travel Safety / වගකීම සහ ගමන් ආරක්ෂාව:</p>
+                        <p style="margin: 0 0 0.25rem 0;">The Organizing Committee, Hotel Swissdale administration, and all associated members assume no liability or responsibility for any accidents, injuries, or damages of any kind, including loss of life, that may occur during travel to or from the venue.</p>
+                        <p style="margin: 0; color: var(--navy-strong); font-size: 0.85rem;">උත්සව ස්ථානයට පැමිණීමේදී හෝ නැවත යාමේදී සිදුවන ජීවිත හානි ඇතුළු ඕනෑම ආකාරයක අනතුරකට, තුවාලයකට හෝ හානියකට සංවිධායක මණ්ඩලය, හෝටල් ස්විස්ඩේල් පරිපාලනය සහ ඊට සම්බන්ධ සියලුම සාමාජිකයන් කිසිදු වගකීමක් හෝ වගවීමක් භාර නොගනී.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <p style="margin-bottom: 0.25rem; font-weight: 700; color: var(--navy-deep);">4. Attendee Conduct & Disputes / සහභාගිවන්නන්ගේ හැසිරීම සහ මතභේද:</p>
+                        <p style="margin: 0 0 0.25rem 0;">The Organizing Committee and partners shall not be held accountable for any disputes, altercations, or physical conflicts resulting in injury among attendees during the event.</p>
+                        <p style="margin: 0; color: var(--navy-strong); font-size: 0.85rem;">උත්සවය අතරතුර සහභාගී වන්නන් අතර සිදුවන මතභේද, ආරවුල් හෝ තුවාල සිදුකරන ශාරීරික ගැටුම් සම්බන්ධයෙන් සංවිධායක මණ්ඩලය සහ හවුල්කරුවන් කිසිදු වගකීමක් දරන්නේ නැත.</p>
+                    </div>
+
+                    <div style="margin-bottom: 1.25rem;">
+                        <p style="margin-bottom: 0.25rem; font-weight: 700; color: var(--navy-deep);">5. Safety Guidelines & Protocol / ආරක්ෂක මාර්ගෝපදේශ සහ ක්‍රමවේද:</p>
+                        <p style="margin: 0 0 0.25rem 0;">All participants are expected to maintain appropriate conduct and adhere strictly to all safety guidelines and instructions provided by the venue management and organizers.</p>
+                        <p style="margin: 0; color: var(--navy-strong); font-size: 0.85rem;">සියලුම සහභාගී වන්නන් විසින් උචිත ලෙස හැසිරීම සහ ස්ථාන කළමනාකරණය හා සංවිධායකයින් විසින් ලබා දෙන ආරක්ෂක මාර්ගෝපදේශ හා උපදෙස් දැඩි ලෙස පිළිපැදීම අපේක්ෂා කෙරේ.</p>
+                    </div>
+
+                    <div style="background: var(--frost); padding: 1rem; border-radius: 8px; text-align: center; border: 1px solid var(--ice); margin-top: 1.5rem;">
+                        <p style="margin: 0; font-size: 0.85rem; color: var(--navy-strong);">
+                            <strong>Event Information / උත්සව තොරතුරු:</strong><br>
+                            Flurries 26 @ Hotel Swissdale | 08th November 2026 | Full Day Event
+                        </p>
                     </div>
                 </div>
                 
                 <label style="display: flex; align-items: flex-start; gap: 0.75rem; cursor: pointer; margin-bottom: 1.5rem;">
                     <input type="checkbox" id="agreeCheckbox" style="width: 20px; height: 20px; margin-top: 3px; accent-color: var(--navy-deep); flex-shrink: 0;">
-                    <span style="font-weight: 600; color: var(--navy-deep);">I have read and agree to the Terms and Conditions.<br><span style="font-weight: 400; font-size: 0.85rem; color: var(--navy-strong);">මම නියමයන් සහ කොන්දේසි කියවා එයට එකඟ වෙමි.</span></span>
+                    <span style="font-weight: 600; color: var(--navy-deep);">I have read and agree to the Terms and Conditions above.<br><span style="font-weight: 400; font-size: 0.85rem; color: var(--navy-strong);">මම ඉහත නියමයන් සහ කොන්දේසි කියවා එයට එකඟ වෙමි.</span></span>
                 </label>
             </div>
 
@@ -143,12 +215,15 @@
                         <i class="fas fa-eraser"></i> Clear
                     </button>
                 </div>
-                <p style="font-size: 0.8rem; color: var(--navy-strong); margin-top: 0.5rem;">Please sign in the box above using your mouse or finger. / කරුණාකර ඉහත කොටුව තුළ අත්සන් කරන්න.</p>
+                <p style="font-size: 0.8rem; color: var(--navy-strong); margin-top: 0.5rem;">Please sign in the box above using your mouse or finger. / කරුණාකර ඔබේ මවුසය හෝ ඇඟිල්ල භාවිතා කර ඉහත කොටුව තුළ අත්සන් කරන්න.</p>
             </div>
 
-            <button id="submitAgreementBtn" class="btn btn-primary btn-block btn-faded">
-                <i class="fas fa-file-signature"></i> Submit Agreement
-            </button>
+            <!-- Wrapper to catch clicks even when button is disabled -->
+            <div class="submit-wrapper">
+                <button id="submitAgreementBtn" class="btn btn-primary btn-block" disabled title="Please check the agreement and draw your signature first">
+                    <i class="fas fa-file-signature"></i> Submit Agreement
+                </button>
+            </div>
         </section>
 
         <!-- Step 3: Success Message -->
@@ -157,7 +232,7 @@
                 <i class="fas fa-check-circle"></i>
             </div>
             <h1 style="font-family: 'Playfair Display', serif; color: var(--navy-deep); margin-bottom: 1rem;">Agreement Submitted!</h1>
-            <p style="color: var(--navy-strong); margin-bottom: 2rem;">Your signature has been securely saved. You are all set for Flurries 26.<br><span style="font-size: 0.9rem;">ඔබේ අත්සන ආරක්ෂිතව සුරැකිණි.</span></p>
+            <p style="color: var(--navy-strong); margin-bottom: 2rem;">Your signature has been securely saved. You are all set for Flurries 26.<br><span style="font-size: 0.9rem;">ඔබේ අත්සන ආරක්ෂිතව සුරැකිණි. ඔබ Flurries 26 සඳහා සූදානම්.</span></p>
             <a href="index.html" class="btn btn-primary">
                 <i class="fas fa-home"></i> Return to Home
             </a>
@@ -165,19 +240,14 @@
 
     </main>
 
-    <!-- Warning Popup Modal -->
-    <div id="warningModal" class="modal-overlay">
-        <div class="modal-content warning-modal-content">
-            <div class="modal-header">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h2>Action Required</h2>
-            </div>
-            <div class="modal-body">
-                <p id="warningMessage">Please complete all required fields.</p>
-            </div>
-            <div class="modal-footer">
-                <button id="closeWarningBtn" class="btn btn-primary btn-block"><i class="fas fa-check"></i> Understood</button>
-            </div>
+    <!-- Popup Modal for Incomplete Submission -->
+    <div id="agreementPopup" class="popup-overlay hidden">
+        <div class="popup-content">
+            <i class="fas fa-exclamation-circle" style="color: #dc2626; font-size: 2.5rem; margin-bottom: 1rem;"></i>
+            <h3 style="color: var(--navy-deep); margin-bottom: 0.5rem;">Action Required</h3>
+            <p style="color: var(--navy-strong); margin-bottom: 0.25rem;">Please check the agreement box and draw your signature first.</p>
+            <p style="color: var(--navy-strong); font-size: 0.9rem; margin-bottom: 1.5rem;">කරුණාකර ගිවිසුම් කොටුව සලකුණු කර ඔබේ අත්සන යොදන්න.</p>
+            <button id="closePopupBtn" class="btn btn-primary">OK</button>
         </div>
     </div>
 
@@ -201,16 +271,10 @@
         let currentPassId = '';
         let isDrawing = false;
         let hasDrawn = false;
-        let isAgreed = false;
 
         const canvas = document.getElementById('signatureCanvas');
         const ctx = canvas.getContext('2d');
-        const submitBtn = document.getElementById('submitAgreementBtn');
-        const agreeCheckbox = document.getElementById('agreeCheckbox');
-        const warningModal = document.getElementById('warningModal');
-        const warningMessage = document.getElementById('warningMessage');
-        const closeWarningBtn = document.getElementById('closeWarningBtn');
-
+        
         function resizeCanvas() {
             const rect = canvas.getBoundingClientRect();
             const dpr = window.devicePixelRatio || 1;
@@ -235,7 +299,7 @@
         function startDrawing(e) {
             isDrawing = true;
             hasDrawn = true;
-            updateButtonState();
+            checkSubmitButton();
             const pos = getPos(e);
             ctx.beginPath();
             ctx.moveTo(pos.x, pos.y);
@@ -263,55 +327,36 @@
         document.getElementById('clearSignatureBtn').addEventListener('click', () => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             hasDrawn = false;
-            updateButtonState();
+            checkSubmitButton();
         });
 
-        agreeCheckbox.addEventListener('change', (e) => {
-            isAgreed = e.target.checked;
-            updateButtonState();
-        });
+        document.getElementById('agreeCheckbox').addEventListener('change', checkSubmitButton);
 
-        function updateButtonState() {
-            // If both conditions are met, remove faded class. Otherwise, add it.
-            if (isAgreed && hasDrawn) {
-                submitBtn.classList.remove('btn-faded');
-            } else {
-                submitBtn.classList.add('btn-faded');
-            }
+        function checkSubmitButton() {
+            const checkbox = document.getElementById('agreeCheckbox').checked;
+            const btn = document.getElementById('submitAgreementBtn');
+            // Button is ONLY enabled if BOTH checkbox is checked AND signature is drawn
+            btn.disabled = !(checkbox && hasDrawn);
         }
 
-        // Intercept click to show helpful popup if not ready
-        submitBtn.addEventListener('click', (e) => {
-            if (!isAgreed && !hasDrawn) {
+        // Popup logic for when user tries to click the disabled button
+        document.querySelector('.submit-wrapper').addEventListener('click', (e) => {
+            const btn = document.getElementById('submitAgreementBtn');
+            if (btn.disabled) {
                 e.preventDefault();
-                showWarning('Please draw your signature AND agree to the Terms and Conditions by ticking the checkbox. / කරුණාකර අත්සන් කර නියමයන්ට එකඟ වන්න.');
-                return;
+                e.stopPropagation();
+                document.getElementById('agreementPopup').classList.remove('hidden');
             }
-            if (!isAgreed) {
-                e.preventDefault();
-                showWarning('Please agree to the Terms and Conditions by ticking the checkbox. / කරුණාකර නියමයන්ට එකඟ වීමට කොටුව සලකුණු කරන්න.');
-                return;
-            }
-            if (!hasDrawn) {
-                e.preventDefault();
-                showWarning('Please draw your signature in the box above. / කරුණාකර ඉහත කොටුව තුළ අත්සන් කරන්න.');
-                return;
-            }
-            // If we reach here, both are true, proceed with submission
-            submitAgreement();
         });
 
-        function showWarning(msg) {
-            warningMessage.textContent = msg;
-            warningModal.classList.add('active');
-        }
-
-        closeWarningBtn.addEventListener('click', () => {
-            warningModal.classList.remove('active');
+        document.getElementById('closePopupBtn').addEventListener('click', () => {
+            document.getElementById('agreementPopup').classList.add('hidden');
         });
 
-        warningModal.addEventListener('click', (e) => {
-            if (e.target === warningModal) warningModal.classList.remove('active');
+        document.getElementById('agreementPopup').addEventListener('click', (e) => {
+            if (e.target.id === 'agreementPopup') {
+                e.target.classList.add('hidden');
+            }
         });
 
         document.getElementById('verifyPassForm').addEventListener('submit', async (e) => {
@@ -341,21 +386,29 @@
                     document.getElementById('agreementSection').classList.remove('hidden');
                     setTimeout(resizeCanvas, 100);
                 } else {
-                    alert('Invalid Pass ID. Please check and try again. / වලංගු නොවන Pass ID යි.');
+                    alert('Invalid Pass ID. Please check and try again. / වලංගු නොවන Pass ID යි. කරුණාකර පරීක්ෂා කර නැවත උත්සාහ කරන්න.');
                 }
             } catch (error) {
                 console.error(error);
-                alert('Connection error. Please try again. / සම්බන්ධතා දෝෂයකි.');
+                alert('Connection error. Please try again. / සම්බන්ධතා දෝෂයකි. කරුණාකර නැවත උත්සාහ කරන්න.');
             } finally {
                 btn.innerHTML = originalHTML;
                 btn.disabled = false;
             }
         });
 
-        async function submitAgreement() {
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-            submitBtn.classList.add('btn-faded'); // Prevent double clicks
-            
+        document.getElementById('submitAgreementBtn').addEventListener('click', async () => {
+            const btn = document.getElementById('submitAgreementBtn');
+            // Double-check conditions before submitting
+            const checkbox = document.getElementById('agreeCheckbox').checked;
+            if (!checkbox || !hasDrawn) {
+                document.getElementById('agreementPopup').classList.remove('hidden');
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+            btn.disabled = true;
+
             try {
                 const signatureData = canvas.toDataURL('image/png');
                 await updateDoc(doc(db, 'passes', currentPassId), {
@@ -369,10 +422,10 @@
             } catch (error) {
                 console.error(error);
                 alert('Error saving agreement: ' + error.message);
-                submitBtn.innerHTML = '<i class="fas fa-file-signature"></i> Submit Agreement';
-                updateButtonState(); // Restore state if failed
+                btn.innerHTML = '<i class="fas fa-file-signature"></i> Submit Agreement';
+                btn.disabled = false;
             }
-        }
+        });
     </script>
 </body>
 </html>
